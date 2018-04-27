@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <TypeScriptCompileBlocked>true</TypeScriptCompileBlocked>
+    <TypeScriptToolsVersion>Latest</TypeScriptToolsVersion>
+    <DefaultItemExcludes>${DefaultItemExcludes};node_modules\**</DefaultItemExcludes>
+    
+    <!-- VS's FastUpToDateCheck doesn't consider .ts file changes, so it's necessary to disable it to get incremental builds to work correctly (albeit not as fast as if FastUpToDateCheck did work for them) -->
+    <DisableFastUpToDateCheck>true</DisableFastUpToDateCheck>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="2.0.0" />
+    <WebpackInputs Include="**\*.ts" Exclude="node_modules\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="dist\" />
+  </ItemGroup>
+
+  <Target Name="RunWebpack" BeforeTargets="Build" Inputs="@(WebpackInputs)" Outputs="dist\blazor.polyfill.js">
+    <RemoveDir Directories="dist" />
+    <Exec Command="npm install --save core-js" />
+    <Exec Command="npm install --save whatwg-fetch" />
+    <Exec Command="npm run build" />
+    <ItemGroup>
+      <EmbeddedResource Include="dist\blazor.polyfill.js" LogicalName="blazor./blazor.polyfill.js" />
+    </ItemGroup>
+  </Target>
+</Project>
