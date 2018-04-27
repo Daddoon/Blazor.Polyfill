@@ -17,6 +17,7 @@ import 'core-js/es6/promise'
 import 'whatwg-fetch';
 
 declare var Symbol;
+declare var document;
 
 function IsIE() {
 
@@ -34,6 +35,17 @@ function blazorPolyfill() {
     // option from core-js
     if (IsIE()) {
         Symbol.useSimple();
+
+        //Adding document.baseURI for IE
+        //Additional checks for Internet Explorer"
+        if (document.baseURI == null || document.baseURI == undefined) {
+            //IE case
+            var port = "";
+            if (location.port != undefined && location.port != null && location.port != "")
+                port = ":" + location.port;
+
+            document.baseURI = location.protocol + "//" + location.hostname + port + "/";
+        }
     }
 }
 
