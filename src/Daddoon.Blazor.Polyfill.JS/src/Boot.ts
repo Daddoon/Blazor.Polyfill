@@ -30,6 +30,12 @@ declare var self;
         return false;
     }
 
+    function IsAndroid() {
+        if (/android/i.test(navigator.userAgent)) {
+            return true;
+        }
+    }
+
     function blazorPolyfill() {
 
         // IE11 has somme issue about setter with deep recursion
@@ -76,7 +82,7 @@ declare var self;
             support = false;
         }
 
-        if (support == false) {
+        if (support == false || IsAndroid()) {
             //If support value changed, something wrong happened. We must delete WebAssembly namespace then.
             delete self.WebAssembly;
         }

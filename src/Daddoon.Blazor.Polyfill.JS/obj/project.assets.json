@@ -771,11 +771,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "G:\\Blazor.Polyfill\\src\\Daddoon.Blazor.Polyfill.JS\\Daddoon.Blazor.Polyfill.JS.csproj",
+      "projectUniqueName": "C:\\Appizeo\\Dev\\Allogaia\\Allogaia\\BlazorComponents\\Blazor.Polyfill\\Blazor.Polyfill\\src\\Daddoon.Blazor.Polyfill.JS\\Daddoon.Blazor.Polyfill.JS.csproj",
       "projectName": "Daddoon.Blazor.Polyfill.JS",
-      "projectPath": "G:\\Blazor.Polyfill\\src\\Daddoon.Blazor.Polyfill.JS\\Daddoon.Blazor.Polyfill.JS.csproj",
+      "projectPath": "C:\\Appizeo\\Dev\\Allogaia\\Allogaia\\BlazorComponents\\Blazor.Polyfill\\Blazor.Polyfill\\src\\Daddoon.Blazor.Polyfill.JS\\Daddoon.Blazor.Polyfill.JS.csproj",
       "packagesPath": "C:\\Users\\blyzz\\.nuget\\packages\\",
-      "outputPath": "G:\\Blazor.Polyfill\\src\\Daddoon.Blazor.Polyfill.JS\\obj\\",
+      "outputPath": "C:\\Appizeo\\Dev\\Allogaia\\Allogaia\\BlazorComponents\\Blazor.Polyfill\\Blazor.Polyfill\\src\\Daddoon.Blazor.Polyfill.JS\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackagesFallback\\",
@@ -790,10 +790,10 @@
         "netcoreapp2.0"
       ],
       "sources": {
+        "C:\\Appizeo\\Dev\\Allogaia\\Allogaia\\BlazorComponents\\daddoon.Blazor\\Blazor\\artifacts\\build": {},
         "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-        "G:\\DEV_Allogaia\\Allogaia\\Allogaia\\Github\\Blazor\\artifacts\\build": {},
-        "G:\\DEV_Allogaia\\Allogaia\\Daddoon.Blazor\\Daddoon.Blazor\\Daddoon.Blazor.Extensions": {},
-        "https://api.nuget.org/v3/index.json": {}
+        "https://api.nuget.org/v3/index.json": {},
+        "https://dotnet.myget.org/F/aspnetcore-tools/api/v3/index.json": {}
       },
       "frameworks": {
         "netcoreapp2.0": {
