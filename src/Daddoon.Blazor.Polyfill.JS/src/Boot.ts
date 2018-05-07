@@ -57,6 +57,20 @@ declare var self;
         }
     }
 
+    function isChrome() {
+        if (getChromeVersion() == false)
+            return false;
+        return true;
+    }
+
+    //Return the Chrome version or false
+    function getChromeVersion() {
+        var raw = navigator.userAgent.match(/Chrom(e|ium)\/([0-9]+)\./);
+
+        //may return true for version == 0 but it's an impossible case
+        return raw ? parseInt(raw[2], 10) : false;
+    }
+
     function checkWebAssemblySupport() {
         // from https://github.com/brion/min-wasm-fail/blob/master/min-wasm-fail.js
 
@@ -82,7 +96,14 @@ declare var self;
             support = false;
         }
 
-        if (support == false || IsAndroid()) {
+        //Just sanity check for full WebAssembly support on Chrome
+        //See https://www.chromestatus.com/feature/5453022515691520
+        //This case may not be really effective
+        if (isChrome() && getChromeVersion() < 57) {
+            support = false;
+        }
+
+        if (support == false) {
             //If support value changed, something wrong happened. We must delete WebAssembly namespace then.
             delete self.WebAssembly;
         }
