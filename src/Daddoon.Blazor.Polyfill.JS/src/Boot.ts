@@ -19,6 +19,7 @@ import 'whatwg-fetch';
 declare var Symbol;
 declare var document;
 declare var self;
+declare var window;
 
 (function () {
     function IsIE() {
@@ -71,7 +72,25 @@ declare var self;
         return raw ? parseInt(raw[2], 10) : false;
     }
 
+    function IsWkWebview() {
+        var isWKWebView = false;
+        if (navigator.platform.substr(0, 2) === 'iP') {    // iOS detected
+            if (window.webkit && window.webkit.messageHandlers) {
+                isWKWebView = true;
+            }
+        }
+
+        return isWKWebView;
+    }
+
     function checkWebAssemblySupport() {
+
+        //Still buggy WkWebview on iOS 11
+        if (IsWkWebview()) {
+            delete self.WebAssembly;
+            return;
+        }
+
         // from https://github.com/brion/min-wasm-fail/blob/master/min-wasm-fail.js
 
         // detect WebAssembly support and load either WASM or ASM version of Blazor
