@@ -1,5 +1,5 @@
 # Blazor.Polyfill
-Polyfills for Blazor for Internet Explorer 11 support
+Polyfills for Blazor for Internet Explorer 11 support and some fix for some other browsers, like buggy Safari with WebAssembly
 
 # ABOUT
 
@@ -13,10 +13,10 @@ Tested with Blazor 3.0.x source code.
 
 # INSTALLATION
 
-The easiest way to install is to download the [*latest release*](https://github.com/Daddoon/Blazor.Polyfill/releases) and include the **blazor.polyfill.js** file before the blazor-boot script tag like:
+The easiest way to install is to download the [*latest release*](https://github.com/Daddoon/Blazor.Polyfill/releases) and include the **blazor.polyfill.js** file before the blazor-boot script tag in your **wwwroot\index.html** file like:
 
 ```html
-<script src="js/blazor.polyfill.js"></script>
+<script type="text/javascript" src="blazor.polyfill.js"></script>
 <script type="blazor-boot">
 </script>
 ```
