@@ -1,4 +1,6 @@
-﻿/** IE9, IE10 and IE11 requires all of the following polyfills. **/
+﻿/* BLAZOR.POLYFILL Version 0.2.0 */
+
+/** IE9, IE10 and IE11 requires all of the following polyfills. **/
 import 'core-js/es6/symbol';
 import 'core-js/es6/object';
 import 'core-js/es6/function';
@@ -72,21 +74,98 @@ declare var window;
         return raw ? parseInt(raw[2], 10) : false;
     }
 
-    function IsWkWebview() {
-        var isWKWebView = false;
-        if (navigator.platform.substr(0, 2) === 'iP') {    // iOS detected
-            if (window.webkit && window.webkit.messageHandlers) {
-                isWKWebView = true;
-            }
-        }
+    function IsWebkitInputVersionGreaterOrEqualTo(input, comparator) {
+        try {
+            var inputArray = input.split('.');
+            var inputMajor = parseInt(inputArray[0], 10);
+            var inputMinor = parseInt(inputArray[1], 10);
+            var inputRevision = 0;
 
-        return isWKWebView;
+            if (inputArray.length >= 3) {
+                inputRevision = parseInt(inputArray[2], 10);
+            }
+
+            var comparatorArray = comparator.split('.');
+            var comparatorMajor = parseInt(comparatorArray[0], 10);
+            var comparatorMinor = parseInt(comparatorArray[1], 10);
+            var comparatorRevision = 0;
+
+            if (comparatorArray.length >= 3) {
+                comparatorRevision = parseInt(comparatorArray[2], 10);
+            }
+
+            var inputDVersion = (inputMajor * 1000000) + (inputMinor * 1000) + inputRevision;
+
+            var comparatorDVersion = (comparatorMajor * 1000000) + (comparatorMinor * 1000) + comparatorRevision;
+
+            if (inputDVersion >= comparatorDVersion)
+                return true;
+            return false;
+        }
+        catch (e) {
+            //Should not happen if verified correctly
+            return false;
+        }
+    }
+
+    function IsWebkitInputVersionLessOrEqualTo(input, comparator) {
+        try {
+            var inputArray = input.split('.');
+            var inputMajor = parseInt(inputArray[0], 10);
+            var inputMinor = parseInt(inputArray[1], 10);
+            var inputRevision = 0;
+
+            if (inputArray.length >= 3) {
+                inputRevision = parseInt(inputArray[2], 10);
+            }
+
+            var comparatorArray = comparator.split('.');
+            var comparatorMajor = parseInt(comparatorArray[0], 10);
+            var comparatorMinor = parseInt(comparatorArray[1], 10);
+            var comparatorRevision = 0;
+
+            if (comparatorArray.length >= 3) {
+                comparatorRevision = parseInt(comparatorArray[2], 10);
+            }
+
+            var inputDVersion = (inputMajor * 1000000) + (inputMinor * 1000) + inputRevision;
+
+            var comparatorDVersion = (comparatorMajor * 1000000) + (comparatorMinor * 1000) + comparatorRevision;
+
+            if (inputDVersion <= comparatorDVersion)
+                return true;
+            return false;
+        }
+        catch (e) {
+            //Should not happen if verified correctly
+            return false;
+        }
+    }
+
+    function IsBuggyWebKit() {
+
+        var userAgent = navigator.userAgent;
+        var matchResult = userAgent.match(/AppleWebKit\/+([\d\.]+)/i);
+        if (matchResult == null) {
+            return false;
+        }
+        if (matchResult.length < 2) {
+            //Version is on the second index, on AppleWebKit/xxx.x.x
+            return false;
+        }
+        var version = matchResult[1];
+        if (IsWebkitInputVersionGreaterOrEqualTo(version, "604.1.34")
+            && IsWebkitInputVersionLessOrEqualTo(version, "605.1.33")) {
+            console.log("Buggy webkit detected");
+            return true;
+        }
+        return false;
     }
 
     function checkWebAssemblySupport() {
 
-        //Still buggy WkWebview on iOS 11
-        if (IsWkWebview()) {
+        //For buggy Webkit versions
+        if (IsBuggyWebKit()) {
             delete self.WebAssembly;
             return;
         }
