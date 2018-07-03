@@ -23,6 +23,29 @@ The easiest way to install is to download the [*latest release*](https://github.
 
 That's all !
 
+# TROUBLESHOOT
+
+## Missing .mem file (404 error)
+Not directly related to **Blazor.Polyfill**, but depending your environment (IIS, IIS Express, Kestrel etC.) you may encounter this kind of error in the browser console at Blazor startup:
+
+```
+[Error] Failed to load resource: the server responded with a status of 404 (Not Found) (mono.js.mem, line 0)
+```
+
+This is surely related to a missing mime-type in your web configuration.
+If you are using IIS hosting (or similar) edit your **web.config** file and at this node level:
+
+```xml
+<configuration>
+  <system.webServer>
+    <staticContent>
+```
+add a child node like:
+
+```xml
+<mimeMap fileExtension=".mem" mimeType="application/octet-stream" /> 
+```
+
 # DISCLAIMER
 
 This project is not affiliated with the Blazor project.
