@@ -74,45 +74,36 @@ declare var window;
         return raw ? parseInt(raw[2], 10) : false;
     }
     
-    function VersionStringToNumber(input) {
-        var inputArray = input.split('.');
-        var inputMajor = parseInt(inputArray[0], 10);
-        var inputMinor = parseInt(inputArray[1], 10);
-        var inputRevision = 0;
-
-        if (inputArray.length >= 3) {
-            inputRevision = parseInt(inputArray[2], 10);
-        }
-
-        return (inputMajor * 1000000) + (inputMinor * 1000) + inputRevision;
+    function VersionTupleFromString(input) {
+        return input.split('.').map(x => parseInt(x, 10));
     }
 
-    function IsBuggyWebKit() {
+    function IsWebkitLtOrEqual(userVersion, maxVersion) {
+        return userVersion[0] === maxVersion[0] && userVersion[1] <= maxVersion[1] && userVersion[2] ? userVersion[2] <= maxVersion[2] : true;
+    }
 
+    function IsWebkitGtOrEqual(userVersion, minVersion) {
+        return userVersion[0] === minVersion[0] && userVersion[1] >= minVersion[1] && userVersion[2] ? userVersion[2] >= minVersion[2] : true;
+    }
+
+    function IsBuggyWebkit() {
         var userAgent = navigator.userAgent;
         var matchResult = userAgent.match(/AppleWebKit\/+([\d\.]+)/i);
-        if (matchResult == null) {
-            return false;
-        }
-        if (matchResult.length < 2) {
+        if (matchResult == null || matchResult.length < 2) {
             //Version is on the second index, on AppleWebKit/xxx.x.x
             return false;
         }
         var version = matchResult[1];
-        
-        try{
-            const userVersion = VersionStringToNumber(version);
-            const minVersion = 604001034; //"604.1.34"
-            const maxVersion = 605001033; //"605.1.33"
-            
-            if(userVersion >= minVersion && userVersion <= maxVersion){
-                console.log("Buggy webkit detected");
-                return true;
-            }
-        }catch{
+
+        try {
+            const userVersion = VersionTupleFromString(version);
+            const minVersion = VersionTupleFromString("604.1.34");
+            const maxVersion = VersionTupleFromString("605.1.33");
+
+            return IsWebkitLtOrEqual(userVersion, maxVersion) || IsWebkitGtOrEqual(userVersion, minVersion);
+        } finally {
             return false;
         }
-        return false;
     }
 
     function checkWebAssemblySupport() {
