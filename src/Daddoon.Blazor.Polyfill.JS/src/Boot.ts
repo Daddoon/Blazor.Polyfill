@@ -86,7 +86,7 @@ declare var window;
         return userVersion[0] === minVersion[0] && userVersion[1] >= minVersion[1] && userVersion[2] ? userVersion[2] >= minVersion[2] : true;
     }
 
-    function IsBuggyWebkit() {
+    function IsBuggyWebKit() {
         var userAgent = navigator.userAgent;
         var matchResult = userAgent.match(/AppleWebKit\/+([\d\.]+)/i);
         if (matchResult == null || matchResult.length < 2) {
