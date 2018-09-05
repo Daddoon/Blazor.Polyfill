@@ -73,73 +73,18 @@ declare var window;
         //may return true for version == 0 but it's an impossible case
         return raw ? parseInt(raw[2], 10) : false;
     }
+    
+    function VersionStringToNumber(input) {
+        var inputArray = input.split('.');
+        var inputMajor = parseInt(inputArray[0], 10);
+        var inputMinor = parseInt(inputArray[1], 10);
+        var inputRevision = 0;
 
-    function IsWebkitInputVersionGreaterOrEqualTo(input, comparator) {
-        try {
-            var inputArray = input.split('.');
-            var inputMajor = parseInt(inputArray[0], 10);
-            var inputMinor = parseInt(inputArray[1], 10);
-            var inputRevision = 0;
-
-            if (inputArray.length >= 3) {
-                inputRevision = parseInt(inputArray[2], 10);
-            }
-
-            var comparatorArray = comparator.split('.');
-            var comparatorMajor = parseInt(comparatorArray[0], 10);
-            var comparatorMinor = parseInt(comparatorArray[1], 10);
-            var comparatorRevision = 0;
-
-            if (comparatorArray.length >= 3) {
-                comparatorRevision = parseInt(comparatorArray[2], 10);
-            }
-
-            var inputDVersion = (inputMajor * 1000000) + (inputMinor * 1000) + inputRevision;
-
-            var comparatorDVersion = (comparatorMajor * 1000000) + (comparatorMinor * 1000) + comparatorRevision;
-
-            if (inputDVersion >= comparatorDVersion)
-                return true;
-            return false;
+        if (inputArray.length >= 3) {
+            inputRevision = parseInt(inputArray[2], 10);
         }
-        catch (e) {
-            //Should not happen if verified correctly
-            return false;
-        }
-    }
 
-    function IsWebkitInputVersionLessOrEqualTo(input, comparator) {
-        try {
-            var inputArray = input.split('.');
-            var inputMajor = parseInt(inputArray[0], 10);
-            var inputMinor = parseInt(inputArray[1], 10);
-            var inputRevision = 0;
-
-            if (inputArray.length >= 3) {
-                inputRevision = parseInt(inputArray[2], 10);
-            }
-
-            var comparatorArray = comparator.split('.');
-            var comparatorMajor = parseInt(comparatorArray[0], 10);
-            var comparatorMinor = parseInt(comparatorArray[1], 10);
-            var comparatorRevision = 0;
-
-            if (comparatorArray.length >= 3) {
-                comparatorRevision = parseInt(comparatorArray[2], 10);
-            }
-
-            var inputDVersion = (inputMajor * 1000000) + (inputMinor * 1000) + inputRevision;
-
-            var comparatorDVersion = (comparatorMajor * 1000000) + (comparatorMinor * 1000) + comparatorRevision;
-
-            if (inputDVersion <= comparatorDVersion)
-                return true;
-            return false;
-        }
-        catch (e) {
-            //Should not happen if verified correctly
-            return false;
-        }
+        return (inputMajor * 1000000) + (inputMinor * 1000) + inputRevision;
     }
 
     function IsBuggyWebKit() {
@@ -154,10 +99,18 @@ declare var window;
             return false;
         }
         var version = matchResult[1];
-        if (IsWebkitInputVersionGreaterOrEqualTo(version, "604.1.34")
-            && IsWebkitInputVersionLessOrEqualTo(version, "605.1.33")) {
-            console.log("Buggy webkit detected");
-            return true;
+        
+        try{
+            const userVersion = VersionStringToNumber(version);
+            const minVersion = 604001034; //"604.1.34"
+            const maxVersion = 605001033; //"605.1.33"
+            
+            if(userVersion >= minVersion && userVersion <= maxVersion){
+                console.log("Buggy webkit detected");
+                return true;
+            }
+        }catch{
+            return false;
         }
         return false;
     }
