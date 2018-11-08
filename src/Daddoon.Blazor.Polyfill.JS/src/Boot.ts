@@ -1,4 +1,4 @@
-﻿/* BLAZOR.POLYFILL Version 0.2.0 */
+﻿/* BLAZOR.POLYFILL Version 0.3.0 */
 
 /** IE9, IE10 and IE11 requires all of the following polyfills. **/
 import 'core-js/es6/symbol';
@@ -16,7 +16,9 @@ import 'core-js/es6/map';
 import 'core-js/es6/weak-map';
 import 'core-js/es6/set';
 import 'core-js/es6/promise'
+import 'core-js/es6/typed'
 import 'whatwg-fetch';
+import '../src/template.js'
 
 declare var Symbol;
 declare var document;
