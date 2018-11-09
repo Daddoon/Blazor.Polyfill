@@ -35,7 +35,7 @@ That's all !
 # TROUBLESHOOT
 
 ## Missing .mem file (404 error)
-Not directly related to **Blazor.Polyfill**, but depending your environment (IIS, IIS Express, Kestrel etC.) you may encounter this kind of error in the browser console at Blazor startup:
+Not directly related to **Blazor.Polyfill**, but depending your environment (IIS, IIS Express, Kestrel, ...) you may encounter this kind of error in the browser console at Blazor startup:
 
 ```
 [Error] Failed to load resource: the server responded with a status of 404 (Not Found) (mono.js.mem, line 0)
