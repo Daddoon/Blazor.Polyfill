@@ -30,8 +30,6 @@ The easiest way to install is to download the [*latest release*](https://github.
 <script src="_framework/blazor.server.js"></script>
 ```
 
-That's all !
-
 # TROUBLESHOOT
 
 ## Missing .mem file (404 error)
@@ -58,3 +56,4 @@ add a child node like:
 # DISCLAIMER
 
 This project is not affiliated with the Blazor project.
+
