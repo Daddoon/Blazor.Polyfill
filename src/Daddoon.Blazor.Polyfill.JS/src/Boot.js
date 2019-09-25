@@ -18,10 +18,14 @@ require("../src/template.js");
         // option from core-js
         if (IsIE()) {
             Symbol.useSimple();
-            //Adding document.baseURI for IE
-            //Additional checks for Internet Explorer"
-            if (document.baseURI == null || document.baseURI == undefined) {
-                //IE case
+        }
+        //Adding document.baseURI for IE and maybe other browser that would not have it
+        if (document.baseURI == null || document.baseURI == undefined) {
+            try {
+                document.baseURI = document.getElementsByTagName("base")[0].href;
+            }
+            catch (e) {
+                //This should not happen as <base> tag must be present at page loading
                 var port = "";
                 if (window.location.port != undefined && window.location.port != null && window.location.port != "")
                     port = ":" + location.port;
@@ -29,7 +33,7 @@ require("../src/template.js");
                 if (path === undefined || path === null || path === "") {
                     path = "/";
                 }
-                document.baseURI = window.location.protocol + "//" + window.location.hostname + port + path;
+                document.baseURI = window.location.protocol + "//" + window.location.hostname + port + "/";
             }
         }
     }
