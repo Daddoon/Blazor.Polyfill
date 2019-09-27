@@ -17,7 +17,6 @@ The easiest way to install is to download the [*latest release*](https://github.
 ```html
 <script type="text/javascript" src="blazor.polyfill.min.js"></script>
 <script src="_framework/blazor.webassembly.js"></script>
-</script>
 ```
 
 ## For Blazor in Server-side mode
