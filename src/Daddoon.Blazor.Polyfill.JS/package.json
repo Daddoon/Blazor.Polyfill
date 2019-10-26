@@ -14,7 +14,7 @@
     "ts-loader": "^3.2.0"
   },
   "dependencies": {
-    "core-js": "^3.2.1",
+    "core-js": "^3.3.4",
     "whatwg-fetch": "^2.0.4"
   }
 }

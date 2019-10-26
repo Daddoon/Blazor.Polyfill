@@ -5,6 +5,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 require("core-js/es");
 require("whatwg-fetch");
 require("../src/template.js");
+require("../src/navigator.sendbeacon.js");
 (function () {
     function IsIE() {
         if (/MSIE \d|Trident.*rv:/.test(navigator.userAgent)) {
