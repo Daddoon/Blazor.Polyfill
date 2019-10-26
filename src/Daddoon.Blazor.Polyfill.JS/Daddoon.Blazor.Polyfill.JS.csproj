@@ -32,4 +32,8 @@
       <EmbeddedResource Include="dist\blazor.polyfill.js" LogicalName="blazor./blazor.polyfill.js" />
     </ItemGroup>
   </Target>
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="copy &quot;$(ProjectDir)dist\blazor.polyfill.min.js&quot; &quot;$(ProjectDir)..\..\Publish\Blazor.Polyfill.Publish\blazor.polyfill.min.js&quot; /Y" />
+  </Target>
 </Project>
