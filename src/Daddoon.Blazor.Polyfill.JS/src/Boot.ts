@@ -4,6 +4,7 @@
 import 'core-js/es';
 import 'whatwg-fetch';
 import '../src/template.js'
+import '../src/navigator.sendbeacon.js'
 
 declare var Symbol;
 declare var document;
