@@ -1,8 +1,6 @@
 "use strict";
-/* BLAZOR.POLYFILL Version 0.3.0 */
+/* BLAZOR.POLYFILL Version 0.3.1 */
 Object.defineProperty(exports, "__esModule", { value: true });
-/** IE9, IE10 and IE11 requires all of the following polyfills. **/
-require("core-js/es");
 require("whatwg-fetch");
 require("../src/template.js");
 require("../src/navigator.sendbeacon.js");
@@ -37,6 +35,10 @@ require("../src/navigator.sendbeacon.js");
                 document.baseURI = window.location.protocol + "//" + window.location.hostname + port + "/";
             }
         }
+        if (IsIE()) {
+            //IE doesn't auto start blazor.server.js. Forcing it after Blazor loaded in the DOM
+            forceBlazorLoadOnIE(0);
+        }
     }
     function BlazorObjectIsFound() {
         try {
@@ -59,9 +61,5 @@ require("../src/navigator.sendbeacon.js");
         }
     }
     blazorPolyfill();
-    if (IsIE()) {
-        //IE doesn't auto start blazor.server.js. Forcing it after Blazor loaded in the DOM
-        forceBlazorLoadOnIE(0);
-    }
 })();
 //# sourceMappingURL=Boot.js.map
