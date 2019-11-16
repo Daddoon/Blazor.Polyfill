@@ -1,14 +1,11 @@
-﻿/* BLAZOR.POLYFILL Version 0.3.0 */
+﻿/* BLAZOR.POLYFILL Version 0.3.1 */
 
-/** IE9, IE10 and IE11 requires all of the following polyfills. **/
-import 'core-js/es';
 import 'whatwg-fetch';
-import '../src/template.js'
-import '../src/navigator.sendbeacon.js'
+import '../src/template.js';
+import '../src/navigator.sendbeacon.js';
 
 declare var Symbol;
 declare var document;
-declare var self;
 declare var window;
 declare var Blazor;
 
@@ -52,6 +49,11 @@ declare var Blazor;
                 document.baseURI = window.location.protocol + "//" + window.location.hostname + port + "/";
             }
         }
+
+        if (IsIE()) {
+            //IE doesn't auto start blazor.server.js. Forcing it after Blazor loaded in the DOM
+            forceBlazorLoadOnIE(0);
+        }
     }
 
     function BlazorObjectIsFound() {
@@ -79,9 +81,4 @@ declare var Blazor;
     }
 
     blazorPolyfill();
-
-    if (IsIE()) {
-        //IE doesn't auto start blazor.server.js. Forcing it after Blazor loaded in the DOM
-        forceBlazorLoadOnIE(0);
-    }
 })();
