@@ -2,36 +2,36 @@
 
 Polyfills for Blazor and fixes for Internet Explorer 11 support with server-side mode.
 
-### WARNING: BREAK SINCE BLAZOR 3.1.0-preview3.19555.2
+### NOTICE
 
-Since **Blazor 3.1.0-preview3.19555.2**, previous version of Blazor.Polyfill doesn't work correctly if they are included in a **blazor.webassembly.js** project, as it seem to break some Blazor functionnalities on **Edge**.
-I think this is related to some Blazor change and some race condition / module loading with **Webpack** and **core-js**.
+Since **Blazor 3.1.0-preview3.19555.2**, including the polyfill on a **Blazor WebAssembly** project can cause some break, especially on **Edge**.
+As the current library is only aimed for the **Blazor server-side** project and only for **Internet Explorer 11**, you must include this polyfill only on this browser.
 
-I don't have yet found a clean way to workaround and include everything in one package due to theses problems.
-However, things works correctly when including **core-js 2.1.0** and only if outside the Blazor.Polyfill package.
-
-Taking this in consideration, this release of Blazor.Polyfill doesn't have **core-js** included.
-See the installation guide for more info.
-
-**NOTE:** You may still keep the previous Blazor.Polyfill version if you manage to include it only on a server-side, **blazor.server.js**, app. 
-
+See the updated documentation.
 
 # ABOUT
 
-This are the required polyfills in order to launch Blazor from Internet Explorer 11, maybe some other unsupported browsers too.
+This are the required polyfills and fixes in order to launch Blazor from Internet Explorer 11.
 
-Please note that this project is only for compatibility conveniences and no one knows if Blazor will still work even with theses polyfills in the future. There is also no guarantee about full Blazor support.
+This project is using the following polyfills internally:
 
-This project is using [*core-js*](https://github.com/zloirock/core-js), [*fetch*](https://github.com/github/fetch) and also [webcomponents/template](https://github.com/webcomponents/template) polyfills, with some tweak at startup for **Internet Explorer 11**
+- [*core-js*](https://github.com/zloirock/core-js)
+- [*fetch*](https://github.com/github/fetch)
+- [webcomponents/template](https://github.com/webcomponents/template)
+- [miguelmota/Navigator.sendBeacon](https://github.com/miguelmota/Navigator.sendBeacon)
 
 # INSTALLATION
 
 The easiest way to install is to download the [*latest release*](https://github.com/Daddoon/Blazor.Polyfill/releases) and include the **blazor.polyfill.js** or **blazor.polyfill.min.js** file before the **blazor.server.js** (server-mode) script tag in your **wwwroot\index.html** or **_Host.cshtml** file like:
 
 ```html
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/core-js/2.1.0/core.min.js"></script>
+<script type="text/javascript">
+    if (/MSIE \d|Trident.*rv:/.test(navigator.userAgent)) {
+        document.write('<script src="js/blazor.polyfill.min.js"><\/script>');
+    }
+</script>
 <script type="text/javascript" src="blazor.polyfill.min.js"></script>
 <script src="_framework/blazor.server.js"></script>
 ```
 
-
+...considering you have copied the file in a **wwwroot/js** folder.

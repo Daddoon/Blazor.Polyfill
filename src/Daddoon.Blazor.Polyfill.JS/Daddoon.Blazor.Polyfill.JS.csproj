@@ -34,6 +34,6 @@
   </Target>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="copy &quot;$(ProjectDir)dist\blazor.polyfill.min.js&quot; &quot;$(ProjectDir)..\..\Publish\Blazor.Polyfill.Publish\blazor.polyfill.min.js&quot; /Y&#xD;&#xA;copy &quot;$(ProjectDir)dist\blazor.polyfill.js&quot; &quot;$(ProjectDir)..\..\Publish\Blazor.Polyfill.Publish\blazor.polyfill.js&quot; /Y" />
+    <Exec Command="IF EXIST &quot;$(ProjectDir)dist\blazor.polyfill.min.js&quot; (copy &quot;$(ProjectDir)dist\blazor.polyfill.min.js&quot; &quot;$(ProjectDir)..\..\Publish\Blazor.Polyfill.Publish\blazor.polyfill.min.js&quot; /Y)&#xD;&#xA;IF EXIST &quot;$(ProjectDir)dist\blazor.polyfill.js&quot; (copy &quot;$(ProjectDir)dist\blazor.polyfill.js&quot; &quot;$(ProjectDir)..\..\Publish\Blazor.Polyfill.Publish\blazor.polyfill.js&quot; /Y)" />
   </Target>
 </Project>
