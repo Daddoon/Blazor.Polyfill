@@ -1,8 +1,9 @@
-﻿/* BLAZOR.POLYFILL Version 0.3.1 */
+﻿/* BLAZOR.POLYFILL Version 3.0.7 */
 
 import 'whatwg-fetch';
 import '../src/template.js';
 import '../src/navigator.sendbeacon.js';
+import 'core-js/es';
 
 declare var Symbol;
 declare var document;
@@ -34,24 +35,14 @@ declare var Blazor;
             try {
                 document.baseURI = document.getElementsByTagName("base")[0].href;
             } catch (e) {
-
-                //This should not happen as <base> tag must be present at page loading
-
-                var port = "";
-                if (window.location.port != undefined && window.location.port != null && window.location.port != "")
-                    port = ":" + location.port;
-
-                var path = window.location.pathname;
-                if (path === undefined || path === null || path === "") {
-                    path = "/";
-                }
-
-                document.baseURI = window.location.protocol + "//" + window.location.hostname + port + "/";
+                console.error("Blazor.Polyfill: Unable to define the undefined 'document.baseURI' property: No <base> tag present in the <head> of the current document.");
+                console.error("On a Blazor server-side project, check that '<base href=\"~/\" />' is present as a child tag of your <head> tag.");
             }
         }
 
         if (IsIE()) {
-            //IE doesn't auto start blazor.server.js. Forcing it after Blazor loaded in the DOM
+            //IE doesn't auto start blazor.server.js due to a lacking of currentScript, used in blazor.server.js.
+            //Forcing it after Blazor loaded in the DOM
             forceBlazorLoadOnIE(0);
         }
     }
