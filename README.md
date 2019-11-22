@@ -30,7 +30,6 @@ The easiest way to install is to download the [*latest release*](https://github.
         document.write('<script src="js/blazor.polyfill.min.js"><\/script>');
     }
 </script>
-<script type="text/javascript" src="blazor.polyfill.min.js"></script>
 <script src="_framework/blazor.server.js"></script>
 ```
 
