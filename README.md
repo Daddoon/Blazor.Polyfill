@@ -34,3 +34,32 @@ The easiest way to install is to download the [*latest release*](https://github.
 ```
 
 ...considering you have copied the file in a **wwwroot/js** folder.
+
+## Using Telerik Blazor Component on IE11
+
+As [@daver77](https://github.com/daver77) seen in [issue #22](https://github.com/Daddoon/Blazor.Polyfill/issues/22), **Telerik Blazor Component** may not work out of the box on IE11.
+
+This is not related to a missing functionnality of Blazor.Polyfill, as it is sufficient to launch Blazor on IE11 with it, but just the fact that some functionnalities used by Telerik Blazor component are not available on IE11.
+
+Some additionnal polyfills will be required in addition of Blazor.Polyfill, to make the **Telerik Blazor Component** library work on IE11.
+
+You will need:
+
+- Element.prototype.closest polyfill
+- document.IntersectionObserver polyfill
+- document.QuerySelector polyfill
+
+Using **polyfill.io** you could load your Blazor app like this instead:
+
+
+```html
+<script type="text/javascript">
+    if (/MSIE \d|Trident.*rv:/.test(navigator.userAgent)) {
+        document.write('<script src="https://polyfill.io/v3/polyfill.min.js?features=Element.prototype.closest%2CIntersectionObserver%2Cdocument.querySelector"><\/script>');
+        document.write('<script src="js/blazor.polyfill.min.js"><\/script>');
+    }
+</script>
+<script src="_framework/blazor.server.js"></script>
+```
+
+Thanks to [@daver77](https://github.com/daver77)
