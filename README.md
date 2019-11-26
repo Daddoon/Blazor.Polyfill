@@ -39,9 +39,9 @@ The easiest way to install is to download the [*latest release*](https://github.
 
 As [@daver77](https://github.com/daver77) seen in [issue #22](https://github.com/Daddoon/Blazor.Polyfill/issues/22), **Telerik Blazor Component** may not work out of the box on IE11.
 
-This is not related to a missing functionnality of Blazor.Polyfill, as it is sufficient to launch Blazor on IE11 with it, but just the fact that some functionnalities used by Telerik Blazor component are not available on IE11.
+This is not related to a missing functionnality of Blazor.Polyfill, as it is sufficient to launch Blazor on IE11 with it, but just the fact that some functionnalities used by Telerik Blazor component are not available on it.
 
-Some additionnal polyfills will be required in addition of Blazor.Polyfill, to make the **Telerik Blazor Component** library work on IE11.
+Some additionnal polyfills will be required in addition of Blazor.Polyfill, to make the **Telerik Blazor Component** library work on it.
 
 You will need:
 
