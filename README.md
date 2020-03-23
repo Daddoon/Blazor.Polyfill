@@ -35,9 +35,9 @@ The easiest way to install is to download the [*latest release*](https://github.
 
 ...considering you have copied the file in a **wwwroot/js** folder.
 
-## Using Telerik Blazor Component on IE11
+## Using Telerik Blazor Component or MatBlazor on IE11
 
-**Telerik Blazor Component** may not work out of the box on IE11.
+**Telerik Blazor Component** or **MatBlazor** may not work out of the box on IE11.
 
 This is not related to a missing functionnality of Blazor.Polyfill, as it is sufficient to launch Blazor on IE11 with it, but just the fact that some functionnalities used by Telerik Blazor component are not available on it.
 
