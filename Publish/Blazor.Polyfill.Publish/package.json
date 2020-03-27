@@ -1,6 +1,6 @@
 {
   "name": "blazor.polyfill",
-  "version": "3.0.7",
+  "version": "3.0.8",
   "description": "Polyfills for Blazor and fixes for Internet Explorer 11 support with server-side mode.",
   "main": "blazor.polyfill.min.js",
   "scripts": {
