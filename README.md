@@ -17,8 +17,9 @@ This project is using the following polyfills internally:
 
 - [*core-js*](https://github.com/zloirock/core-js)
 - [*fetch*](https://github.com/github/fetch)
-- [webcomponents/template](https://github.com/webcomponents/template)
-- [miguelmota/Navigator.sendBeacon](https://github.com/miguelmota/Navigator.sendBeacon)
+- [*webcomponents/template*](https://github.com/webcomponents/template)
+- [*miguelmota/Navigator.sendBeacon*](https://github.com/miguelmota/Navigator.sendBeacon)
+- [*mo/abortcontroller-polyfill*](https://github.com/mo/abortcontroller-polyfill)
 
 # INSTALLATION
 
