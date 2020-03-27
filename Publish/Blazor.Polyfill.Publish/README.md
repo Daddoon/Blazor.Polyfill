@@ -19,6 +19,7 @@ This project is using the following polyfills internally:
 - [*fetch*](https://github.com/github/fetch)
 - [webcomponents/template](https://github.com/webcomponents/template)
 - [miguelmota/Navigator.sendBeacon](https://github.com/miguelmota/Navigator.sendBeacon)
+- [mo/abortcontroller-polyfill](https://github.com/mo/abortcontroller-polyfill)
 
 # INSTALLATION
 
