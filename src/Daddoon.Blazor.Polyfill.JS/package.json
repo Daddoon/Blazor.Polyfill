@@ -14,7 +14,8 @@
     "ts-loader": "^3.2.0"
   },
   "dependencies": {
-    "core-js": "^3.4.1",
+    "abortcontroller-polyfill": "^1.4.0",
+    "core-js": "^3.6.4",
     "whatwg-fetch": "^2.0.4"
   }
 }

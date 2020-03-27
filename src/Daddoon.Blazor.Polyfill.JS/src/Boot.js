@@ -1,10 +1,11 @@
 "use strict";
-/* BLAZOR.POLYFILL Version 3.0.7 */
+/* BLAZOR.POLYFILL Version 3.0.8 */
 Object.defineProperty(exports, "__esModule", { value: true });
+require("core-js/es");
 require("whatwg-fetch");
+require("abortcontroller-polyfill/dist/polyfill-patch-fetch");
 require("../src/template.js");
 require("../src/navigator.sendbeacon.js");
-require("core-js/es");
 (function () {
     function IsIE() {
         if (/MSIE \d|Trident.*rv:/.test(navigator.userAgent)) {

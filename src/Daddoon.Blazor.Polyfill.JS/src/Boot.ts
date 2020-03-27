@@ -1,9 +1,10 @@
-﻿/* BLAZOR.POLYFILL Version 3.0.7 */
+﻿/* BLAZOR.POLYFILL Version 3.0.8 */
 
+import 'core-js/es';
 import 'whatwg-fetch';
+import 'abortcontroller-polyfill/dist/polyfill-patch-fetch';
 import '../src/template.js';
 import '../src/navigator.sendbeacon.js';
-import 'core-js/es';
 
 declare var Symbol;
 declare var document;
