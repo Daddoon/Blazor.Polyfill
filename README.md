@@ -1,4 +1,4 @@
-# Blazor.Polyfill
+# Blazor.Polyfill[<img src="logo_blazorpolyfill.png_256x256.png?raw=true" align="right" width="200">]() 
 
 Polyfills for Blazor and fixes for Internet Explorer 11 support with server-side mode.
 
