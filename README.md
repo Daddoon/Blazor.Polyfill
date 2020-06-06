@@ -35,6 +35,20 @@ The easiest way to install is to download the [*latest release*](https://github.
 ```
 
 ...considering you have copied the file in a **wwwroot/js** folder.
+Alternatively, the browser detection can be done server side:
+
+```html
+@{
+    // IE11 compatibility
+    if (Request.Headers.TryGetValue("User-Agent", out var userAgents)
+        && (userAgents.FirstOrDefault() is string userAgent)
+        && System.Text.RegularExpressions.Regex.IsMatch(userAgent, @"MSIE \d|Trident.*rv:"))
+    {
+        <script src="js/blazor.polyfill.min.js"></script>
+    }
+}
+<script src="_framework/blazor.server.js"></script>
+```
 
 ## Using Telerik Blazor Component or MatBlazor on IE11
 
