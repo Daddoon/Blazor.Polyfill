@@ -8,6 +8,8 @@ Polyfills for Blazor server-side for Internet Explorer 11 support on **.NET 5.0.
 **BlazorPolyfill.Server** NuGet package can be either found [on nuget.org](https://www.nuget.org/packages/BlazorPolyfill.Server/5.0.0) or from the [*latest release*](https://github.com/Daddoon/Blazor.Polyfill/releases) page on this repository.
 
 - (Optional) If updating from Blazor.Polyfill **3.0.8**, please remove any reference to **blazor.polyfill.js** or **blazor.polyfill.min.js** from your **_Host.cshtml** code, or any static file about the library you would link to in your code, as the library is now embedded is the NuGet package, and managed by **_framework/blazor.polyfill.min.js** as a magic path.
+
+
 - Install the package interactively from the NuGet Package manager in Visual Studio
 - **Or** install it from the Package Manager CLI with this command:
 ```
