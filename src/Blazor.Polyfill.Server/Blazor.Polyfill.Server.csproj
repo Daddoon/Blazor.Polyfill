@@ -21,4 +21,19 @@
     <PackageReference Include="React.AspNet" Version="5.2.11" />
   </ItemGroup>
 
+  <ItemGroup>
+    <AssemblyAttribute Include="BlazorPolyfillBuildDateAttribute">
+      <_Parameter1>$([System.DateTime]::UtcNow.ToString("yyyyMMddHHmmss"))</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="dist\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="..\Daddoon.Blazor.Polyfill.JS\dist\blazor.polyfill.js" Link="dist\blazor.polyfill.js" />
+    <EmbeddedResource Include="..\Daddoon.Blazor.Polyfill.JS\dist\blazor.polyfill.min.js" Link="dist\blazor.polyfill.min.js" />
+  </ItemGroup>
+
 </Project>

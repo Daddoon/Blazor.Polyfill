@@ -15,6 +15,9 @@ using JavaScriptEngineSwitcher.V8;
 using React.Exceptions;
 using System.Text.RegularExpressions;
 using NUglify;
+using System.Globalization;
+using System.Net;
+using Blazor.Polyfill.Server.Model;
 
 namespace Blazor.Polyfill.Server
 {
@@ -60,17 +63,33 @@ namespace Blazor.Polyfill.Server
                 subBuilder.Run(async (context) =>
                 {
                     var fileContent = GetPatchedBlazorServerFile();
+                    await HttpRequestManager.ManageRequest(context, fileContent);
+                });
+            });
 
-                    context.Response.ContentType = "application/javascript";
-                    context.Response.Headers.Append(HeaderNames.CacheControl, "no-cache");
-                    await context.Response.WriteAsync(fileContent.Value);
+            //Should return the resource file if IE11
+            builder.MapWhen(ctx =>
+            ctx.Request.Path.StartsWithSegments("/_framework")
+            && (
+                ctx.Request.Path.StartsWithSegments("/_framework/blazor.polyfill.js")
+                || ctx.Request.Path.StartsWithSegments("/_framework/blazor.polyfill.min.js")
+            ),
+            subBuilder =>
+            {
+                subBuilder.Run(async (context) =>
+                {
+                    //Eval if the requested file is the minified version or not
+                    bool isMinified = context.Request.Path.StartsWithSegments("/_framework/blazor.polyfill.min.js");
+
+                    var fileContent = GetIE11BlazorPolyfill(context.Request.IsInternetExplorer(), isMinified);
+                    await HttpRequestManager.ManageRequest(context, fileContent);
                 });
             });
 
             return builder;
         }
 
-        public static string Transform(string input, string filename, string babelrcJSON)
+        private static string Transform(string input, string filename, string babelrcJSON)
         {
             string str;
             try
@@ -87,6 +106,8 @@ namespace Blazor.Polyfill.Server
 
             return str;
         }
+
+        #region PATCHED BLAZOR.SERVER.JS
 
         private static FileContentReference _patchedBlazorServerFile = null;
 
@@ -118,9 +139,21 @@ namespace Blazor.Polyfill.Server
                     //kind of thing here...
                     js = Uglify.Js(js).Code;
 
+                    //Computing ETag. Should be computed last !
+                    string Etag = EtagGenerator.GenerateEtagFromString(js);
+
+                    //Computing Build time for the Last-Modified Http Header
+                    //We should rely on the creation date of the Microsoft API
+                    //not the Blazor.Polyfill.Server one as the Microsoft.AspNetCore.Components.Server
+                    //assembly may be updated in time. We will rely on the current creation/modification date on disk
+                    DateTime buildTime = GetAssemblyCreationDate(assembly);
+
                     _patchedBlazorServerFile = new FileContentReference()
                     {
-                        Value = js
+                        Value = js,
+                        ETag = Etag,
+                        LastModified = buildTime,
+                        ContentLength = System.Text.UTF8Encoding.UTF8.GetByteCount(js).ToString(CultureInfo.InvariantCulture)
                     };
                 }
             }
@@ -128,13 +161,165 @@ namespace Blazor.Polyfill.Server
             return _patchedBlazorServerFile;
         }
 
+        #endregion PATCHED BLAZOR.SERVER.JS
+
+        #region IE11 BLAZOR.POLYFILL.JS
+
+        private static FileContentReference _ie11Polyfill = null;
+        private static FileContentReference _ie11PolyfillMin = null;
+
         /// <summary>
-        /// This class is intentionally a kind of placeholder in order to avoid "value" copy of the file stored
-        /// with the string class. We want a kind of "ref" behavior, with the value copied/written only 
+        /// Used to return an empty file
         /// </summary>
-        internal class FileContentReference
+        private static FileContentReference _fakeie11Polyfill = null;
+
+        private static FileContentReference GetIE11BlazorPolyfill(bool isIE11, bool isMinified)
         {
-            public string Value { get; set; }
+            if (!isIE11)
+            {
+                if (_fakeie11Polyfill == null)
+                {
+                    string fakeContent = "var _fakeBlazorPolyfill = { };";
+
+                    //Computing ETag. Should be computed last !
+                    string Etag = EtagGenerator.GenerateEtagFromString(fakeContent);
+
+                    //Computing Build time for the Last-Modified Http Header
+                    DateTime buildTime = GetBlazorPolyfillServerBuildDate();
+
+                    _fakeie11Polyfill = new FileContentReference()
+                    {
+                        Value = fakeContent,
+                        ETag = Etag,
+                        LastModified = buildTime,
+                        ContentLength = System.Text.UTF8Encoding.UTF8.GetByteCount(fakeContent).ToString(CultureInfo.InvariantCulture)
+                    };
+                }
+
+                return _fakeie11Polyfill;
+            }
+            else
+            {
+                if (isMinified)
+                {
+                    if (_ie11PolyfillMin == null)
+                    {
+                        var assembly = GetBlazorPolyfillAssembly();
+
+                        var resources = assembly.GetManifestResourceNames();
+                        var resourceName = resources.Single(str => str.EndsWith("blazor.polyfill.min.js"));
+
+                        using (Stream stream = assembly.GetManifestResourceStream(resourceName))
+                        using (StreamReader reader = new StreamReader(stream))
+                        {
+                            string js = reader.ReadToEnd();
+
+                            //Computing ETag. Should be computed last !
+                            string Etag = EtagGenerator.GenerateEtagFromString(js);
+
+                            //Computing Build time for the Last-Modified Http Header
+                            DateTime buildTime = GetBlazorPolyfillServerBuildDate();
+
+                            _ie11PolyfillMin = new FileContentReference()
+                            {
+                                Value = js,
+                                ETag = Etag,
+                                LastModified = buildTime,
+                                ContentLength = System.Text.UTF8Encoding.UTF8.GetByteCount(js).ToString(CultureInfo.InvariantCulture)
+                            };
+                        }
+                    }
+
+                    return _ie11PolyfillMin;
+                }
+                else
+                {
+                    if (_ie11Polyfill == null)
+                    {
+                        var assembly = GetBlazorPolyfillAssembly();
+
+                        var resources = assembly.GetManifestResourceNames();
+                        var resourceName = resources.Single(str => str.EndsWith("blazor.polyfill.js"));
+
+                        using (Stream stream = assembly.GetManifestResourceStream(resourceName))
+                        using (StreamReader reader = new StreamReader(stream))
+                        {
+                            string js = reader.ReadToEnd();
+
+                            //Computing ETag. Should be computed last !
+                            string Etag = EtagGenerator.GenerateEtagFromString(js);
+
+                            //Computing Build time for the Last-Modified Http Header
+                            DateTime buildTime = GetBlazorPolyfillServerBuildDate();
+
+                            _ie11Polyfill = new FileContentReference()
+                            {
+                                Value = js,
+                                ETag = Etag,
+                                LastModified = buildTime,
+                                ContentLength = System.Text.UTF8Encoding.UTF8.GetByteCount(js).ToString(CultureInfo.InvariantCulture)
+                            };
+                        }
+                    }
+
+                    return _ie11Polyfill;
+                }
+            }
+        }
+
+        #endregion IE11 BLAZOR.POLYFILL.JS
+
+        private static DateTime GetBlazorPolyfillServerBuildDate()
+        {
+            //This class Assembly
+            var thisAssembly = GetBlazorPolyfillAssembly();
+
+            var attribute = thisAssembly.GetCustomAttribute<BlazorPolyfillBuildDateAttribute>();
+            return attribute != null ? attribute.DateTime : default(DateTime);
+        }
+
+        #region ASSEMBLY RELATED
+
+        public static DateTime GetAssemblyCreationDate(Assembly assembly)
+        {
+            if (assembly == null)
+            {
+                throw new NullReferenceException(nameof(assembly));
+            }
+
+            try
+            {
+                FileInfo fi = new FileInfo(assembly.Location);
+                var created = fi.CreationTime;
+                var lastmodified = fi.LastWriteTime;
+
+                if (created == DateTime.MinValue)
+                {
+                    throw new InvalidOperationException($"Unable to stat '{assembly.GetName()}' assembly file. Check file existence at this location and permissions");
+                }
+
+                return fi.LastWriteTime != DateTime.MinValue ? fi.LastWriteTime : fi.CreationTime;
+            }
+            catch (Exception)
+            {
+                //Shoud not go into exception. If we are here, that mean that there is some access rights exception
+                //We bubble here in order to differenciate an unexisting FileInfo or something else at the same code area
+                throw;
+            }
+        }
+
+        private static Assembly _blazorPolyfillAssembly = null;
+
+        private static Assembly GetBlazorPolyfillAssembly()
+        {
+            if (_blazorPolyfillAssembly == null)
+            {
+                //Getting Assembly reference through a currently loaded class type issued
+                //from this assembly
+                _blazorPolyfillAssembly = Assembly.GetAssembly(typeof(BlazorPolyfillMiddlewareExtensions));
+            }
+
+            return _blazorPolyfillAssembly;
         }
 
         private static Assembly _serverAssembly = null;
@@ -157,5 +342,7 @@ namespace Blazor.Polyfill.Server
 
             return _serverAssembly;
         }
+
+        #endregion ASSEMBLY RELATED
     }
 }
