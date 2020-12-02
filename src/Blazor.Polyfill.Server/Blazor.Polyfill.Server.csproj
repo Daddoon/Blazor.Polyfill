@@ -2,6 +2,21 @@
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Version>5.0.0</Version>
+    <Authors>Guillaume ZAHRA</Authors>
+    <Company>Daddoon</Company>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <Description>Polyfills and fix for Blazor server-side on Internet Explorer 11</Description>
+    <PackageProjectUrl>https://github.com/Daddoon/Blazor.Polyfill</PackageProjectUrl>
+    <PackageIcon>logo_blazorpolyfill_128.png</PackageIcon>
+    <RepositoryType>Git</RepositoryType>
+    <RepositoryUrl>https://github.com/Daddoon/Blazor.Polyfill</RepositoryUrl>
+    <PackageTags>blazor blazor-server ie11 polyfill</PackageTags>
+    <PackageReleaseNotes>Support of Blazor server-side for Internet Explorer 11 on .NET 5</PackageReleaseNotes>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageId>BlazorPolyfill.Server</PackageId>
+    <Product>Blazor.Polyfill</Product>
   </PropertyGroup>
 
   <ItemGroup>
@@ -34,6 +49,13 @@
   <ItemGroup>
     <EmbeddedResource Include="..\Daddoon.Blazor.Polyfill.JS\dist\blazor.polyfill.js" Link="dist\blazor.polyfill.js" />
     <EmbeddedResource Include="..\Daddoon.Blazor.Polyfill.JS\dist\blazor.polyfill.min.js" Link="dist\blazor.polyfill.min.js" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\logo_blazorpolyfill_128.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
   </ItemGroup>
 
 </Project>

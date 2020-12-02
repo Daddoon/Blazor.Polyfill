@@ -18,7 +18,7 @@ namespace Blazor.Polyfill.Server
             context.Response.ContentType = contentType;
             context.Response.Headers.Append(HeaderNames.CacheControl, "no-cache");
             context.Response.Headers.Append(HeaderNames.LastModified, fileContent.LastModified.ToString("r"));
-            context.Response.Headers.Append(HeaderNames.ETag, $"\"{fileContent.ETag}\"");
+            context.Response.Headers.Append(HeaderNames.ETag, fileContent.ETag);
 
             //In this case we should return the entire response
             if (RequestHasTheNoCacheHeaderSet(context.Request)
