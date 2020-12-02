@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "abortcontroller-polyfill": "^1.4.0",
-    "core-js": "^3.6.4",
+    "core-js": "^3.8.0",
     "whatwg-fetch": "^2.0.4"
   }
 }
