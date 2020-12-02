@@ -38,7 +38,7 @@ namespace Blazor.Polyfill.Server
             //return the same value.
             string md5 = CreateMD5(content);
 
-            return md5;
+            return $"\"{md5}\"";
         }
     }
 }
