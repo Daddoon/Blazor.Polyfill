@@ -15,6 +15,8 @@
     <PackageTags>blazor blazor-server ie11 polyfill</PackageTags>
     <PackageReleaseNotes>Support of Blazor server-side for Internet Explorer 11 on .NET 5</PackageReleaseNotes>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageId>BlazorPolyfill.Server</PackageId>
+    <Product>Blazor.Polyfill</Product>
   </PropertyGroup>
 
   <ItemGroup>
