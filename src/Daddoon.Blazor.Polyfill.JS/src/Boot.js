@@ -20,6 +20,12 @@ require("../src/navigator.sendbeacon.js");
         if (IsIE()) {
             Symbol.useSimple();
         }
+        if (IsIE()) {
+            // Function to make IE9+ support forEach:
+            if (window.NodeList && !NodeList.prototype.forEach) {
+                NodeList.prototype.forEach = Array.prototype.forEach;
+            }
+        }
         //Adding document.baseURI for IE and maybe other browser that would not have it
         if (document.baseURI == null || document.baseURI == undefined) {
             try {
