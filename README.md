@@ -1,11 +1,10 @@
 # Blazor.Polyfill[<img src="logo_blazorpolyfill.png_256x256.png?raw=true" align="right" width="200">]() 
 
-Polyfills for Blazor server-side for Internet Explorer 11 support on **.NET 5.0.0**
-
+Blazor server-side Polyfills and fixes for **Internet Explorer 11** & **Edge Legacy** (EdgeHTML engine).
 
 # INSTALLATION
 
-**BlazorPolyfill.Server** NuGet package can be either found [on nuget.org](https://www.nuget.org/packages/BlazorPolyfill.Server/5.0.0) or from the [*latest release*](https://github.com/Daddoon/Blazor.Polyfill/releases) page on this repository.
+**BlazorPolyfill.Server** NuGet package can be either found [on nuget.org](https://www.nuget.org/packages/BlazorPolyfill.Server/) or from the [*latest release*](https://github.com/Daddoon/Blazor.Polyfill/releases) page on this repository.
 
 - (Optional) If updating from Blazor.Polyfill **3.0.8**, please remove any reference to **blazor.polyfill.js** or **blazor.polyfill.min.js** from your **_Host.cshtml** code, or any static file about the library you would link to in your code, as the library is now embedded is the NuGet package, and managed by **_framework/blazor.polyfill.min.js** as a magic path.
 
@@ -15,7 +14,7 @@ Polyfills for Blazor server-side for Internet Explorer 11 support on **.NET 5.0.
 ```
 Install-Package BlazorPolyfill.Server
 ```
-- **Or** additional syntax and possibilities available from the [NuGet package page](https://www.nuget.org/packages/BlazorPolyfill.Server/5.0.0)
+- **Or** additional syntax and possibilities available from the [NuGet package page](https://www.nuget.org/packages/BlazorPolyfill.Server/)
 
 - In your **_Host.cshtml** page, include **_framework/blazor.polyfill.min.js** file before the **_framework/blazor.server.js** script tag.
   The end of your page should look like this:
@@ -46,30 +45,55 @@ Install-Package BlazorPolyfill.Server
         }
 ```
 
-- You are good to go ! Blazor server-side with .NET 5 should be able load on Internet Explorer 11
+- You are good to go ! Blazor server-side with .NET 5 should be able load on Internet Explorer 11 & Edge
+
+## KNOWN ISSUE
+
+### Error 500 with blazor.server.js
+
+The current library components have been tested working on a **Windows environment** concerning the 'altered on-the-fly' **blazor.server.js** file generation.
+
+Some components relies on **ReactJS.NET** for the use of **babel-standalone**, needing a **JavaScriptEngine image**, shipped with this library.
+
+The following **Microsoft.ClearScript.V8** Native images are used:
+
+- win-x64
+- win-x86
+- linux-x64
+- osx-x64
+
+Following theses statements, unfortunately it has been reported that it fail on **Azur WebApp** if using a **Linux** OS image.
+
+Test on regular Linux distribution has not been done yet.
+
+You can [follow the issue here](https://github.com/Daddoon/Blazor.Polyfill/issues/40)
 
 # ABOUT
 
 ## Polyfills
 
-This are the required polyfills and fixes in order to launch Blazor from Internet Explorer 11.
+This are the required polyfills and fixes in order to launch Blazor from Internet Explorer 11 & Edge Legacy (EdgeHTML engine).
 
 This project is using the following polyfills internally:
 
 - [*core-js*](https://github.com/zloirock/core-js)
+- [*web-animations-js*](https://github.com/web-animations/web-animations-js)
 - [*fetch*](https://github.com/github/fetch)
-- [*webcomponents/template*](https://github.com/webcomponents/template)
-- [*miguelmota/Navigator.sendBeacon*](https://github.com/miguelmota/Navigator.sendBeacon)
-- [*mo/abortcontroller-polyfill*](https://github.com/mo/abortcontroller-polyfill)
+- [*template*](https://github.com/webcomponents/template)
+- [*Navigator.sendBeacon*](https://github.com/miguelmota/Navigator.sendBeacon)
+- [*abortcontroller-polyfill*](https://github.com/mo/abortcontroller-polyfill)
+- [*after*](https://developer.mozilla.org/en-US/docs/Web/API/ChildNode/after)
 
-**NOTE:** that the **blazor.polyfill.js** file return an "empty" javascript content if the browser is not Internet Explorer 11.
+Also an usage of **babel-standalone** through **ReactJS.NET** library for the alteration of the **blazor.server.js** library on-the-fly, in order to transpile code to **ES5**.
 
-## blazor.server.js file alteration on Internet Explorer 11
+**NOTE:** that the **blazor.polyfill.js** file return an "empty" javascript content if the browser is not Internet Explorer 11 or Edge Legacy.
 
-Only using Polyfills was not sufficient in order to make it working on IE11.
+## blazor.server.js file alteration on Internet Explorer 11 & Edge Legacy
 
-The **blazor.server.js** library is dynamicly altered at the first app request when IE11 is the calling browser.
-The altered returned version is **ONLY** returned for IE11, other browsers will receive the regular file packaged by Microsoft.
+Only using Polyfills was not sufficient in order to make it working on IE11 and Edge.
+
+The **blazor.server.js** library is dynamicaly altered at the first app request.
+The altered returned version is **ONLY** returned for IE11 and Edge, other browsers will receive the regular file packaged by Microsoft.
 
 The library is altered on the fly because the Microsoft library may update in the future in your app, and we always want to have the current latest version of the library to be modified at startup.
 
