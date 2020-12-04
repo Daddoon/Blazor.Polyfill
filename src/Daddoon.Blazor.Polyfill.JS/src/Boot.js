@@ -1,7 +1,8 @@
 "use strict";
-/* BLAZOR.POLYFILL Version 3.0.8 */
+/* BLAZOR.POLYFILL Version 5.0.100.1 */
 Object.defineProperty(exports, "__esModule", { value: true });
 require("core-js/es");
+require("web-animations-js");
 require("whatwg-fetch");
 require("abortcontroller-polyfill/dist/polyfill-patch-fetch");
 require("../src/template.js");

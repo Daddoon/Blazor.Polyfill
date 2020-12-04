@@ -1,6 +1,7 @@
-﻿/* BLAZOR.POLYFILL Version 3.0.8 */
+﻿/* BLAZOR.POLYFILL Version 5.0.100.1 */
 
 import 'core-js/es';
+import 'web-animations-js';
 import 'whatwg-fetch';
 import 'abortcontroller-polyfill/dist/polyfill-patch-fetch';
 import '../src/template.js';
