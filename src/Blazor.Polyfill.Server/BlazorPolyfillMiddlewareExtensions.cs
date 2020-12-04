@@ -54,6 +54,21 @@ namespace Blazor.Polyfill.Server
 
             InitReact(builder);
 
+            //This is a kind of hack for caching the data at boot
+            //It's better to prevent anything at first request by caching instead of
+            //making the user wait the file generation
+            builder.Use((context, next) =>
+            {
+                if (!IsBlazorPolyfillLibCached())
+                {
+                    //Avoiding first client to await the file generation
+                    CacheBlazorPolyfillLib();
+                }
+
+                //Normal behavior
+                return next();
+            });
+
             builder.MapWhen(ctx =>
             ctx.Request.BrowserNeedES5Fallback()
             && ctx.Request.Path.StartsWithSegments("/_framework")
@@ -87,6 +102,33 @@ namespace Blazor.Polyfill.Server
             });
 
             return builder;
+        }
+
+
+        private static bool _blazorPolyfillLibCached = false;
+        private static bool IsBlazorPolyfillLibCached() => _blazorPolyfillLibCached;
+
+        private static void CacheBlazorPolyfillLib()
+        {
+            //Assuming that everything succeed even if it fail.
+            //We don't want to hang the app for next request if something fail for any reason, as something
+            //critical may happened in file generation depending the environment.
+            _blazorPolyfillLibCached = true;
+
+            try
+            {
+                GetPatchedBlazorServerFile();
+
+                GetIE11BlazorPolyfill(true, false);
+                GetIE11BlazorPolyfill(false, true);
+
+                //In this case the parameter does not change anything
+                GetIE11BlazorPolyfill(false, true);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
         private static string Transform(string input, string filename, string babelrcJSON)
