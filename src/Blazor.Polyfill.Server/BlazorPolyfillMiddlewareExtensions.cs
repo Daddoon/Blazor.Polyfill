@@ -129,7 +129,7 @@ namespace Blazor.Polyfill.Server
                     js = js.Replace("/\\W*Blazor:[^{]*(?<descriptor>.*)$/;", @"/[\0-\/:-@\[-\^`\{-\uFFFF]*Blazor:(?:(?!\{)[\s\S])*(.*)$/;");
 
                     //Transpile code to ES5 for IE11 before manual patching
-                    js = Transform(js, "blazor.server.js", "{\"plugins\":[\"proposal-class-properties\",\"proposal-object-rest-spread\"],\"presets\":[[\"env\",{\"targets\":{\"browsers\":[\"ie 11\"]}}], \"es2015\",\"es2016\",\"es2017\",\"stage-3\"]}");
+                    js = Transform(js, "blazor.server.js", "{\"plugins\":[\"proposal-class-properties\",\"proposal-object-rest-spread\"],\"presets\":[[\"env\",{\"targets\":{\"browsers\":[\"ie 11\"]}}], \"es2015\",\"es2016\",\"es2017\",\"stage-3\"], \"sourceType\": \"script\"}");
 
                     //At this point, Babel has unminified the code, and fixed IE11 issues, like 'import' method calls.
                     //We still need to fix 'descriptor' regex evaluation code, as it was expecting a named capture group.
