@@ -1,15 +1,56 @@
 # Blazor.Polyfill[<img src="logo_blazorpolyfill.png_256x256.png?raw=true" align="right" width="200">]() 
 
-Polyfills for Blazor and fixes for Internet Explorer 11 support with server-side mode.
+Polyfills for Blazor server-side for Internet Explorer 11 support on **.NET 5.0.0**
 
-### NOTICE
 
-Since **Blazor 3.1.0-preview3.19555.2**, including the polyfill on a **Blazor WebAssembly** project can cause some break, especially on **Edge**.
-As the current library is only aimed for the **Blazor server-side** project and only for **Internet Explorer 11**, you must include this polyfill only on this browser.
+# INSTALLATION
 
-See the updated documentation.
+**BlazorPolyfill.Server** NuGet package can be either found [on nuget.org](https://www.nuget.org/packages/BlazorPolyfill.Server/5.0.0) or from the [*latest release*](https://github.com/Daddoon/Blazor.Polyfill/releases) page on this repository.
+
+- (Optional) If updating from Blazor.Polyfill **3.0.8**, please remove any reference to **blazor.polyfill.js** or **blazor.polyfill.min.js** from your **_Host.cshtml** code, or any static file about the library you would link to in your code, as the library is now embedded is the NuGet package, and managed by **_framework/blazor.polyfill.min.js** as a magic path.
+
+
+- Install the **BlazorPolyfill.Server** package interactively from the NuGet Package manager in Visual Studio
+- **Or** install it from the Package Manager CLI with this command:
+```
+Install-Package BlazorPolyfill.Server
+```
+- **Or** additional syntax and possibilities available from the [NuGet package page](https://www.nuget.org/packages/BlazorPolyfill.Server/5.0.0)
+
+- In your **_Host.cshtml** page, include **_framework/blazor.polyfill.min.js** file before the **_framework/blazor.server.js** script tag.
+  The end of your page should look like this:
+```html
+<script src="_framework/blazor.polyfill.min.js"></script>
+<script src="_framework/blazor.server.js"></script>
+```
+
+- In your **Startup.cs** file, in your **ConfigureServices** method, add **services.AddBlazorPolyfill()** at the end of your services declaration:
+```cs
+        public void ConfigureServices(IServiceCollection services)
+        {
+            services.AddRazorPages();
+            services.AddServerSideBlazor();
+            services.AddSingleton<WeatherForecastService>();
+            services.AddBlazorPolyfill();
+        }
+```
+
+- In your **Startup.cs** file, in your **Configure** method, add **app.UseBlazorPolyfill()** just before **app.UseStaticFiles()**:
+```cs
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        {
+            /* Some code */
+            app.UseBlazorPolyfill();
+            app.UseStaticFiles();
+            /* Some code */
+        }
+```
+
+- You are good to go ! Blazor server-side with .NET 5 should be able load on Internet Explorer 11
 
 # ABOUT
+
+## Polyfills
 
 This are the required polyfills and fixes in order to launch Blazor from Internet Explorer 11.
 
@@ -21,31 +62,24 @@ This project is using the following polyfills internally:
 - [*miguelmota/Navigator.sendBeacon*](https://github.com/miguelmota/Navigator.sendBeacon)
 - [*mo/abortcontroller-polyfill*](https://github.com/mo/abortcontroller-polyfill)
 
-# INSTALLATION
+**NOTE:** that the **blazor.polyfill.js** file return an "empty" javascript content if the browser is not Internet Explorer 11.
 
-The easiest way to install is to download the [*latest release*](https://github.com/Daddoon/Blazor.Polyfill/releases) and include the **blazor.polyfill.js** or **blazor.polyfill.min.js** file before the **blazor.server.js** (server-mode) script tag in your **wwwroot\index.html** or **_Host.cshtml** file like:
+## blazor.server.js file alteration on Internet Explorer 11
 
-```html
-<script type="text/javascript">
-    if (/MSIE \d|Trident.*rv:/.test(navigator.userAgent)) {
-        document.write('<script src="js/blazor.polyfill.min.js"><\/script>');
-    }
-</script>
-<script src="_framework/blazor.server.js"></script>
-```
+Only using Polyfills was not sufficient in order to make it working on IE11.
 
-...considering you have copied the file in a **wwwroot/js** folder.
-Alternatively, the browser detection can be done server side:
+The **blazor.server.js** library is dynamicly altered at the first app request when IE11 is the calling browser.
+The altered returned version is **ONLY** returned for IE11, other browsers will receive the regular file packaged by Microsoft.
 
-```razor
-@if (Request.Headers.TryGetValue("User-Agent", out var userAgents)
-    && (userAgents.FirstOrDefault() is string userAgent)
-    && System.Text.RegularExpressions.Regex.IsMatch(userAgent, @"MSIE \d|Trident.*rv:"))
-{
-    <script src="js/blazor.polyfill.min.js"></script>
-}
-<script src="_framework/blazor.server.js"></script>
-```
+The library is altered on the fly because the Microsoft library may update in the future in your app, and we always want to have the current latest version of the library to be modified at startup.
+
+Some events are done before the final file result is cached on the server:
+
+- Fixing Regular Expressions issues for IE11, by removing named capturing groups in the library and related regexp properties expecting to be accessed this way.
+- Transpiling the **blazor.server.js** file to ES5 with **babel-standalone** for the IE11 profile.
+  That's why there is some dependencies on **ReactJS.NET** package, that is embedding **babel-standalone** internally.
+- Minifying the library content again as **babel** return a non-minified version of the code
+- Then the result is cached for application lifetime for all IE11 requests, and so for the browser caching logic (ETag, Modified-Since headers...)
 
 ## Using Telerik Blazor Component or MatBlazor on IE11
 
@@ -70,8 +104,8 @@ Using **polyfill.io** you could load your Blazor app like this instead:
 <script type="text/javascript">
     if (/MSIE \d|Trident.*rv:/.test(navigator.userAgent)) {
         document.write('<script src="https://polyfill.io/v3/polyfill.min.js?features=Element.prototype.closest%2CIntersectionObserver%2Cdocument.querySelector%2Cfeatures=Array.prototype.forEach%2CNodeList.prototype.forEach"><\/script>');
-        document.write('<script src="js/blazor.polyfill.min.js"><\/script>');
     }
 </script>
+<script src="_framework/blazor.polyfill.min.js"></script>
 <script src="_framework/blazor.server.js"></script>
 ```
