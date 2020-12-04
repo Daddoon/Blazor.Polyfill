@@ -1,11 +1,14 @@
 "use strict";
-/* BLAZOR.POLYFILL Version 3.0.8 */
+/* BLAZOR.POLYFILL Version 5.0.100.1 */
 Object.defineProperty(exports, "__esModule", { value: true });
 require("core-js/es");
+require("web-animations-js");
 require("whatwg-fetch");
 require("abortcontroller-polyfill/dist/polyfill-patch-fetch");
 require("../src/template.js");
 require("../src/navigator.sendbeacon.js");
+//Polyfill for 'after' method not existing on ChildNode on IE9+
+require("../src/after.js");
 (function () {
     function IsIE() {
         if (/MSIE \d|Trident.*rv:/.test(navigator.userAgent)) {
@@ -19,6 +22,12 @@ require("../src/navigator.sendbeacon.js");
         // option from core-js
         if (IsIE()) {
             Symbol.useSimple();
+        }
+        if (IsIE()) {
+            // Function to make IE9+ support forEach:
+            if (window.NodeList && !NodeList.prototype.forEach) {
+                NodeList.prototype.forEach = Array.prototype.forEach;
+            }
         }
         //Adding document.baseURI for IE and maybe other browser that would not have it
         if (document.baseURI == null || document.baseURI == undefined) {

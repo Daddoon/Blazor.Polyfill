@@ -20,7 +20,9 @@ namespace MyApp
             Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
-                    webBuilder.UseStartup<Startup>();
+                    webBuilder
+                    .UseUrls("http://*:1000", "https://*:1234", "http://0.0.0.0:5000")
+                    .UseStartup<Startup>();
                 });
     }
 }

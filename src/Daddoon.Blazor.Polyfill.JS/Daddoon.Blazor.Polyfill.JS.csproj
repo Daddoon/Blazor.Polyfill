@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <TargetFramework>net5.0</TargetFramework>
     <TypeScriptCompileBlocked>true</TypeScriptCompileBlocked>
     <TypeScriptToolsVersion>Latest</TypeScriptToolsVersion>
     <DefaultItemExcludes>${DefaultItemExcludes};node_modules\**</DefaultItemExcludes>
@@ -24,12 +24,11 @@
   </ItemGroup>
 
   <Target Name="RunWebpack" BeforeTargets="Build" Inputs="@(WebpackInputs)" Outputs="dist\blazor.polyfill.js">
-    <RemoveDir Directories="dist" />
+    <Delete Files="dist/blazor.polyfill.js" ContinueOnError="true" />
+    <Delete Files="dist/blazor.polyfill.min.js" ContinueOnError="true" />
     <Exec Command="npm install --save core-js" />
     <Exec Command="npm install --save whatwg-fetch" />
+    <Exec Command="npm install --save web-animations-js" />
     <Exec Command="npm run build" />
-    <ItemGroup>
-      <EmbeddedResource Include="dist\blazor.polyfill.js" LogicalName="blazor./blazor.polyfill.js" />
-    </ItemGroup>
   </Target>
 </Project>

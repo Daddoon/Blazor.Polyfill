@@ -1,15 +1,20 @@
-﻿/* BLAZOR.POLYFILL Version 3.0.8 */
+﻿/* BLAZOR.POLYFILL Version 5.0.100.1 */
 
 import 'core-js/es';
+import 'web-animations-js';
 import 'whatwg-fetch';
 import 'abortcontroller-polyfill/dist/polyfill-patch-fetch';
 import '../src/template.js';
 import '../src/navigator.sendbeacon.js';
 
+//Polyfill for 'after' method not existing on ChildNode on IE9+
+import '../src/after.js';
+
 declare var Symbol;
 declare var document;
 declare var window;
 declare var Blazor;
+declare var NodeList;
 
 (function () {
     function IsIE() {
@@ -28,6 +33,13 @@ declare var Blazor;
         // option from core-js
         if (IsIE()) {
             Symbol.useSimple();
+        }
+
+        if (IsIE()) {
+            // Function to make IE9+ support forEach:
+            if (window.NodeList && !NodeList.prototype.forEach) {
+                NodeList.prototype.forEach = Array.prototype.forEach;
+            }
         }
 
         //Adding document.baseURI for IE and maybe other browser that would not have it

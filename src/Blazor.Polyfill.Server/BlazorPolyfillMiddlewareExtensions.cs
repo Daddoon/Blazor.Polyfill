@@ -54,8 +54,23 @@ namespace Blazor.Polyfill.Server
 
             InitReact(builder);
 
+            //This is a kind of hack for caching the data at boot
+            //It's better to prevent anything at first request by caching instead of
+            //making the user wait the file generation
+            builder.Use((context, next) =>
+            {
+                if (!IsBlazorPolyfillLibCached())
+                {
+                    //Avoiding first client to await the file generation
+                    CacheBlazorPolyfillLib();
+                }
+
+                //Normal behavior
+                return next();
+            });
+
             builder.MapWhen(ctx =>
-            ctx.Request.IsInternetExplorer()
+            ctx.Request.BrowserNeedES5Fallback()
             && ctx.Request.Path.StartsWithSegments("/_framework")
             && ctx.Request.Path.StartsWithSegments("/_framework/blazor.server.js"),
             subBuilder =>
@@ -81,12 +96,39 @@ namespace Blazor.Polyfill.Server
                     //Eval if the requested file is the minified version or not
                     bool isMinified = context.Request.Path.StartsWithSegments("/_framework/blazor.polyfill.min.js");
 
-                    var fileContent = GetIE11BlazorPolyfill(context.Request.IsInternetExplorer(), isMinified);
+                    var fileContent = GetIE11BlazorPolyfill(context.Request.BrowserNeedES5Fallback(), isMinified);
                     await HttpRequestManager.ManageRequest(context, fileContent);
                 });
             });
 
             return builder;
+        }
+
+
+        private static bool _blazorPolyfillLibCached = false;
+        private static bool IsBlazorPolyfillLibCached() => _blazorPolyfillLibCached;
+
+        private static void CacheBlazorPolyfillLib()
+        {
+            //Assuming that everything succeed even if it fail.
+            //We don't want to hang the app for next request if something fail for any reason, as something
+            //critical may happened in file generation depending the environment.
+            _blazorPolyfillLibCached = true;
+
+            try
+            {
+                GetPatchedBlazorServerFile();
+
+                GetIE11BlazorPolyfill(true, false);
+                GetIE11BlazorPolyfill(false, true);
+
+                //In this case the parameter does not change anything
+                GetIE11BlazorPolyfill(false, true);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
         private static string Transform(string input, string filename, string babelrcJSON)
@@ -129,7 +171,7 @@ namespace Blazor.Polyfill.Server
                     js = js.Replace("/\\W*Blazor:[^{]*(?<descriptor>.*)$/;", @"/[\0-\/:-@\[-\^`\{-\uFFFF]*Blazor:(?:(?!\{)[\s\S])*(.*)$/;");
 
                     //Transpile code to ES5 for IE11 before manual patching
-                    js = Transform(js, "blazor.server.js", "{\"plugins\":[\"proposal-class-properties\",\"proposal-object-rest-spread\"],\"presets\":[[\"env\",{\"targets\":{\"browsers\":[\"ie 11\"]}}], \"es2015\",\"es2016\",\"es2017\",\"stage-3\"]}");
+                    js = Transform(js, "blazor.server.js", "{\"plugins\":[\"proposal-class-properties\",\"proposal-object-rest-spread\"],\"presets\":[[\"env\",{\"targets\":{\"browsers\":[\"ie 11\"]}}], \"es2015\",\"es2016\",\"es2017\",\"stage-3\"], \"sourceType\": \"script\"}");
 
                     //At this point, Babel has unminified the code, and fixed IE11 issues, like 'import' method calls.
                     //We still need to fix 'descriptor' regex evaluation code, as it was expecting a named capture group.
@@ -169,7 +211,7 @@ namespace Blazor.Polyfill.Server
         private static FileContentReference _ie11PolyfillMin = null;
 
         /// <summary>
-        /// Used to return an empty file
+        /// Used to return an empty file but hashed with some dummy valid values in order to generate a usable Hash/ETag for browser caching
         /// </summary>
         private static FileContentReference _fakeie11Polyfill = null;
 
