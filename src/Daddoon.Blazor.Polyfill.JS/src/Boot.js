@@ -7,6 +7,8 @@ require("whatwg-fetch");
 require("abortcontroller-polyfill/dist/polyfill-patch-fetch");
 require("../src/template.js");
 require("../src/navigator.sendbeacon.js");
+//Polyfill for 'after' method not existing on ChildNode on IE9+
+require("../src/after.js");
 (function () {
     function IsIE() {
         if (/MSIE \d|Trident.*rv:/.test(navigator.userAgent)) {

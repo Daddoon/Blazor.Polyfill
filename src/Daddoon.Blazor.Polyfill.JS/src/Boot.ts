@@ -7,6 +7,9 @@ import 'abortcontroller-polyfill/dist/polyfill-patch-fetch';
 import '../src/template.js';
 import '../src/navigator.sendbeacon.js';
 
+//Polyfill for 'after' method not existing on ChildNode on IE9+
+import '../src/after.js';
+
 declare var Symbol;
 declare var document;
 declare var window;
