@@ -55,7 +55,7 @@ namespace Blazor.Polyfill.Server
             InitReact(builder);
 
             builder.MapWhen(ctx =>
-            ctx.Request.IsInternetExplorer()
+            ctx.Request.BrowserNeedES5Fallback()
             && ctx.Request.Path.StartsWithSegments("/_framework")
             && ctx.Request.Path.StartsWithSegments("/_framework/blazor.server.js"),
             subBuilder =>
@@ -81,7 +81,7 @@ namespace Blazor.Polyfill.Server
                     //Eval if the requested file is the minified version or not
                     bool isMinified = context.Request.Path.StartsWithSegments("/_framework/blazor.polyfill.min.js");
 
-                    var fileContent = GetIE11BlazorPolyfill(context.Request.IsInternetExplorer(), isMinified);
+                    var fileContent = GetIE11BlazorPolyfill(context.Request.BrowserNeedES5Fallback(), isMinified);
                     await HttpRequestManager.ManageRequest(context, fileContent);
                 });
             });
@@ -169,7 +169,7 @@ namespace Blazor.Polyfill.Server
         private static FileContentReference _ie11PolyfillMin = null;
 
         /// <summary>
-        /// Used to return an empty file
+        /// Used to return an empty file but hashed with some dummy valid values in order to generate a usable Hash/ETag for browser caching
         /// </summary>
         private static FileContentReference _fakeie11Polyfill = null;
 
