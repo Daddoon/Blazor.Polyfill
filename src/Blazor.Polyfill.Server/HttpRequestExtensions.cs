@@ -1,9 +1,4 @@
 ﻿using Microsoft.AspNetCore.Http;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Blazor.Polyfill.Server
 {
@@ -28,13 +23,18 @@ namespace Blazor.Polyfill.Server
         /// <returns></returns>
         public static bool IsInternetExplorer(string userAgent)
         {
+            if (userAgent == null)
+            {
+                return false;
+            }
+
             return userAgent.Contains("MSIE")
                    || userAgent.Contains("Trident");
         }
 
         #endregion Internet Explorer
 
-        #region Internet Explorer
+        #region Edge Legacy
 
         /// <summary>
         /// This is about Edge Legacy / EdgeHTML, not the new Chromium one
@@ -53,6 +53,11 @@ namespace Blazor.Polyfill.Server
         /// <returns></returns>
         public static bool IsEdgeHTML(string userAgent)
         {
+            if (userAgent == null)
+            {
+                return false;
+            }
+
             return userAgent.Contains("Edge");
         }
 
@@ -75,6 +80,11 @@ namespace Blazor.Polyfill.Server
         /// <returns></returns>
         public static bool BrowserNeedES5Fallback(string userAgent)
         {
+            if (userAgent == null)
+            {
+                return false;
+            }
+
             return IsInternetExplorer(userAgent)
                    || IsEdgeHTML(userAgent);
         }
