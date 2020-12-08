@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "abortcontroller-polyfill": "^1.4.0",
-    "core-js": "^3.8.0",
+    "core-js": "^3.8.1",
     "web-animations-js": "^2.3.2",
     "whatwg-fetch": "^2.0.4"
   }
