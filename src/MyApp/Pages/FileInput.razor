@@ -1,0 +1,42 @@
+@page "/fileinput"
+
+<h3>Upload PNG images</h3>
+
+<p>
+    <InputFile OnChange="@OnInputFileChange" multiple />
+</p>
+
+@if (imageDataUrls.Count > 0)
+{
+    <h4>Images</h4>
+
+    <div class="card" style="width:30rem;">
+        <div class="card-body">
+            @foreach (var imageDataUrl in imageDataUrls)
+            {
+                <img class="rounded m-1" src="@imageDataUrl" />
+            }
+        </div>
+    </div>
+}
+
+@code {
+    private IList<string> imageDataUrls = new List<string>();
+
+    private async Task OnInputFileChange(InputFileChangeEventArgs e)
+    {
+        var maxAllowedFiles = 3;
+        var format = "image/png";
+
+        foreach (var imageFile in e.GetMultipleFiles(maxAllowedFiles))
+        {
+            var resizedImageFile = await imageFile.RequestImageFileAsync(format,
+                100, 100);
+            var buffer = new byte[resizedImageFile.Size];
+            await resizedImageFile.OpenReadStream().ReadAsync(buffer);
+            var imageDataUrl =
+                $"data:{format};base64,{Convert.ToBase64String(buffer)}";
+            imageDataUrls.Add(imageDataUrl);
+        }
+    }
+}
