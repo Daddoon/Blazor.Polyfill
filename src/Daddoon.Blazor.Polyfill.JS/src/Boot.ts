@@ -7,6 +7,9 @@ import 'abortcontroller-polyfill/dist/polyfill-patch-fetch';
 import '../src/template.js';
 import '../src/navigator.sendbeacon.js';
 
+//CanvasToBlob Polyfill
+import '../src/canvas-to-blob.js';
+
 //Polyfill for 'after' method not existing on ChildNode on IE9+
 import '../src/after.js';
 
@@ -15,6 +18,7 @@ declare var document;
 declare var window;
 declare var Blazor;
 declare var NodeList;
+declare var File;
 
 (function () {
     function IsIE() {
@@ -40,6 +44,14 @@ declare var NodeList;
             if (window.NodeList && !NodeList.prototype.forEach) {
                 NodeList.prototype.forEach = Array.prototype.forEach;
             }
+        }
+
+        //Function emulate lastModified property on File object, missing on IE11 and some Edge Legacy:
+        if (window.File && !File.prototype.hasOwnProperty("lastModified")) {
+            File.prototype.__defineGetter__("lastModified", function lastModified() {
+                // @ts-ignore
+                return this.lastModifiedDate;
+            });
         }
 
         //Adding document.baseURI for IE and maybe other browser that would not have it

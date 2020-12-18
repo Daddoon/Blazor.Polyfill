@@ -7,6 +7,8 @@ require("whatwg-fetch");
 require("abortcontroller-polyfill/dist/polyfill-patch-fetch");
 require("../src/template.js");
 require("../src/navigator.sendbeacon.js");
+//CanvasToBlob Polyfill
+require("../src/canvas-to-blob.js");
 //Polyfill for 'after' method not existing on ChildNode on IE9+
 require("../src/after.js");
 (function () {
@@ -28,6 +30,13 @@ require("../src/after.js");
             if (window.NodeList && !NodeList.prototype.forEach) {
                 NodeList.prototype.forEach = Array.prototype.forEach;
             }
+        }
+        //Function emulate lastModified property on File object, missing on IE11 and some Edge Legacy:
+        if (window.File && !File.prototype.hasOwnProperty("lastModified")) {
+            File.prototype.__defineGetter__("lastModified", function lastModified() {
+                // @ts-ignore
+                return this.lastModifiedDate;
+            });
         }
         //Adding document.baseURI for IE and maybe other browser that would not have it
         if (document.baseURI == null || document.baseURI == undefined) {
