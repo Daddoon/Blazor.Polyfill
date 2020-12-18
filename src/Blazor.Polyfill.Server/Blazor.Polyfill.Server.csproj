@@ -3,17 +3,29 @@
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>5.0.100.2</Version>
+    <Version>5.0.100.4</Version>
     <Authors>Guillaume ZAHRA</Authors>
     <Company>Daddoon</Company>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <Description>Support of Blazor server-side for Internet Explorer 11 and Edge Legacy on .NET 5</Description>
+    <Description>Support of Blazor server-side for Internet Explorer 11 and Edge Legacy on .NET 5.0.100</Description>
     <PackageProjectUrl>https://github.com/Daddoon/Blazor.Polyfill</PackageProjectUrl>
     <PackageIcon>logo_blazorpolyfill_128.png</PackageIcon>
     <RepositoryType>Git</RepositoryType>
     <RepositoryUrl>https://github.com/Daddoon/Blazor.Polyfill</RepositoryUrl>
     <PackageTags>blazor blazor-server ie11 edgeHTML edge-legacy polyfill</PackageTags>
-    <PackageReleaseNotes>- Fix possible application crash if request headers do not contains the User-Agent header or value</PackageReleaseNotes>
+    <PackageReleaseNotes>5.0.100.4:
+- Fix InputFile Razor component not working on IE11 and possibly some legacy Edge versions.
+
+5.0.100.2:
+- Fix possible application crash if request headers do not contains the User-Agent header or value
+
+5.0.100.1:
+- Add Edge Legacy (EdgeHTML engine) support
+- Fix missing reconnection modal behavior on Internet Explorer 11 and Edge Legacy
+- Add pre-caching of all files needed for this library at the first web app request, in order to prevent further requests to wait for file generation on the server before serving the app. This mean that, now, if the app page is shown, then everything is ready.
+
+5.0.0:
+- Add .NET 5.0 support</PackageReleaseNotes>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageId>BlazorPolyfill.Server</PackageId>
     <Product>Blazor.Polyfill</Product>
