@@ -83,7 +83,7 @@ This project is using the following polyfills internally:
 - [*Navigator.sendBeacon*](https://github.com/miguelmota/Navigator.sendBeacon)
 - [*abortcontroller-polyfill*](https://github.com/mo/abortcontroller-polyfill)
 - [*after*](https://developer.mozilla.org/en-US/docs/Web/API/ChildNode/after)
-- [canvas-to-blob](https://github.com/blueimp/JavaScript-Canvas-to-Blob)
+- [*canvas-to-blob*](https://github.com/blueimp/JavaScript-Canvas-to-Blob)
 
 Also an usage of **babel-standalone** through **ReactJS.NET** library for the alteration of the **blazor.server.js** library on-the-fly, in order to transpile code to **ES5**.
 
