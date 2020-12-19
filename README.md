@@ -4,6 +4,11 @@ Blazor server-side Polyfills and fixes for **Internet Explorer 11** & **Edge Leg
 
 # INSTALLATION
 
+- [.NET 5.0+](#NET50+)
+- [.NET 3.1](#NET31)
+
+## .NET 5.0+
+
 **BlazorPolyfill.Server** NuGet package can be either found [on nuget.org](https://www.nuget.org/packages/BlazorPolyfill.Server/) or from the [*latest release*](https://github.com/Daddoon/Blazor.Polyfill/releases) page on this repository.
 
 - (Optional) If updating from Blazor.Polyfill **3.0.8**, please remove any reference to **blazor.polyfill.js** or **blazor.polyfill.min.js** from your **_Host.cshtml** code, or any static file about the library you would link to in your code, as the library is now embedded is the NuGet package, and managed by **_framework/blazor.polyfill.min.js** as a magic path.
@@ -46,6 +51,30 @@ Install-Package BlazorPolyfill.Server
 ```
 
 - You are good to go ! Blazor server-side with .NET 5 should be able load on Internet Explorer 11 & Edge
+
+**NOTE:** blazor.polyfill.js content will be kind of empty automatically if the detected browser, through the user-agent, is something else than Internet Explorer or Edge Legacy.
+
+## .NET 3.1
+
+- Download the [*Blazor.Polyfill 3.0.8 release*](https://github.com/Daddoon/Blazor.Polyfill/releases/tag/3.0.8) and include the **blazor.polyfill.js** or **blazor.polyfill.min.js** file before the **blazor.server.js** script tag in your **wwwroot\index.html** or **_Host.cshtml** file like:
+
+```html
+<script type="text/javascript" src="js/blazor.polyfill.min.js"></script>
+<script src="_framework/blazor.server.js"></script>
+```
+
+...considering you have copied the file in a **wwwroot/js** folder.
+
+- If you want this file to be loaded only if this is Internet Explorer actually running, you may write this instead:
+
+```html
+<script type="text/javascript">
+    if (/MSIE \d|Trident.*rv:/.test(navigator.userAgent)) {
+        document.write('<script src="js/blazor.polyfill.min.js"><\/script>');
+    }
+</script>
+<script src="_framework/blazor.server.js"></script>
+```
 
 ## KNOWN ISSUE
 
