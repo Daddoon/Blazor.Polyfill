@@ -167,6 +167,5 @@ Using **polyfill.io** you could load your Blazor app like this instead:
         document.write('<script src="https://polyfill.io/v3/polyfill.min.js?features=Element.prototype.closest%2CIntersectionObserver%2Cdocument.querySelector%2Cfeatures=Array.prototype.forEach%2CNodeList.prototype.forEach"><\/script>');
     }
 </script>
-<script src="_framework/blazor.polyfill.min.js"></script>
-<script src="_framework/blazor.server.js"></script>
+<!-- Your blazor.polyfill.js and blazor.server.js scripts -->
 ```
