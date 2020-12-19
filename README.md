@@ -2,6 +2,13 @@
 
 Blazor server-side Polyfills and fixes for **Internet Explorer 11** & **Edge Legacy** (EdgeHTML engine).
 
+# SUMMARY
+
+- [Installation](#installation)
+- [Known issue](#known-issue)
+- [About](#about)
+- [Using Telerik Blazor Component or MatBlazor on IE11](#telerik)
+
 # INSTALLATION
 
 - [.NET 5.0+](#net-50)
@@ -135,7 +142,7 @@ Some events are done before the final file result is cached on the server:
 - Minifying the library content again as **babel** return a non-minified version of the code
 - Then the result is cached for application lifetime for all IE11 requests, and so for the browser caching logic (ETag, Modified-Since headers...)
 
-## Using Telerik Blazor Component or MatBlazor on IE11
+# Using Telerik Blazor Component or MatBlazor on IE11
 
 **Telerik Blazor Component** or **MatBlazor** may not work out of the box on IE11.
 
