@@ -4,8 +4,8 @@ Blazor server-side Polyfills and fixes for **Internet Explorer 11** & **Edge Leg
 
 # INSTALLATION
 
-- [.NET 5.0+](#NET50+)
-- [.NET 3.1](#NET31)
+- [.NET 5.0+](#net-50)
+- [.NET 3.1](#net-31)
 
 ## .NET 5.0+
 
