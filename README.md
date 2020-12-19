@@ -7,7 +7,7 @@ Blazor server-side Polyfills and fixes for **Internet Explorer 11** & **Edge Leg
 - [Installation](#installation)
 - [Known issue](#known-issue)
 - [About](#about)
-- [Using Telerik Blazor Component or MatBlazor on IE11](#telerik)
+- [Using Telerik Blazor Component or MatBlazor on IE11](#using-telerik-blazor-component-or-matblazor-on-ie11)
 
 # INSTALLATION
 
