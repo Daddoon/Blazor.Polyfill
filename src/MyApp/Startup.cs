@@ -49,7 +49,7 @@ namespace MyApp
 
             app.UseHttpsRedirection();
 
-            app.UseBlazorPolyfill();
+            app.UseBlazorPolyfill(true);
             app.UseStaticFiles();
 
 

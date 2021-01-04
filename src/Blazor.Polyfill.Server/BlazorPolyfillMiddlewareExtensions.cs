@@ -44,12 +44,26 @@ namespace Blazor.Polyfill.Server
 
         }
 
+        /// <summary>
+        /// Initialize the Blazor.Polyfill behavior.
+        /// If the forceES5Fallback parameter is set to true, all
+        /// requests needing a possible polyfill will return the
+        /// polyfilled version, even if the browser is not IE11 or Edge Legacy
+        /// </summary>
+        /// <param name="builder"></param>
+        /// <param name="forceES5Fallback"></param>
+        /// <returns></returns>
         public static IApplicationBuilder UseBlazorPolyfill(
-            this IApplicationBuilder builder)
+            this IApplicationBuilder builder, bool forceES5Fallback = false)
         {
             if (builder is null)
             {
                 throw new ArgumentNullException(nameof(builder));
+            }
+
+            if (forceES5Fallback)
+            {
+                HttpRequestExtensions.ForceES5FallbackFlag();
             }
 
             InitReact(builder);
