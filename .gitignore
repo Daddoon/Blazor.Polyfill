@@ -4,3 +4,4 @@ obj/
 *.user
 launchSettings.json
 .vscode/
+*/**/Properties/PublishProfiles

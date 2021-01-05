@@ -18,6 +18,7 @@ using NUglify;
 using System.Globalization;
 using System.Net;
 using Blazor.Polyfill.Server.Model;
+using JavaScriptEngineSwitcher.ChakraCore;
 
 namespace Blazor.Polyfill.Server
 {
@@ -29,7 +30,8 @@ namespace Blazor.Polyfill.Server
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
             services.AddReact();
 
-            services.AddJsEngineSwitcher(options => options.DefaultEngineName = V8JsEngine.EngineName)
+            services.AddJsEngineSwitcher(options => options.DefaultEngineName = ChakraCoreJsEngine.EngineName)
+                .AddChakraCore()
                 .AddV8();
 
             return services;
@@ -45,11 +47,55 @@ namespace Blazor.Polyfill.Server
         }
 
         public static IApplicationBuilder UseBlazorPolyfill(
-            this IApplicationBuilder builder)
+    this IApplicationBuilder builder)
         {
             if (builder is null)
             {
                 throw new ArgumentNullException(nameof(builder));
+            }
+
+            //Instanciate with a delegate inheriting from default values given by the extension method
+            return UseBlazorPolyfill(builder, (options) => { });
+        }
+
+        public static IApplicationBuilder UseBlazorPolyfill(
+            this IApplicationBuilder builder, Action<BlazorPolyfillOptions> configureOptions)
+        {
+            if (builder is null)
+            {
+                throw new ArgumentNullException(nameof(builder));
+            }
+
+            if (configureOptions is null)
+            {
+                throw new ArgumentNullException(nameof(configureOptions));
+            }
+
+            BlazorPolyfillOptions options = new BlazorPolyfillOptions();
+
+            //Let the user configure the options in it's delegate method
+            configureOptions(options);
+
+            return UseBlazorPolyfill(builder, options);
+        }
+
+
+        public static IApplicationBuilder UseBlazorPolyfill(
+            this IApplicationBuilder builder, BlazorPolyfillOptions options)
+        {
+            if (builder is null)
+            {
+                throw new ArgumentNullException(nameof(builder));
+            }
+
+            if (options is null)
+            {
+                throw new ArgumentNullException(nameof(options));
+            }
+
+            if (options.ForceES5Fallback)
+            {
+                HttpRequestExtensions.ForceES5FallbackFlag();
             }
 
             InitReact(builder);

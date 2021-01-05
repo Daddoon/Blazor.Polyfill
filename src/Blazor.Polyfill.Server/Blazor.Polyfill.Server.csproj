@@ -3,17 +3,24 @@
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>5.0.100.4</Version>
+    <Version>5.0.100.5</Version>
     <Authors>Guillaume ZAHRA</Authors>
     <Company>Daddoon</Company>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <Description>Support of Blazor server-side for Internet Explorer 11 and Edge Legacy on .NET 5.0.100</Description>
+    <Description>Support of Blazor server-side for Internet Explorer 11, Edge Legacy and more on .NET 5.0.100</Description>
     <PackageProjectUrl>https://github.com/Daddoon/Blazor.Polyfill</PackageProjectUrl>
     <PackageIcon>logo_blazorpolyfill_128.png</PackageIcon>
     <RepositoryType>Git</RepositoryType>
     <RepositoryUrl>https://github.com/Daddoon/Blazor.Polyfill</RepositoryUrl>
     <PackageTags>blazor blazor-server ie11 edgeHTML edge-legacy polyfill</PackageTags>
-    <PackageReleaseNotes>5.0.100.4:
+    <PackageReleaseNotes>5.0.100.5:
+- Fix dependencies error on Linux (Debian 10 default installation)
+- Potentially fix Azure Web App error with the default Linux image container
+- Added BlazorPolyfillOptions parameter for UseBlazorPolyfill methods in order to configure additional behaviors at startup
+- Added the ForceES5Fallback option in order to force ES5 and Polyfill behaviors even if the browser is not Internet Explorer 11 or Edge Legacy.
+- Added ChakraCore engine image and set it as default. V8 engine is still present as fallback engine.
+
+5.0.100.4:
 - Fix InputFile Razor component not working on IE11 and possibly some legacy Edge versions.
 
 5.0.100.2:
@@ -36,6 +43,13 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="JavaScriptEngineSwitcher.ChakraCore" Version="3.9.1" />
+    <PackageReference Include="JavaScriptEngineSwitcher.ChakraCore.Native.linux-x64" Version="3.9.1" />
+    <PackageReference Include="JavaScriptEngineSwitcher.ChakraCore.Native.osx-x64" Version="3.9.1" />
+    <PackageReference Include="JavaScriptEngineSwitcher.ChakraCore.Native.win-arm" Version="3.9.1" />
+    <PackageReference Include="JavaScriptEngineSwitcher.ChakraCore.Native.win-arm64" Version="3.9.1" />
+    <PackageReference Include="JavaScriptEngineSwitcher.ChakraCore.Native.win-x64" Version="3.9.1" />
+    <PackageReference Include="JavaScriptEngineSwitcher.ChakraCore.Native.win-x86" Version="3.9.1" />
     <PackageReference Include="JavaScriptEngineSwitcher.Extensions.MsDependencyInjection" Version="3.3.0" />
     <PackageReference Include="JavaScriptEngineSwitcher.V8" Version="3.9.0" />
     <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
@@ -44,7 +58,7 @@
     <PackageReference Include="Microsoft.ClearScript.V8.Native.osx-x64" Version="7.0.0" />
     <PackageReference Include="Microsoft.ClearScript.V8.Native.win-x64" Version="7.0.0" />
     <PackageReference Include="Microsoft.ClearScript.V8.Native.win-x86" Version="7.0.0" />
-    <PackageReference Include="NUglify" Version="1.11.3" />
+    <PackageReference Include="NUglify" Version="1.13.1" />
     <PackageReference Include="React.AspNet" Version="5.2.11" />
   </ItemGroup>
 

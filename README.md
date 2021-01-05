@@ -5,13 +5,13 @@ Blazor server-side Polyfills and fixes for **Internet Explorer 11** & **Edge Leg
 # SUMMARY
 
 - [Installation](#installation)
-- [Known issue](#known-issue)
 - [About](#about)
 - [Using Telerik Blazor Component or MatBlazor on IE11](#using-telerik-blazor-component-or-matblazor-on-ie11)
 
 # INSTALLATION
 
 - [.NET 5.0+](#net-50)
+  - [Additional options](#additional-options)
 - [.NET 3.1](#net-31)
 
 ## .NET 5.0+
@@ -36,7 +36,7 @@ Install-Package BlazorPolyfill.Server
 ```
 
 - In your **Startup.cs** file, in your **ConfigureServices** method, add **services.AddBlazorPolyfill()** at the end of your services declaration:
-```cs
+```csharp
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddRazorPages();
@@ -47,7 +47,7 @@ Install-Package BlazorPolyfill.Server
 ```
 
 - In your **Startup.cs** file, in your **Configure** method, add **app.UseBlazorPolyfill()** just before **app.UseStaticFiles()**:
-```cs
+```csharp
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             /* Some code */
@@ -60,6 +60,33 @@ Install-Package BlazorPolyfill.Server
 - You are good to go ! Blazor server-side with .NET 5 should be able load on Internet Explorer 11 & Edge
 
 **NOTE:** blazor.polyfill.js content will be kind of empty automatically if the detected browser, through the user-agent, is something else than Internet Explorer or Edge Legacy.
+
+### Additional options
+
+You can configure additional options through the **UseBlazorPolyfill** method with a **BlazorPolyfillOptions** object instance or configuration delegate.
+Here some kind of example:
+
+```csharp
+app.UseBlazorPolyfill(
+    (options) => {
+        options.ForceES5Fallback = true;
+    });
+```
+
+Options:
+
+```csharp
+// If the ForceES5Fallback parameter is set to true,
+// the blazor.polyfill.js library content will always be returned
+// and the blazor.server.js library will always be transpiled to ES5 with the needed fixes.
+ 
+// If this parameter is set to false, only Internet Explorer 11 and Edge Legacy will have
+// the ES5 fallback behavior.
+ 
+// Default value is false.
+public bool ForceES5Fallback { get; set; }
+```
+
 
 ## .NET 3.1
 
@@ -82,27 +109,6 @@ Install-Package BlazorPolyfill.Server
 </script>
 <script src="_framework/blazor.server.js"></script>
 ```
-
-## KNOWN ISSUE
-
-### Error 500 with blazor.server.js
-
-The current library components have been tested working on a **Windows environment** concerning the 'altered on-the-fly' **blazor.server.js** file generation.
-
-Some components relies on **ReactJS.NET** for the use of **babel-standalone**, needing a **JavaScriptEngine image**, shipped with this library.
-
-The following **Microsoft.ClearScript.V8** Native images are used:
-
-- win-x64
-- win-x86
-- linux-x64
-- osx-x64
-
-Following theses statements, unfortunately it has been reported that it fail on **Azur WebApp** if using a **Linux** OS image.
-
-Test on regular Linux distribution has not been done yet.
-
-You can [follow the issue here](https://github.com/Daddoon/Blazor.Polyfill/issues/40)
 
 # ABOUT
 

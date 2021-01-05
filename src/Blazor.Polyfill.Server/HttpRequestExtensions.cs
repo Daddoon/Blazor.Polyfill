@@ -4,6 +4,14 @@ namespace Blazor.Polyfill.Server
 {
     internal static class HttpRequestExtensions
     {
+        private static bool _forceES5Fallback = false;
+
+        internal static void ForceES5FallbackFlag()
+        {
+            _forceES5Fallback = true;
+        }
+
+
         #region Internet Explorer
 
         /// <summary>
@@ -80,6 +88,11 @@ namespace Blazor.Polyfill.Server
         /// <returns></returns>
         public static bool BrowserNeedES5Fallback(string userAgent)
         {
+            if (_forceES5Fallback)
+            {
+                return true;
+            }
+
             if (userAgent == null)
             {
                 return false;
