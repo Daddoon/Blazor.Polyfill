@@ -49,7 +49,10 @@ namespace MyApp
 
             app.UseHttpsRedirection();
 
-            app.UseBlazorPolyfill();
+            app.UseBlazorPolyfill(
+                (options) => {
+                    options.ForceES5Fallback = true;
+                });
             app.UseStaticFiles();
 
 
