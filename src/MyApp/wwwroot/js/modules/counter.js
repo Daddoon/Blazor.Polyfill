@@ -1,3 +1,3 @@
 ﻿export function sayHi(name) {
-    alert("hello ${name}!");
+    alert("hello counter");
 }

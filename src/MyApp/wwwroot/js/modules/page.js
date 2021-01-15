@@ -1,3 +1,3 @@
-﻿export function sayHello(name) {
-    alert("hello ${name}!");
+﻿export function sayHi(name) {
+    alert("hello Page!");
 }
