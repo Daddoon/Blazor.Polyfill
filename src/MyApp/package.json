@@ -1,0 +1,22 @@
+{
+  "version": "1.0.0",
+  "name": "compatlib",
+  "private": true,
+  "main": "index.js",
+  "babel": {
+    "presets": [
+      "@babel/preset-env"
+    ]
+  },
+  "devDependencies": {
+    "@babel/core": "^7.12.10",
+    "@babel/preset-env": "^7.12.11",
+    "babel-loader": "^8.2.2",
+    "webpack": "^5.14.0"
+  },
+  "scripts": {
+    "build": "webpack",
+    "dev": "webpack",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
