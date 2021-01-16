@@ -2,13 +2,15 @@
 import * as page_js from './page.js';
 
 (function () {
-    window.es5Export = {
-        counter_js: counter_js,
-        page_js: page_js
-    };
+
+    if (window._es5Export === undefined || window._es5Export === null) {
+        window._es5Export = {};
+    }
+
+    window._es5Export["counter_js"] = counter_js;
+    window._es5Export["page_js"] = page_js;
 
     window.es5Import = function (fileName) {
-        //TODO: If import supported, fallback on native import
 
         //Remove any param pollution
         var moduleName = fileName.split('?')[0];

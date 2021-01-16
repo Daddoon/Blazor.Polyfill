@@ -267,7 +267,7 @@ namespace Blazor.Polyfill.Server
             {
                 if (_fakeie11Polyfill == null)
                 {
-                    string fakeContent = "var _fakeBlazorPolyfill = { };";
+                    string fakeContent = "var _fakeBlazorPolyfill = { }; window._import_ = function (fileName) { if (fileName.length > 0 && fileName[0] === '.') { throw new Error(\"_import_: For compatibility reason please use absolute path\"); }  return import(fileName); }; ";
 
                     //Computing ETag. Should be computed last !
                     string Etag = EtagGenerator.GenerateEtagFromString(fakeContent);

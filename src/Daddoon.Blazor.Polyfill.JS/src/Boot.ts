@@ -97,4 +97,40 @@ declare var File;
     }
 
     blazorPolyfill();
+
+    window._es5Export = {};
+    window._es5Import = function (fileName) {
+
+        //Remove any param pollution
+        var moduleName = fileName.split('?')[0];
+
+        var lastSeparator = moduleName.lastIndexOf('/');
+
+        if (lastSeparator != -1) {
+            moduleName = moduleName.substring(moduleName.lastIndexOf('/') + 1);
+        }
+
+        moduleName = moduleName.replace(/\./gi, "_");
+
+        if (window._es5Export[moduleName] !== this.undefined && window._es5Export[moduleName] !== null) {
+            // @ts-ignore
+            return Promise.resolve(window._es5Export[moduleName]);
+        }
+        else {
+            // @ts-ignore
+            return Promise.reject(new Error('es5Export: Cannot find module "' + fileName + '"'));
+        }
+    }
+
+    window._import_ = function (fileName) {
+        //Assuming that if this polyfill is loaded the user want a full ES5 compliant
+        //behavior, even with imports.
+
+        if (fileName.length > 0 && fileName[0] === '.') {
+            throw new Error("_import_: For compatibility reason please use absolute path");
+        }
+
+        //The "no polyfill" version does integrate an _import_ that call the native import
+        return window._es5Import(fileName);
+    };
 })();
