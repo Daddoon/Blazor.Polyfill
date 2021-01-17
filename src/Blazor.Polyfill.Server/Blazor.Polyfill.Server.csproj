@@ -38,6 +38,14 @@
     <Product>Blazor.Polyfill</Product>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DocumentationFile>C:\2Bee\Sources\Blazor.Polyfill\src\Blazor.Polyfill.Server\Blazor.Polyfill.Server.xml</DocumentationFile>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DocumentationFile>C:\2Bee\Sources\Blazor.Polyfill\src\Blazor.Polyfill.Server\Blazor.Polyfill.Server.xml</DocumentationFile>
+  </PropertyGroup>
+
   <ItemGroup>
     <None Remove="dist\fake.polyfill.js" />
   </ItemGroup>

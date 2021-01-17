@@ -6,3 +6,5 @@ launchSettings.json
 .vscode/
 */**/Properties/PublishProfiles
 node_modules/
+*/**/Blazor.Polyfill.Build/tools/net5.0
+artifacts/

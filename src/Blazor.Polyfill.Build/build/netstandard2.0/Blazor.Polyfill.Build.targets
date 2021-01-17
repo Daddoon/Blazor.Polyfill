@@ -1,0 +1,4 @@
+﻿<!-- Blazor.Polyfill.Build.targets -->
+<Project>
+  <Import Project="$(MSBuildThisFileDirectory)/../../tools/GenerateBlazorPolyfillBuild.targets" />
+</Project>

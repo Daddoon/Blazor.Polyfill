@@ -51,9 +51,9 @@ namespace MyApp
 
             app.UseBlazorPolyfill((options) =>
             {
-                options.ForceES5Fallback = true;
+                options.ForceES5Fallback = false;
                 options.JavascriptModuleImportEmulation = true;
-                options.JavascriptModuleImportEmulationLibraryPath = "/js/compat/main.libcompat.js";
+                options.JavascriptModuleImportEmulationLibraryPath = "/es5module.min.js";
             });
             //app.UseBlazorPolyfill();
             app.UseStaticFiles();

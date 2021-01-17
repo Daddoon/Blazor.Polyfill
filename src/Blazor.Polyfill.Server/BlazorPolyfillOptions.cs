@@ -10,7 +10,7 @@ namespace Blazor.Polyfill.Server
 {
     public class BlazorPolyfillOptions
     {
-        internal const string DefaultJSModuleImportEmulationLibraryPath = "/artifacts/es5module.min.js";
+        internal const string DefaultJSModuleImportEmulationLibraryPath = "/es5module.min.js";
 
         /// <summary>
         /// The returned value will be injected before the polyfill content
@@ -67,7 +67,7 @@ namespace Blazor.Polyfill.Server
         /// <summary>
         /// Get or set the value of the path location of your ES5 javascript library file that emulate your regular javascript modules,
         /// generated from the Blazor.Polyfill.Build package. The path given will be used to load your modules after the polyfill
-        /// initialization. Default value is: "/artifacts/es5module.min.js"
+        /// initialization. Default value is: "/es5module.min.js"
         /// </summary>
         public string JavascriptModuleImportEmulationLibraryPath { get; set; }
     }

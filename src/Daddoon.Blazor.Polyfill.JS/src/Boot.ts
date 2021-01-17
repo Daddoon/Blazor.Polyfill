@@ -96,6 +96,22 @@ declare var File;
         }
     }
 
+    function absolutePathParser(base, relative) {
+        var stack = base.split("/"),
+            parts = relative.split("/");
+        stack.pop(); // remove current file name (or empty string)
+        // (omit if "base" is the current folder without trailing slash)
+        for (var i = 0; i < parts.length; i++) {
+            if (parts[i] == ".")
+                continue;
+            if (parts[i] == "..")
+                stack.pop();
+            else
+                stack.push(parts[i]);
+        }
+        return stack.join("/");
+    }
+
     blazorPolyfill();
 
     //Must be set by prior by the server but sanity checking here
@@ -104,22 +120,34 @@ declare var File;
     }
 
     if (window._es5modulePath === undefined || window._es5modulePath === null) {
-        window._es5modulePath = "/artifacts/es5module.min.js";
+        window._es5modulePath = "/es5module.min.js";
     }
 
     window._es5Export = {};
     window._es5Import = function (fileName) {
 
+        if (fileName.length > 0 && fileName[0] !== '/') {
+            console.log("_import_: For compatibility reasons, assuming current path '" + fileName + "' as absolute.");
+        }
+
         //Remove any param pollution
         var moduleName = fileName.split('?')[0];
 
-        var lastSeparator = moduleName.lastIndexOf('/');
+        //Replace all ambigeous "\" to "/"
+        moduleName = moduleName.replace(/\\/gi, "/");
 
-        if (lastSeparator != -1) {
-            moduleName = moduleName.substring(moduleName.lastIndexOf('/') + 1);
+        //Parse any strange URI path
+        moduleName = absolutePathParser("", moduleName);
+
+        //Add a "/" to the start if not present
+        if (moduleName[0] !== '/') {
+            moduleName = "/" + moduleName;
         }
 
-        moduleName = moduleName.replace(/\./gi, "_");
+        //Normalize path. Replace ".", "/" and "\" with "_".
+        moduleName = moduleName
+            .replace(/\./gi, "_")
+            .replace(/\//gi, "_");
 
         if (window._es5Export[moduleName] !== this.undefined && window._es5Export[moduleName] !== null) {
             // @ts-ignore
@@ -134,10 +162,6 @@ declare var File;
     window._import_ = function (fileName) {
         //Assuming that if this polyfill is loaded the user want a full ES5 compliant
         //behavior, even with imports.
-
-        if (fileName.length > 0 && fileName[0] === '.') {
-            throw new Error("_import_: For compatibility reason please use absolute path");
-        }
 
         //The "no polyfill" version does integrate an _import_ that call the native import
         return window._es5Import(fileName);

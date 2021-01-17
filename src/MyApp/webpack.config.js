@@ -1,5 +1,6 @@
 ﻿const path = require('path');
 const webpack = require('webpack');
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 
 module.exports = {
     resolve:
@@ -32,10 +33,17 @@ module.exports = {
     resolve: {
         extensions: ['*', '.js']
     },
-    entry: './wwwroot/js/modules/app.js',
+    entry: {
+        'es5module': './wwwroot/es5module_entry.js',
+        'es5module.min': './wwwroot/es5module_entry.js'
+    },
     output: {
-        path: path.join(__dirname, '/wwwroot/js/compat'), filename: '[name].libcompat.js'
+        path: path.join(__dirname, '/wwwroot'), filename: '[name].js'
     },
     plugins: [
+        new webpack.optimize.UglifyJsPlugin({
+            include: /\.min\.js$/,
+            minimize: true
+        })
     ]
 };
