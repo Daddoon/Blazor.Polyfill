@@ -93,10 +93,7 @@ namespace Blazor.Polyfill.Server
                 throw new ArgumentNullException(nameof(options));
             }
 
-            if (options.ForceES5Fallback)
-            {
-                HttpRequestExtensions.ForceES5FallbackFlag();
-            }
+            HttpRequestExtensions.ProvideBlazorPolyfillOptions(options);
 
             InitReact(builder);
 
@@ -115,10 +112,14 @@ namespace Blazor.Polyfill.Server
                 return next();
             });
 
+            //BrowserNeedES5Fallback is written hiere and not in the builder
+            //because we only want to use MapWhen when we need ES5 fallback.
+            //If this is false, the request will be redirected to the Microsoft
+            //default request management for this file.
             builder.MapWhen(ctx =>
-            ctx.Request.BrowserNeedES5Fallback()
-            && ctx.Request.Path.StartsWithSegments("/_framework")
-            && ctx.Request.Path.StartsWithSegments("/_framework/blazor.server.js"),
+            ctx.Request.Path.StartsWithSegments("/_framework")
+            && ctx.Request.Path.StartsWithSegments("/_framework/blazor.server.js")
+            && ctx.Request.BrowserNeedES5Fallback(),
             subBuilder =>
             {
                 subBuilder.Run(async (context) =>
@@ -128,7 +129,10 @@ namespace Blazor.Polyfill.Server
                 });
             });
 
-            //Should return the resource file if IE11
+            //As blazor.polyfill.js files does not exist really on theses path and
+            //does not have a real fallback request mangement (as for blazor.server.js)
+            //we should intercept them at any time with MapWhen, but change the result
+            //behavior lately in the builder. Otherwise this would return a 404 error.
             builder.MapWhen(ctx =>
             ctx.Request.Path.StartsWithSegments("/_framework")
             && (
@@ -142,7 +146,7 @@ namespace Blazor.Polyfill.Server
                     //Eval if the requested file is the minified version or not
                     bool isMinified = context.Request.Path.StartsWithSegments("/_framework/blazor.polyfill.min.js");
 
-                    var fileContent = GetIE11BlazorPolyfill(context.Request.BrowserNeedES5Fallback(), isMinified);
+                    var fileContent = GetBlazorPolyfillFile(context.Request.BrowserNeedES5Fallback(), isMinified);
                     await HttpRequestManager.ManageRequest(context, fileContent);
                 });
             });
@@ -165,11 +169,11 @@ namespace Blazor.Polyfill.Server
             {
                 GetPatchedBlazorServerFile();
 
-                GetIE11BlazorPolyfill(true, false);
-                GetIE11BlazorPolyfill(false, true);
+                GetBlazorPolyfillFile(true, false);
+                GetBlazorPolyfillFile(false, true);
 
                 //In this case the parameter does not change anything
-                GetIE11BlazorPolyfill(false, true);
+                GetBlazorPolyfillFile(false, true);
             }
             catch (Exception)
             {
@@ -261,7 +265,7 @@ namespace Blazor.Polyfill.Server
         /// </summary>
         private static FileContentReference _fakeie11Polyfill = null;
 
-        private static FileContentReference GetIE11BlazorPolyfill(bool isIE11, bool isMinified)
+        private static FileContentReference GetBlazorPolyfillFile(bool isIE11, bool isMinified)
         {
             if (!isIE11)
             {

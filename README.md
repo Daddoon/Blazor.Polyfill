@@ -69,7 +69,16 @@ Here some kind of example:
 ```csharp
 app.UseBlazorPolyfill(
     (options) => {
-        options.ForceES5Fallback = true;
+        options.ForceES5Fallback = false;
+        options.ES5FallbackValidation = (HttpRequest request) =>
+        {
+            //Add your custom polyfill validation logic here.
+
+            //The current example always validate polyfill behavior
+            //but you can check User-Agent or other things
+            //in the 'request' parameter.
+            return true;
+        };
     });
 ```
 
@@ -85,6 +94,15 @@ Options:
  
 // Default value is false.
 public bool ForceES5Fallback { get; set; }
+
+// Provide a method that validate if the current request should return the ES5 Fallback behavior or not.
+// This can be useful if you want to extend the polyfill to some other browsers and/or conditions specific values.
+// 
+// Note that if ForceES5Fallback option is set to true, the ES5FallbackValidation return value
+// will have no effect.
+// 
+// Also, Internet Explorer 11 and Edge Legacy will always return the ES5 Fallback behavior in all scenarios.
+public Func<HttpRequest, bool> ES5FallbackValidation { get; set; }
 ```
 
 
