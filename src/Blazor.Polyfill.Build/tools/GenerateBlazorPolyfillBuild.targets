@@ -9,7 +9,7 @@
   <!-- ES5 WEBPACK ENTRY GENERATOR -->
 
   <PropertyGroup>
-    <BlazorPolyfillBuildDir Condition="'$(BlazorPolyfillBuildDir)' == ''">$(MSBuildThisFileDirectory)net5.0/</BlazorPolyfillBuildDir>
+    <BlazorPolyfillBuildDir Condition="'$(BlazorPolyfillBuildDir)' == ''">$(MSBuildThisFileDirectory)netcoreapp3.1/</BlazorPolyfillBuildDir>
     <BlazorPolyfillBuildFileExe>dotnet &quot;$([MSBuild]::Escape($(BlazorPolyfillBuildDir)Blazor.Polyfill.Build.dll))&quot;</BlazorPolyfillBuildFileExe>
     <BlazorPolyfillBuildInput>&quot;$([MSBuild]::Escape($(MSBuildProjectDirectory)))&quot;</BlazorPolyfillBuildInput>
   </PropertyGroup>

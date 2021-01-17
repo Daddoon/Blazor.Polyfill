@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
     <AssemblyName>Blazor.Polyfill.Build</AssemblyName>
     <Description>Build mechanism for Blazor.Polyfill if you intend to emulate the module import and javascript isolation in your project. This package will create a transpiled version of your javascript modules with babel and webpack, that must be loaded for your older browsers support. This must be referenced in your Blazor web application project. Read the documentation for the usage and limitations.</Description>
     <OutputType>Exe</OutputType>
@@ -29,20 +29,21 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="artifacts\" />
     <Folder Include="lib\" />
     <Folder Include="Properties\" />
   </ItemGroup>
 
   <ItemGroup>
     <None Include="tools\GenerateBlazorPolyfillBuild.targets" />
-    <None Include="tools\net5.0\Blazor.Polyfill.Build.deps.json" />
-    <None Include="tools\net5.0\Blazor.Polyfill.Build.runtimeconfig.dev.json" />
-    <None Include="tools\net5.0\Blazor.Polyfill.Build.runtimeconfig.json" />
-    <None Include="tools\net5.0\Blazor.Polyfill.Build.dll" />
-    <None Include="tools\net5.0\Blazor.Polyfill.Build.exe" />
-    <None Include="tools\net5.0\Blazor.Polyfill.Build.pdb" />
-    <None Include="tools\net5.0\Microsoft.Extensions.CommandLineUtils.dll" />
-    <None Include="tools\net5.0\ref\Blazor.Polyfill.Build.dll" />
+    <None Include="tools\netcoreapp3.1\Blazor.Polyfill.Build.deps.json" />
+    <None Include="tools\netcoreapp3.1\Blazor.Polyfill.Build.runtimeconfig.dev.json" />
+    <None Include="tools\netcoreapp3.1\Blazor.Polyfill.Build.runtimeconfig.json" />
+    <None Include="tools\netcoreapp3.1\Blazor.Polyfill.Build.dll" />
+    <None Include="tools\netcoreapp3.1\Blazor.Polyfill.Build.exe" />
+    <None Include="tools\netcoreapp3.1\Blazor.Polyfill.Build.pdb" />
+    <None Include="tools\netcoreapp3.1\Microsoft.Extensions.CommandLineUtils.dll" />
+    <None Include="tools\netcoreapp3.1\ref\Blazor.Polyfill.Build.dll" />
   </ItemGroup>
 
   <!-- Pack settings -->

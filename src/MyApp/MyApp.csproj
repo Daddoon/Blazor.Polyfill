@@ -6,7 +6,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="BlazorMobile.Build" Version="3.2.8" />
     <PackageReference Include="BlazorPolyfill.Build" Version="5.0.100.6" />
   </ItemGroup>
 
@@ -14,13 +13,8 @@
     <ProjectReference Include="..\Blazor.Polyfill.Server\Blazor.Polyfill.Server.csproj" />
   </ItemGroup>
 
-  <Target Name="BuildES5ModulesPack" AfterTargets="GenerateBlazorPolyfillBuild">
-    <Message Importance="High" Text="... comes Two." />
-  </Target>
-
-
-  <!--<Target Name="BuildES5ModulesPack" BeforeTargets="Build">
+  <Target Name="BuildES5ModulesPack" BeforeTargets="Build">
     <Exec Command="npm run build" />
-  </Target>-->
+  </Target>
 
 </Project>
