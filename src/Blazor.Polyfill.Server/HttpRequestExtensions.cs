@@ -4,13 +4,6 @@ namespace Blazor.Polyfill.Server
 {
     internal static class HttpRequestExtensions
     {
-        private static BlazorPolyfillOptions _options = new BlazorPolyfillOptions();
-
-        internal static void ProvideBlazorPolyfillOptions(BlazorPolyfillOptions options)
-        {
-            _options = options;
-        }
-
 
         #region Internet Explorer
 
@@ -78,6 +71,8 @@ namespace Blazor.Polyfill.Server
         /// <returns></returns>
         public static bool BrowserNeedES5Fallback(this HttpRequest request)
         {
+            BlazorPolyfillOptions _options = BlazorPolyfillMiddlewareExtensions.GetOptions();
+
             if (_options.ForceES5Fallback)
             {
                 return true;

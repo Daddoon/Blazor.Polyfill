@@ -79,6 +79,17 @@ namespace Blazor.Polyfill.Server
             return UseBlazorPolyfill(builder, options);
         }
 
+        private static BlazorPolyfillOptions _options = null;
+
+        private static void SetOptions(BlazorPolyfillOptions options)
+        {
+            _options = options;
+        }
+
+        internal static BlazorPolyfillOptions GetOptions()
+        {
+            return _options;
+        }
 
         public static IApplicationBuilder UseBlazorPolyfill(
             this IApplicationBuilder builder, BlazorPolyfillOptions options)
@@ -93,7 +104,7 @@ namespace Blazor.Polyfill.Server
                 throw new ArgumentNullException(nameof(options));
             }
 
-            HttpRequestExtensions.ProvideBlazorPolyfillOptions(options);
+            SetOptions(options);
 
             InitReact(builder);
 
@@ -271,21 +282,30 @@ namespace Blazor.Polyfill.Server
             {
                 if (_fakeie11Polyfill == null)
                 {
-                    string fakeContent = "var _fakeBlazorPolyfill = { }; window._import_ = function (fileName) { if (fileName.length > 0 && fileName[0] === '.') { throw new Error(\"_import_: For compatibility reason please use absolute path\"); }  return import(fileName); }; ";
+                    var assembly = GetBlazorPolyfillAssembly();
 
-                    //Computing ETag. Should be computed last !
-                    string Etag = EtagGenerator.GenerateEtagFromString(fakeContent);
+                    var resources = assembly.GetManifestResourceNames();
+                    var resourceName = resources.Single(str => str.EndsWith("fake.polyfill.js"));
 
-                    //Computing Build time for the Last-Modified Http Header
-                    DateTime buildTime = GetBlazorPolyfillServerBuildDate();
-
-                    _fakeie11Polyfill = new FileContentReference()
+                    using (Stream stream = assembly.GetManifestResourceStream(resourceName))
+                    using (StreamReader reader = new StreamReader(stream))
                     {
-                        Value = fakeContent,
-                        ETag = Etag,
-                        LastModified = buildTime,
-                        ContentLength = System.Text.UTF8Encoding.UTF8.GetByteCount(fakeContent).ToString(CultureInfo.InvariantCulture)
-                    };
+                        string js = reader.ReadToEnd();
+
+                        //Computing ETag. Should be computed last !
+                        string Etag = EtagGenerator.GenerateEtagFromString(js);
+
+                        //Computing Build time for the Last-Modified Http Header
+                        DateTime buildTime = GetBlazorPolyfillServerBuildDate();
+
+                        _fakeie11Polyfill = new FileContentReference()
+                        {
+                            Value = js,
+                            ETag = Etag,
+                            LastModified = buildTime,
+                            ContentLength = System.Text.UTF8Encoding.UTF8.GetByteCount(js).ToString(CultureInfo.InvariantCulture)
+                        };
+                    }
                 }
 
                 return _fakeie11Polyfill;
@@ -305,6 +325,9 @@ namespace Blazor.Polyfill.Server
                         using (StreamReader reader = new StreamReader(stream))
                         {
                             string js = reader.ReadToEnd();
+
+                            //Should inject es5 module override before launch
+                            js = GetOptions().GetJavascriptToInject() + js;
 
                             //Computing ETag. Should be computed last !
                             string Etag = EtagGenerator.GenerateEtagFromString(js);
@@ -337,6 +360,9 @@ namespace Blazor.Polyfill.Server
                         using (StreamReader reader = new StreamReader(stream))
                         {
                             string js = reader.ReadToEnd();
+
+                            //Should inject es5 module override before launch
+                            js = GetOptions().GetJavascriptToInject() + js;
 
                             //Computing ETag. Should be computed last !
                             string Etag = EtagGenerator.GenerateEtagFromString(js);

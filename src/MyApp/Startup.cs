@@ -49,7 +49,12 @@ namespace MyApp
 
             app.UseHttpsRedirection();
 
-            app.UseBlazorPolyfill((options) => options.ForceES5Fallback = true);
+            app.UseBlazorPolyfill((options) =>
+            {
+                options.ForceES5Fallback = true;
+                options.JavascriptModuleImportEmulation = true;
+                options.JavascriptModuleImportEmulationLibraryPath = "/js/compat/main.libcompat.js";
+            });
             //app.UseBlazorPolyfill();
             app.UseStaticFiles();
 

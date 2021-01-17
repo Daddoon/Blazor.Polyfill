@@ -4,15 +4,32 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web;
 
 namespace Blazor.Polyfill.Server
 {
     public class BlazorPolyfillOptions
     {
+        internal const string DefaultJSModuleImportEmulationLibraryPath = "/artifacts/es5module.min.js";
+
+        /// <summary>
+        /// The returned value will be injected before the polyfill content
+        /// </summary>
+        /// <returns></returns>
+        internal string GetJavascriptToInject()
+        {
+            string esload = JavascriptModuleImportEmulation.ToString().ToLowerInvariant();
+            string espath = HttpUtility.JavaScriptStringEncode(JavascriptModuleImportEmulationLibraryPath);
+
+            return $"window._es5ShouldLoadModuleAfterBoot = {esload};window._es5modulePath = '{espath}';";
+        }
+
         public BlazorPolyfillOptions()
         {
             ForceES5Fallback = false;
             ES5FallbackValidation = null;
+            JavascriptModuleImportEmulation = false;
+            JavascriptModuleImportEmulationLibraryPath = DefaultJSModuleImportEmulationLibraryPath;
         }
 
         /// <summary>
@@ -37,5 +54,21 @@ namespace Blazor.Polyfill.Server
         /// Also, Internet Explorer 11 and Edge Legacy will always return the ES5 Fallback behavior in all scenarios.
         /// </summary>
         public Func<HttpRequest, bool> ES5FallbackValidation { get; set; }
+
+        /// <summary>
+        /// If enabled, the polyfill library will assume that you have added the Blazor.Polyfill.Build library to your project
+        /// and will try to load the generated ES5 scripts version of your javascript modules at boot after the polyfill library
+        /// initialization on client side.
+        /// 
+        /// You can customize the expected library path and name to load through <see cref="JavascriptModuleImportEmulationLibraryPath"/> property
+        /// </summary>
+        public bool JavascriptModuleImportEmulation { get; set; }
+
+        /// <summary>
+        /// Get or set the value of the path location of your ES5 javascript library file that emulate your regular javascript modules,
+        /// generated from the Blazor.Polyfill.Build package. The path given will be used to load your modules after the polyfill
+        /// initialization. Default value is: "/artifacts/es5module.min.js"
+        /// </summary>
+        public string JavascriptModuleImportEmulationLibraryPath { get; set; }
     }
 }

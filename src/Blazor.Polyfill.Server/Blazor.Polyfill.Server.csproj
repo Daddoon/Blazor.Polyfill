@@ -39,6 +39,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="dist\fake.polyfill.js" />
+  </ItemGroup>
+
+  <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
 
@@ -69,12 +73,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="dist\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <EmbeddedResource Include="..\Daddoon.Blazor.Polyfill.JS\dist\blazor.polyfill.js" Link="dist\blazor.polyfill.js" />
     <EmbeddedResource Include="..\Daddoon.Blazor.Polyfill.JS\dist\blazor.polyfill.min.js" Link="dist\blazor.polyfill.min.js" />
+    <EmbeddedResource Include="dist\fake.polyfill.js" />
   </ItemGroup>
 
   <ItemGroup>

@@ -98,6 +98,15 @@ declare var File;
 
     blazorPolyfill();
 
+    //Must be set by prior by the server but sanity checking here
+    if (window._es5ShouldLoadModuleAfterBoot === undefined || window._es5ShouldLoadModuleAfterBoot === null) {
+        window._es5ShouldLoadModuleAfterBoot = false;
+    }
+
+    if (window._es5modulePath === undefined || window._es5modulePath === null) {
+        window._es5modulePath = "/artifacts/es5module.min.js";
+    }
+
     window._es5Export = {};
     window._es5Import = function (fileName) {
 
@@ -133,4 +142,11 @@ declare var File;
         //The "no polyfill" version does integrate an _import_ that call the native import
         return window._es5Import(fileName);
     };
+
+    //After this script is finished, we must "inject" the ES5 fallback user lib, if configured from the server
+    if (window._es5ShouldLoadModuleAfterBoot) {
+        const script = document.createElement("script");
+        script.src = window._es5modulePath;
+        document.body.appendChild(script);
+    }
 })();
