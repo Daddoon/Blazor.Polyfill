@@ -4,11 +4,11 @@ namespace Blazor.Polyfill.Server
 {
     internal static class HttpRequestExtensions
     {
-        private static bool _forceES5Fallback = false;
+        private static BlazorPolyfillOptions _options = new BlazorPolyfillOptions();
 
-        internal static void ForceES5FallbackFlag()
+        internal static void ProvideBlazorPolyfillOptions(BlazorPolyfillOptions options)
         {
-            _forceES5Fallback = true;
+            _options = options;
         }
 
 
@@ -78,20 +78,20 @@ namespace Blazor.Polyfill.Server
         /// <returns></returns>
         public static bool BrowserNeedES5Fallback(this HttpRequest request)
         {
-            return BrowserNeedES5Fallback(request.Headers["User-Agent"]);
-        }
-
-        /// <summary>
-        /// If the current user-agent is eligible for ES5 fallback, return true
-        /// </summary>
-        /// <param name="userAgent"></param>
-        /// <returns></returns>
-        public static bool BrowserNeedES5Fallback(string userAgent)
-        {
-            if (_forceES5Fallback)
+            if (_options.ForceES5Fallback)
             {
                 return true;
             }
+
+            //In this case, the user is responsible from any delegate crash.
+            //As it does have control over the delegate, the error will be visible for him.
+            //If this call does not return true, we must continue the regular checking workflow
+            if (_options.ES5FallbackValidation != null && _options.ES5FallbackValidation(request))
+            {
+                return true;
+            }
+
+            string userAgent = request.Headers["User-Agent"];
 
             if (userAgent == null)
             {
