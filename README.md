@@ -149,10 +149,10 @@ Options:
 // If the ForceES5Fallback parameter is set to true,
 // the blazor.polyfill.js library content will always be returned
 // and the blazor.server.js library will always be transpiled to ES5 with the needed fixes.
- 
+//
 // If this parameter is set to false, only Internet Explorer 11 and Edge Legacy will have
 // the ES5 fallback behavior.
- 
+//
 // Default value is false.
 public bool ForceES5Fallback { get; set; }
 
@@ -164,6 +164,18 @@ public bool ForceES5Fallback { get; set; }
 // 
 // Also, Internet Explorer 11 and Edge Legacy will always return the ES5 Fallback behavior in all scenarios.
 public Func<HttpRequest, bool> ES5FallbackValidation { get; set; }
+
+// If enabled, the polyfill library will assume that you have added the BlazorPolyfill.Build library to your project
+// and will try to load the generated ES5 scripts version of your javascript modules at boot after the polyfill library
+// initialization on client side.
+// 
+// You can customize the expected library path and name to load through JavascriptModuleImportEmulationLibraryPath property
+public bool JavascriptModuleImportEmulation { get; set; }
+
+// Get or set the value of the path location of your ES5 javascript library file that emulate your regular javascript modules,
+// generated from the BlazorPolyfill.Build package. The path given will be used to load your modules after the polyfill
+// initialization. Default value is: "/es5module.min.js"
+public string JavascriptModuleImportEmulationLibraryPath { get; set; }
 ```
 
 

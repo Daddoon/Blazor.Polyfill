@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>5.0.100.5</Version>
+    <Version>5.0.100.6</Version>
     <Authors>Guillaume ZAHRA</Authors>
     <Company>Daddoon</Company>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
@@ -13,7 +13,11 @@
     <RepositoryType>Git</RepositoryType>
     <RepositoryUrl>https://github.com/Daddoon/Blazor.Polyfill</RepositoryUrl>
     <PackageTags>blazor blazor-server ie11 edgeHTML edge-legacy polyfill</PackageTags>
-    <PackageReleaseNotes>5.0.100.5:
+    <PackageReleaseNotes>5.0.100.6:
+- Add configurable ES5 fallback option with a delegate validation
+- Add Javascript isolation and dynamic import emulation - See the documentation
+
+5.0.100.5:
 - Fix dependencies error on Linux (Debian 10 default installation)
 - Potentially fix Azure Web App error with the default Linux image container
 - Added BlazorPolyfillOptions parameter for UseBlazorPolyfill methods in order to configure additional behaviors at startup

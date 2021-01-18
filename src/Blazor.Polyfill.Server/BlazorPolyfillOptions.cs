@@ -56,7 +56,7 @@ namespace Blazor.Polyfill.Server
         public Func<HttpRequest, bool> ES5FallbackValidation { get; set; }
 
         /// <summary>
-        /// If enabled, the polyfill library will assume that you have added the Blazor.Polyfill.Build library to your project
+        /// If enabled, the polyfill library will assume that you have added the BlazorPolyfill.Build library to your project
         /// and will try to load the generated ES5 scripts version of your javascript modules at boot after the polyfill library
         /// initialization on client side.
         /// 
@@ -66,7 +66,7 @@ namespace Blazor.Polyfill.Server
 
         /// <summary>
         /// Get or set the value of the path location of your ES5 javascript library file that emulate your regular javascript modules,
-        /// generated from the Blazor.Polyfill.Build package. The path given will be used to load your modules after the polyfill
+        /// generated from the BlazorPolyfill.Build package. The path given will be used to load your modules after the polyfill
         /// initialization. Default value is: "/es5module.min.js"
         /// </summary>
         public string JavascriptModuleImportEmulationLibraryPath { get; set; }
