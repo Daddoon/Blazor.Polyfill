@@ -92,7 +92,7 @@ Here are the step to install it:
                 options.JavascriptModuleImportEmulationLibraryPath = "/es5module.min.js";
             });
     ```
-- Replace any **import** keyword by **\_import\_** instead.
+- Replace any **import** keyword in your web project by **\_import\_** instead.
 - Launch your web application. If your browser need ES5 fallback, or if your have forced it through the additional options (See [Additional options](#additional-options)), the **es5module.min.js** will be automatically loaded in the page, and will try to emulate module import calls. If the browser is not in ES5 falback mode, it will call the regular **import** keyword instead.
 - Here an example like on this [Microsoft documentation: Blazor JavaScript isolation and object references](https://docs.microsoft.com/en-us/aspnet/core/blazor/call-javascript-from-dotnet?view=aspnetcore-5.0#blazor-javascript-isolation-and-object-references) should now work, with our little changes:
 
