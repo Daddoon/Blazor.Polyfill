@@ -67,7 +67,7 @@ Install-Package BlazorPolyfill.Server
 
 ### (Optional) Javascript isolation & module import support
 
-Due to the lack ES6 and dynamic module import support on old browsers like Internet Explorer 11, some powerful functionalities like javascript isolation is note available.
+Due to the lack ES6 and dynamic module import support on old browsers like Internet Explorer 11, some powerful functionalities like javascript isolation is not available.
 This cannot be polyfilled directly as it's a missing browser and language feature.
 
 However this can be done by creating a ES5 compatible bundle library, that will mimic the dynamic import behavior at runtime.
