@@ -1,0 +1,99 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Blazor.Polyfill.Server</name>
+    </assembly>
+    <members>
+        <member name="F:Blazor.Polyfill.Server.BlazorPolyfillMiddlewareExtensions._fakeie11Polyfill">
+            <summary>
+            Used to return an empty file but hashed with some dummy valid values in order to generate a usable Hash/ETag for browser caching
+            </summary>
+        </member>
+        <member name="M:Blazor.Polyfill.Server.BlazorPolyfillOptions.GetJavascriptToInject">
+            <summary>
+            The returned value will be injected before the polyfill content
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="P:Blazor.Polyfill.Server.BlazorPolyfillOptions.ForceES5Fallback">
+            <summary>
+            If the <see cref="P:Blazor.Polyfill.Server.BlazorPolyfillOptions.ForceES5Fallback"/> parameter is set to <see cref="!:true"/>,
+            the blazor.polyfill.js library content will always be returned
+            and the blazor.server.js library will always be transpiled to ES5 with the needed fixes.
+            
+            If this parameter is set to <see cref="!:false"/>, only Internet Explorer 11 and Edge Legacy will have
+            the ES5 fallback behavior.
+            
+            Default value is <see cref="!:false"/>.
+            </summary>
+        </member>
+        <member name="P:Blazor.Polyfill.Server.BlazorPolyfillOptions.ES5FallbackValidation">
+            <summary>
+            Provide a method that validate if the current request should return the ES5 Fallback behavior or not.
+            This can be useful if you want to extend the polyfill to some other browsers and/or conditions specific values.
+            
+            Note that if <see cref="P:Blazor.Polyfill.Server.BlazorPolyfillOptions.ForceES5Fallback"/> option is set to true, the <see cref="P:Blazor.Polyfill.Server.BlazorPolyfillOptions.ES5FallbackValidation"/> return value
+            will have no effect.
+            
+            Also, Internet Explorer 11 and Edge Legacy will always return the ES5 Fallback behavior in all scenarios.
+            </summary>
+        </member>
+        <member name="P:Blazor.Polyfill.Server.BlazorPolyfillOptions.JavascriptModuleImportEmulation">
+            <summary>
+            If enabled, the polyfill library will assume that you have added the BlazorPolyfill.Build library to your project
+            and will try to load the generated ES5 scripts version of your javascript modules at boot after the polyfill library
+            initialization on client side.
+            
+            You can customize the expected library path and name to load through <see cref="P:Blazor.Polyfill.Server.BlazorPolyfillOptions.JavascriptModuleImportEmulationLibraryPath"/> property
+            </summary>
+        </member>
+        <member name="P:Blazor.Polyfill.Server.BlazorPolyfillOptions.JavascriptModuleImportEmulationLibraryPath">
+            <summary>
+            Get or set the value of the path location of your ES5 javascript library file that emulate your regular javascript modules,
+            generated from the BlazorPolyfill.Build package. The path given will be used to load your modules after the polyfill
+            initialization. Default value is: "/es5module.min.js"
+            </summary>
+        </member>
+        <member name="M:Blazor.Polyfill.Server.HttpRequestExtensions.IsInternetExplorer(Microsoft.AspNetCore.Http.HttpRequest)">
+            <summary>
+            If Internet Explorer is detected, return true
+            </summary>
+            <param name="request"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Blazor.Polyfill.Server.HttpRequestExtensions.IsInternetExplorer(System.String)">
+            <summary>
+            If Internet Explorer is detected, return true
+            </summary>
+            <param name="userAgent"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Blazor.Polyfill.Server.HttpRequestExtensions.IsEdgeHTML(Microsoft.AspNetCore.Http.HttpRequest)">
+            <summary>
+            This is about Edge Legacy / EdgeHTML, not the new Chromium one
+            </summary>
+            <param name="request"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Blazor.Polyfill.Server.HttpRequestExtensions.IsEdgeHTML(System.String)">
+            <summary>
+            This is about Edge Legacy / EdgeHTML, not the new Chromium one
+            </summary>
+            <param name="userAgent"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Blazor.Polyfill.Server.HttpRequestExtensions.BrowserNeedES5Fallback(Microsoft.AspNetCore.Http.HttpRequest)">
+            <summary>
+            If the current user-agent in the request is eligible for ES5 fallback, return true
+            </summary>
+            <param name="request"></param>
+            <returns></returns>
+        </member>
+        <member name="T:Blazor.Polyfill.Server.Model.FileContentReference">
+            <summary>
+            This class is intentionally a kind of placeholder in order to avoid "value" copy of the file stored
+            with the string class. We want a kind of "ref" behavior, with the value copied/written only 
+            </summary>
+        </member>
+    </members>
+</doc>

@@ -74,6 +74,67 @@ require("../src/after.js");
             }, 50);
         }
     }
+    function absolutePathParser(base, relative) {
+        var stack = base.split("/"), parts = relative.split("/");
+        stack.pop(); // remove current file name (or empty string)
+        // (omit if "base" is the current folder without trailing slash)
+        for (var i = 0; i < parts.length; i++) {
+            if (parts[i] == ".")
+                continue;
+            if (parts[i] == "..")
+                stack.pop();
+            else
+                stack.push(parts[i]);
+        }
+        return stack.join("/");
+    }
     blazorPolyfill();
+    //Must be set by prior by the server but sanity checking here
+    if (window._es5ShouldLoadModuleAfterBoot === undefined || window._es5ShouldLoadModuleAfterBoot === null) {
+        window._es5ShouldLoadModuleAfterBoot = false;
+    }
+    if (window._es5modulePath === undefined || window._es5modulePath === null) {
+        window._es5modulePath = "/es5module.min.js";
+    }
+    window._es5Export = {};
+    window._es5Import = function (fileName) {
+        if (fileName.length > 0 && fileName[0] !== '/') {
+            console.log("_import_: For compatibility reasons, assuming current path '" + fileName + "' as absolute.");
+        }
+        //Remove any param pollution
+        var moduleName = fileName.split('?')[0];
+        //Replace all ambigeous "\" to "/"
+        moduleName = moduleName.replace(/\\/gi, "/");
+        //Parse any strange URI path
+        moduleName = absolutePathParser("", moduleName);
+        //Add a "/" to the start if not present
+        if (moduleName[0] !== '/') {
+            moduleName = "/" + moduleName;
+        }
+        //Normalize path. Replace ".", "/" and "\" with "_".
+        moduleName = moduleName
+            .replace(/\./gi, "_")
+            .replace(/\//gi, "_");
+        if (window._es5Export[moduleName] !== this.undefined && window._es5Export[moduleName] !== null) {
+            // @ts-ignore
+            return Promise.resolve(window._es5Export[moduleName]);
+        }
+        else {
+            // @ts-ignore
+            return Promise.reject(new Error('es5Export: Cannot find module "' + fileName + '"'));
+        }
+    };
+    window._import_ = function (fileName) {
+        //Assuming that if this polyfill is loaded the user want a full ES5 compliant
+        //behavior, even with imports.
+        //The "no polyfill" version does integrate an _import_ that call the native import
+        return window._es5Import(fileName);
+    };
+    //After this script is finished, we must "inject" the ES5 fallback user lib, if configured from the server
+    if (window._es5ShouldLoadModuleAfterBoot) {
+        var script = document.createElement("script");
+        script.src = window._es5modulePath;
+        document.body.appendChild(script);
+    }
 })();
 //# sourceMappingURL=Boot.js.map
