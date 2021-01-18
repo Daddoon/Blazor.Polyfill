@@ -115,6 +115,8 @@ Here are the step to install it:
 
 #### Limitations
 
+- File path and name are case-sensitive, but this may be changed in the future.
+
 - All given path with **\_import\_** are considered as absolute path. Any other kind of input will be internally converted to an absolute path format. You should take this into consideration while calling your JS file in code.
 
 - Only the modules placed in the **/wwwroot/js/modules** folder will be bundled. This is by Design. This mean that there is no Razor Class Library (**RCL**) bundling support, like **\_content/\*** js libraries.
