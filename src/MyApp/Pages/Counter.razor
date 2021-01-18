@@ -12,7 +12,7 @@ Enter your name:
     // Load the module and keep a reference to it
     // You need to use .AsTask() to convert the ValueTask to Task as it may be awaited multiple times
     private Task<IJSObjectReference> _module;
-    private Task<IJSObjectReference> Module => _module ??= JSRuntime.InvokeAsync<IJSObjectReference>("_import_", "js/modules/.././modules/page.js").AsTask();
+    private Task<IJSObjectReference> Module => _module ??= JSRuntime.InvokeAsync<IJSObjectReference>("_import_", "/js/modules/page.js").AsTask();
 
     async Task Submit()
     {

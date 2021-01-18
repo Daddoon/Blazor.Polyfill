@@ -11,10 +11,14 @@ Blazor server-side Polyfills and fixes for **Internet Explorer 11** & **Edge Leg
 # INSTALLATION
 
 - [.NET 5.0+](#net-50)
+  - [Installation](#installation)
+  - [(Optional) Javascript isolation & module import support](#)
   - [Additional options](#additional-options)
 - [.NET 3.1](#net-31)
 
 ## .NET 5.0+
+
+### Installation
 
 **BlazorPolyfill.Server** NuGet package can be either found [on nuget.org](https://www.nuget.org/packages/BlazorPolyfill.Server/) or from the [*latest release*](https://github.com/Daddoon/Blazor.Polyfill/releases) page on this repository.
 
@@ -60,6 +64,63 @@ Install-Package BlazorPolyfill.Server
 - You are good to go ! Blazor server-side with .NET 5 should be able load on Internet Explorer 11 & Edge
 
 **NOTE:** blazor.polyfill.js content will be kind of empty automatically if the detected browser, through the user-agent, is something else than Internet Explorer or Edge Legacy.
+
+### (Optional) Javascript isolation & module import support
+
+Due to the lack ES6 and dynamic module import support on old browsers like Internet Explorer 11, some powerful functionalities like javascript isolation is note available.
+This cannot be polyfilled directly as it's a missing browser and language feature.
+
+However this can be done by creating a ES5 compatible bundle library, that will mimic the dynamic import behavior at runtime.
+
+The NuGet package [BlazorPolyfill.Build](https://www.nuget.org/packages/BlazorPolyfill.Build/) has been done to make this automatic at build time.
+
+Here are the step to install it:
+
+- Install NPM on your system.
+- Install BlazorPolyfill.Build NuGet package on your Blazor server project.
+- Move your Javascript modules that you want to be bundled in the **wwwroot/js/modules** of your project. The current implementation will only look in this folder by Design, during the bundling process.
+- Build your Blazor server project.
+- If everything goes right, initial build step and bundling with **webpack**, your project build should succeed. An **es5module.js** file and an **es5module.min.js** file should be now visible in **/wwwroot** path.
+- (Optional) You may add theses files in your **.gitignore** file, as they will be generated at build time.
+- Open your **Startup.cs** file and in configure, enable the **JavascriptModuleImportEmulation** option:
+    ```csharp
+            app.UseBlazorPolyfill((options) =>
+            {
+                options.JavascriptModuleImportEmulation = true;
+
+                /* This is the default value if not set */
+                options.JavascriptModuleImportEmulationLibraryPath = "/es5module.min.js";
+            });
+    ```
+- Replace any **import** keyword by **\_import\_** instead.
+- Launch your web application. If your browser need ES5 fallback, or if your have forced it through the additional options (See [Additional options](#additional-options)), the **es5module.min.js** will be automatically loaded in the page, and will try to emulate module import calls. If the browser is not in ES5 falback mode, it will call the regular **import** keyword instead.
+- Here an example like on this [Microsoft documentation: Blazor JavaScript isolation and object references](https://docs.microsoft.com/en-us/aspnet/core/blazor/call-javascript-from-dotnet?view=aspnetcore-5.0#blazor-javascript-isolation-and-object-references) should now work, with our little changes:
+
+  Assuming a js file called **exampleJSInterop.js** placed in **/wwwroot/js/modules** folder:
+  ```js
+  export function showPrompt(message) {
+    return prompt(message, 'Type anything here');
+  }
+  ```
+
+  In your **.razor** page will be written like this:
+  ```razor
+  var module = await js.InvokeAsync<IJSObjectReference>(
+    "_import_", "/js/modules/exampleJsInterop.js");
+  ```
+
+  See the Microsoft documentation for the Blazor API usage.
+
+  With the **es5module.js** library loaded, when the expected module path and name is detected, it will internally return an object scoped on what it should have exported with a native import call. It has also converted all ES6/ES2015 syntax back to ES5.
+
+#### Limitations
+
+- All given path with **\_import\_** are considered as absolute path. Any other kind of input will be internally converted to an absolute path format. You should take this into consideration while calling your JS file in code.
+
+- Only the modules placed in the **/wwwroot/js/modules** folder will be bundled. This is by Design. This mean that there is no Razor Class Library (**RCL**) bundling support, like **\_content/\*** js libraries.
+
+  However feel free provide a **PR** that implement this !
+
 
 ### Additional options
 
