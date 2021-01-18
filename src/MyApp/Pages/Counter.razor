@@ -1,16 +1,31 @@
 @page "/counter"
 
-<h1>Counter</h1>
-
-<p>Current count: @currentCount</p>
-
-<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+@inject IJSRuntime JSRuntime
+@implements IAsyncDisposable
+Enter your name:
+<input @bind="name" />
+<button @onclick="Submit">Submit</button>
 
 @code {
-    private int currentCount = 0;
+    private string name;
 
-    private void IncrementCount()
+    // Load the module and keep a reference to it
+    // You need to use .AsTask() to convert the ValueTask to Task as it may be awaited multiple times
+    private Task<IJSObjectReference> _module;
+    private Task<IJSObjectReference> Module => _module ??= JSRuntime.InvokeAsync<IJSObjectReference>("_import_", "/js/modules/page.js").AsTask();
+
+    async Task Submit()
     {
-        currentCount++;
+        var module = await Module;
+        await module.InvokeVoidAsync("sayHi", name);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_module != null)
+        {
+            var module = await _module;
+            await module.DisposeAsync();
+        }
     }
 }

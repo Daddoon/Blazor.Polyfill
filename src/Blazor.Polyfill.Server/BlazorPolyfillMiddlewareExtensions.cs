@@ -79,6 +79,17 @@ namespace Blazor.Polyfill.Server
             return UseBlazorPolyfill(builder, options);
         }
 
+        private static BlazorPolyfillOptions _options = null;
+
+        private static void SetOptions(BlazorPolyfillOptions options)
+        {
+            _options = options;
+        }
+
+        internal static BlazorPolyfillOptions GetOptions()
+        {
+            return _options;
+        }
 
         public static IApplicationBuilder UseBlazorPolyfill(
             this IApplicationBuilder builder, BlazorPolyfillOptions options)
@@ -93,10 +104,7 @@ namespace Blazor.Polyfill.Server
                 throw new ArgumentNullException(nameof(options));
             }
 
-            if (options.ForceES5Fallback)
-            {
-                HttpRequestExtensions.ForceES5FallbackFlag();
-            }
+            SetOptions(options);
 
             InitReact(builder);
 
@@ -115,10 +123,14 @@ namespace Blazor.Polyfill.Server
                 return next();
             });
 
+            //BrowserNeedES5Fallback is written hiere and not in the builder
+            //because we only want to use MapWhen when we need ES5 fallback.
+            //If this is false, the request will be redirected to the Microsoft
+            //default request management for this file.
             builder.MapWhen(ctx =>
-            ctx.Request.BrowserNeedES5Fallback()
-            && ctx.Request.Path.StartsWithSegments("/_framework")
-            && ctx.Request.Path.StartsWithSegments("/_framework/blazor.server.js"),
+            ctx.Request.Path.StartsWithSegments("/_framework")
+            && ctx.Request.Path.StartsWithSegments("/_framework/blazor.server.js")
+            && ctx.Request.BrowserNeedES5Fallback(),
             subBuilder =>
             {
                 subBuilder.Run(async (context) =>
@@ -128,7 +140,10 @@ namespace Blazor.Polyfill.Server
                 });
             });
 
-            //Should return the resource file if IE11
+            //As blazor.polyfill.js files does not exist really on theses path and
+            //does not have a real fallback request mangement (as for blazor.server.js)
+            //we should intercept them at any time with MapWhen, but change the result
+            //behavior lately in the builder. Otherwise this would return a 404 error.
             builder.MapWhen(ctx =>
             ctx.Request.Path.StartsWithSegments("/_framework")
             && (
@@ -142,7 +157,7 @@ namespace Blazor.Polyfill.Server
                     //Eval if the requested file is the minified version or not
                     bool isMinified = context.Request.Path.StartsWithSegments("/_framework/blazor.polyfill.min.js");
 
-                    var fileContent = GetIE11BlazorPolyfill(context.Request.BrowserNeedES5Fallback(), isMinified);
+                    var fileContent = GetBlazorPolyfillFile(context.Request.BrowserNeedES5Fallback(), isMinified);
                     await HttpRequestManager.ManageRequest(context, fileContent);
                 });
             });
@@ -165,11 +180,11 @@ namespace Blazor.Polyfill.Server
             {
                 GetPatchedBlazorServerFile();
 
-                GetIE11BlazorPolyfill(true, false);
-                GetIE11BlazorPolyfill(false, true);
+                GetBlazorPolyfillFile(true, false);
+                GetBlazorPolyfillFile(false, true);
 
                 //In this case the parameter does not change anything
-                GetIE11BlazorPolyfill(false, true);
+                GetBlazorPolyfillFile(false, true);
             }
             catch (Exception)
             {
@@ -261,27 +276,36 @@ namespace Blazor.Polyfill.Server
         /// </summary>
         private static FileContentReference _fakeie11Polyfill = null;
 
-        private static FileContentReference GetIE11BlazorPolyfill(bool isIE11, bool isMinified)
+        private static FileContentReference GetBlazorPolyfillFile(bool isIE11, bool isMinified)
         {
             if (!isIE11)
             {
                 if (_fakeie11Polyfill == null)
                 {
-                    string fakeContent = "var _fakeBlazorPolyfill = { };";
+                    var assembly = GetBlazorPolyfillAssembly();
 
-                    //Computing ETag. Should be computed last !
-                    string Etag = EtagGenerator.GenerateEtagFromString(fakeContent);
+                    var resources = assembly.GetManifestResourceNames();
+                    var resourceName = resources.Single(str => str.EndsWith("fake.polyfill.js"));
 
-                    //Computing Build time for the Last-Modified Http Header
-                    DateTime buildTime = GetBlazorPolyfillServerBuildDate();
-
-                    _fakeie11Polyfill = new FileContentReference()
+                    using (Stream stream = assembly.GetManifestResourceStream(resourceName))
+                    using (StreamReader reader = new StreamReader(stream))
                     {
-                        Value = fakeContent,
-                        ETag = Etag,
-                        LastModified = buildTime,
-                        ContentLength = System.Text.UTF8Encoding.UTF8.GetByteCount(fakeContent).ToString(CultureInfo.InvariantCulture)
-                    };
+                        string js = reader.ReadToEnd();
+
+                        //Computing ETag. Should be computed last !
+                        string Etag = EtagGenerator.GenerateEtagFromString(js);
+
+                        //Computing Build time for the Last-Modified Http Header
+                        DateTime buildTime = GetBlazorPolyfillServerBuildDate();
+
+                        _fakeie11Polyfill = new FileContentReference()
+                        {
+                            Value = js,
+                            ETag = Etag,
+                            LastModified = buildTime,
+                            ContentLength = System.Text.UTF8Encoding.UTF8.GetByteCount(js).ToString(CultureInfo.InvariantCulture)
+                        };
+                    }
                 }
 
                 return _fakeie11Polyfill;
@@ -301,6 +325,9 @@ namespace Blazor.Polyfill.Server
                         using (StreamReader reader = new StreamReader(stream))
                         {
                             string js = reader.ReadToEnd();
+
+                            //Should inject es5 module override before launch
+                            js = GetOptions().GetJavascriptToInject() + js;
 
                             //Computing ETag. Should be computed last !
                             string Etag = EtagGenerator.GenerateEtagFromString(js);
@@ -333,6 +360,9 @@ namespace Blazor.Polyfill.Server
                         using (StreamReader reader = new StreamReader(stream))
                         {
                             string js = reader.ReadToEnd();
+
+                            //Should inject es5 module override before launch
+                            js = GetOptions().GetJavascriptToInject() + js;
 
                             //Computing ETag. Should be computed last !
                             string Etag = EtagGenerator.GenerateEtagFromString(js);
