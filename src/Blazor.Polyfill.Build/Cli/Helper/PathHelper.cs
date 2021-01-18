@@ -34,5 +34,22 @@ namespace Blazor.Polyfill.Build.Cli.Helper
 
             return input;
         }
+
+        public static string GetIntermediateOutputPath(string rootPath, string baseIntermediateOutputPath)
+        {
+            string trimedPath = baseIntermediateOutputPath.TrimStart('\\');
+
+            if (Path.IsPathRooted(trimedPath))
+            {
+                //Absolute path case
+                return baseIntermediateOutputPath;
+            }
+            else
+            {
+                //Relative path case (the default one)
+                return Path.Combine(rootPath, baseIntermediateOutputPath);
+            }
+        }
+
     }
 }

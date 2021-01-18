@@ -12,10 +12,11 @@
     <BlazorPolyfillBuildDir Condition="'$(BlazorPolyfillBuildDir)' == ''">$(MSBuildThisFileDirectory)netcoreapp3.1/</BlazorPolyfillBuildDir>
     <BlazorPolyfillBuildFileExe>dotnet &quot;$([MSBuild]::Escape($(BlazorPolyfillBuildDir)Blazor.Polyfill.Build.dll))&quot;</BlazorPolyfillBuildFileExe>
     <BlazorPolyfillBuildInput>&quot;$([MSBuild]::Escape($(MSBuildProjectDirectory)))&quot;</BlazorPolyfillBuildInput>
+    <BlazorPolyfillBuildIntermediate>&quot;$([MSBuild]::Escape($(IntermediateOutputPath)))&quot;</BlazorPolyfillBuildIntermediate>
   </PropertyGroup>
 
   <Target Name="GenerateBlazorPolyfillBuild" BeforeTargets="BeforeBuild">
-    <Exec Command="$(BlazorPolyfillBuildFileExe) es5-entry-generator --input $(BlazorPolyfillBuildInput)" />
+    <Exec Command="$(BlazorPolyfillBuildFileExe) es5-entry-generator --input $(BlazorPolyfillBuildInput) --intermediate-dir $(BlazorPolyfillBuildIntermediate)" />
   </Target>
 
 

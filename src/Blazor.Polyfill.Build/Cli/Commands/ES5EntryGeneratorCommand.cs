@@ -12,6 +12,10 @@ namespace Blazor.Polyfill.Build.Commands
                 "The path to your project root folder",
                 CommandOptionType.SingleValue);
 
+            var intermediateDir = command.Option("--intermediate-dir",
+                "The path to your intermediate directory",
+                CommandOptionType.SingleValue);
+
             command.OnExecute(() =>
             {
                 if (!referencesFile.HasValue())
@@ -22,7 +26,7 @@ namespace Blazor.Polyfill.Build.Commands
 
                 try
                 {
-                    JSModuleReferenceHelper.GenerateES5EntryForWebpack(referencesFile.Value());
+                    JSModuleReferenceHelper.GenerateES5EntryForWebpack(referencesFile.Value(), intermediateDir.Value());
                     return 0;
                 }
                 catch (Exception ex)

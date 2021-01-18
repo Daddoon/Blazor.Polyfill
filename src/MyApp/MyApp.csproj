@@ -13,8 +13,4 @@
     <ProjectReference Include="..\Blazor.Polyfill.Server\Blazor.Polyfill.Server.csproj" />
   </ItemGroup>
 
-  <Target Name="BuildES5ModulesPack" BeforeTargets="Build">
-    <Exec Command="npm run build" />
-  </Target>
-
 </Project>
