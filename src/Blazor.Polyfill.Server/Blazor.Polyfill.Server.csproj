@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>5.0.100.6</Version>
+    <Version>5.0.102.0</Version>
     <Authors>Guillaume ZAHRA</Authors>
     <Company>Daddoon</Company>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
@@ -13,7 +13,13 @@
     <RepositoryType>Git</RepositoryType>
     <RepositoryUrl>https://github.com/Daddoon/Blazor.Polyfill</RepositoryUrl>
     <PackageTags>blazor blazor-server ie11 edgeHTML edge-legacy polyfill</PackageTags>
-    <PackageReleaseNotes>5.0.100.6:
+    <PackageReleaseNotes>5.0.102.0:
+- Added option to disable automatic React.NET registration, to give more control to advanced scenarios.
+- Updated V8 and Native V8 dependencies to 7.1.0
+- Added V8 native dependencies for ARM64 (Linux) and ARM64 (Windows)
+- Added some conditional logics about the default JS engine used. Windows and OSX (all CPU type) and Linux (x64) uses ChakraCore. Linux (ARM64) use V8. Other platforms or failing scenarios should use the "UsePackagedBlazorServerLibrary" option instead.
+
+5.0.100.6:
 - Add configurable ES5 fallback option with a delegate validation
 - Add Javascript isolation and dynamic import emulation - See the documentation
 
