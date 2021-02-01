@@ -5,7 +5,10 @@ Blazor server-side Polyfills and fixes for **Internet Explorer 11** & **Edge Leg
 # SUMMARY
 
 - [Installation](#installation)
-- [Recommendations & Troubleshooting]()
+- [Recommendations & Troubleshooting](#recommendations--troubleshooting)
+  - [OS & CPU Compatibilities](#os--cpu-compatibilities)
+  - [What should i do if i'm on an unsupported environment ?](#what-should-i-do-if-im-on-an-unsupported-environment-)
+  - [I would like instead to choose the JS engine for transpilation by myself](#i-would-like-instead-to-choose-the-js-engine-for-transpilation-by-myself)
 - [About](#about)
 - [Using Telerik Blazor Component or MatBlazor on IE11](#using-telerik-blazor-component-or-matblazor-on-ie11)
 
