@@ -266,7 +266,7 @@ If you are on an unsupported environment, consider disabling the transpilation p
   ```
 ### I would like instead to choose the JS engine for transpilation by myself
 
-- As stated for unsupported platforms, you may stop the automatic behavior by disabling automatic registration:
+- As stated for unsupported platforms, you may stop the automatic behavior by disabling automatic registration by setting the **preventReactServicesRegistration** parameter to true:
 
   ```csharp
     public class Startup
