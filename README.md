@@ -5,6 +5,7 @@ Blazor server-side Polyfills and fixes for **Internet Explorer 11** & **Edge Leg
 # SUMMARY
 
 - [Installation](#installation)
+- [Recommendations & Troubleshooting]()
 - [About](#about)
 - [Using Telerik Blazor Component or MatBlazor on IE11](#using-telerik-blazor-component-or-matblazor-on-ie11)
 
@@ -202,6 +203,44 @@ public string JavascriptModuleImportEmulationLibraryPath { get; set; }
 </script>
 <script src="_framework/blazor.server.js"></script>
 ```
+
+# RECOMMENDATIONS & TROUBLESHOOTING
+
+## OS & CPU Compatibilities
+
+Not all OS's or CPU architectures are supported for the dynamic transpilation, or some environments like Azure, base Docker images, or else, may miss some required depdendencies.
+
+**Everything should work out of the box on:**
+
+- Windows (x86, x64, ARM64)
+- OSX (x64)
+- Linux (x64)
+
+**Theses platforms are supported but the environment requirements may have issue depending the configuration:**
+
+- Linux (ARM64)
+- Microsoft Azure
+
+**Theses platforms are unsupported:**
+
+- Linux (x86)
+- Any ARM32v7 environment.
+
+### What should i do if i'm on an unsupported environment ?
+
+If you are on an unsupported environment, consider disabling the transpilation process with BlazorPolyfill, and use a packaged versions of the fixed **blazor.server.js**. Here are the steps:
+
+- In your **Startup** class, set the **preventReactServicesRegistration** parameter to true on **AddBlazorPolyfill**, like below:
+  ```csharp
+    public class Startup
+    {
+        public void ConfigureServices(IServiceCollection services)
+        {
+            /* Other services registrations */
+            services.AddBlazorPolyfill(true);
+        }
+    }
+  ```
 
 # ABOUT
 
