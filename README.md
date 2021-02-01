@@ -218,7 +218,7 @@ public bool UsePackagedBlazorServerLibrary { get; set; }
 
 ## OS & CPU Compatibilities
 
-Not all OS's or CPU architectures are supported for the dynamic transpilation, or some environments like Azure, base Docker images, or else, may miss some required depdendencies.
+Not all OS's or CPU architectures are supported for the dynamic transpilation, or some environments like Azure, base Docker images, or else, may miss some required dependencies.
 
 **Everything should work out of the box on:**
 
