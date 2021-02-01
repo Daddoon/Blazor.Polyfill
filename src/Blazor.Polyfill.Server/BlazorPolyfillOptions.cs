@@ -26,6 +26,7 @@ namespace Blazor.Polyfill.Server
 
         public BlazorPolyfillOptions()
         {
+            UsePackagedBlazorServerLibrary = false;
             ForceES5Fallback = false;
             ES5FallbackValidation = null;
             JavascriptModuleImportEmulation = false;
@@ -70,5 +71,14 @@ namespace Blazor.Polyfill.Server
         /// initialization. Default value is: "/es5module.min.js"
         /// </summary>
         public string JavascriptModuleImportEmulationLibraryPath { get; set; }
+
+        /// <summary>
+        /// If set to true, the returned blazor.server.js file for ES5 compatibility will be a packaged one in this library
+        /// instead of the one generated dynamically. It's not recommended in the sense that this usage prevent the automatic update
+        /// of the blazor.server.js library if you install newer version of Blazor Server, and would maybe add issue. This option
+        /// is a convenience for users who cannot dynamically transpile with React.NET/Babel because of missing JS engines for their
+        /// platform or having issue with it, typically like ARM32v7 OS's.
+        /// </summary>
+        public bool UsePackagedBlazorServerLibrary { get; set; }
     }
 }
