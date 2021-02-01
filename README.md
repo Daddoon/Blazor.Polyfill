@@ -182,6 +182,13 @@ public bool JavascriptModuleImportEmulation { get; set; }
 // generated from the BlazorPolyfill.Build package. The path given will be used to load your modules after the polyfill
 // initialization. Default value is: "/es5module.min.js"
 public string JavascriptModuleImportEmulationLibraryPath { get; set; }
+
+// If set to true, the returned blazor.server.js file for ES5 compatibility will be a packaged one in this library
+// instead of the one generated dynamically. It's not recommended in the sense that this usage prevent the automatic update
+// of the blazor.server.js library if you install newer version of Blazor Server, and would maybe add issue. This option
+// is a convenience for users who cannot dynamically transpile with React.NET/Babel because of missing JS engines for their
+// platform or having issue with it, typically like ARM32v7 OS's.
+public bool UsePackagedBlazorServerLibrary { get; set; }
 ```
 
 
@@ -228,6 +235,7 @@ Not all OS's or CPU architectures are supported for the dynamic transpilation, o
 
 - Linux (x86)
 - Any Docker Linux image on ARM64 or Linux on ARM64 that don't have the **GLIBCXX_3.4.26** lib installed on the system.
+  This lib is required by the V8 JS Engine. ChakraCore does not support ARM64 on Linux at all.
 - Any ARM32v7 environment.
 
 ### What should i do if i'm on an unsupported environment ?
