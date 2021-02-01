@@ -279,7 +279,7 @@ If you are on an unsupported environment, consider disabling the transpilation p
     }
   ```
   
-- Then you will have to all the registration by yourself. This include calling in your **Startup** class:
+- Then you will have to do all the registration by yourself. This include calling in your **Startup** class:
   - **AddReact** (ConfigureServices)
   - **AddJsEngineSwitcher** (ConfigureServices)
   - **UseReact** (Configure), ideally before **UseBlazorPolyfill**
