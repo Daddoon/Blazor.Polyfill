@@ -241,6 +241,36 @@ If you are on an unsupported environment, consider disabling the transpilation p
         }
     }
   ```
+- In your **Startup** class, set the **UsePackagedBlazorServerLibrary** option on **UseBlazorPolyfill** to true, like below:
+  ```csharp
+    public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+    {
+        /* Other method calls */
+        app.UseBlazorPolyfill((options) =>
+        {
+            options.UsePackagedBlazorServerLibrary = true;
+        });
+    }
+  ```
+### I would like instead to choose the JS engine for transpilation by myself
+
+- As stated for unsupported platforms, you may stop the automatic behavior by disabling automatic registration:
+
+  ```csharp
+    public class Startup
+    {
+        public void ConfigureServices(IServiceCollection services)
+        {
+            /* Other services registrations */
+            services.AddBlazorPolyfill(true);
+        }
+    }
+  ```
+  
+- Then you will have to all the registration by yourself. This include calling in your **Startup** class:
+  - **AddReact** (ConfigureServices)
+  - **AddJsEngineSwitcher** (ConfigureServices)
+  - **UseReact** (Configure), ideally before **UseBlazorPolyfill**
 
 # ABOUT
 
