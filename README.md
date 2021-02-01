@@ -222,7 +222,7 @@ Not all OS's or CPU architectures are supported for the dynamic transpilation, o
 
 **Everything should work out of the box on:**
 
-- Windows (x86, x64, ARM64)
+- Windows (x86, x64, ARM64, ARM)
 - OSX (x64)
 - Linux (x64)
 
@@ -236,7 +236,7 @@ Not all OS's or CPU architectures are supported for the dynamic transpilation, o
 - Linux (x86)
 - Any Docker Linux image on ARM64 or Linux on ARM64 that don't have the **GLIBCXX_3.4.26** lib installed on the system.
   This lib is required by the V8 JS Engine. ChakraCore does not support ARM64 on Linux at all.
-- Any ARM32v7 environment.
+- Any ARM32v7 environment, except Windows ARM.
 
 ### What should i do if i'm on an unsupported environment ?
 
