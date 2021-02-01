@@ -227,6 +227,7 @@ Not all OS's or CPU architectures are supported for the dynamic transpilation, o
 **Theses platforms are unsupported:**
 
 - Linux (x86)
+- Any Docker Linux image on ARM64 or Linux on ARM64 that don't have the **GLIBCXX_3.4.26** lib installed on the system.
 - Any ARM32v7 environment.
 
 ### What should i do if i'm on an unsupported environment ?
