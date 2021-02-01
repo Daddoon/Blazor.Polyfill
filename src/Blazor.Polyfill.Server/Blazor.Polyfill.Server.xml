@@ -4,6 +4,33 @@
         <name>Blazor.Polyfill.Server</name>
     </assembly>
     <members>
+        <member name="M:Blazor.Polyfill.Server.BlazorPolyfillMiddlewareExtensions.AddBlazorPolyfill(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.Boolean)">
+            <summary>
+            Add the required services for BlazorPolyfill.
+            If the preventReactServicesRegistration parameter is set to true,
+            the React.NET library used for transpilation with Babel will not
+            be registered automatically. You will have to write yourself the
+            AddReact and AddJsEngineSwitcher logic in your Startup ConfigureServices method.
+            You will also have to call by yourself UseReact in Startup Configure method
+            before UseBlazorPolyfill.
+            
+            You can use this to have control over the transpilation process.
+            
+            Also, if you are on an unsupported platform or CPU for transpilation, like
+            ARM32v7, you should set this option to true, and enable UsePackagedBlazorServerLibrary
+            in BlazorPolyfillOptions in the UseBlazorPolyfill method call in Startup Configure method.
+            </summary>
+            <param name="services"></param>
+            <param name="preventReactServicesRegistration"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Blazor.Polyfill.Server.BlazorPolyfillMiddlewareExtensions.AddBlazorPolyfill(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+            Add the required services for BlazorPolyfill
+            </summary>
+            <param name="services"></param>
+            <returns></returns>
+        </member>
         <member name="F:Blazor.Polyfill.Server.BlazorPolyfillMiddlewareExtensions._fakeie11Polyfill">
             <summary>
             Used to return an empty file but hashed with some dummy valid values in order to generate a usable Hash/ETag for browser caching
@@ -52,6 +79,15 @@
             Get or set the value of the path location of your ES5 javascript library file that emulate your regular javascript modules,
             generated from the BlazorPolyfill.Build package. The path given will be used to load your modules after the polyfill
             initialization. Default value is: "/es5module.min.js"
+            </summary>
+        </member>
+        <member name="P:Blazor.Polyfill.Server.BlazorPolyfillOptions.UsePackagedBlazorServerLibrary">
+            <summary>
+            If set to true, the returned blazor.server.js file for ES5 compatibility will be a packaged one in this library
+            instead of the one generated dynamically. It's not recommended in the sense that this usage prevent the automatic update
+            of the blazor.server.js library if you install newer version of Blazor Server, and would maybe add issue. This option
+            is a convenience for users who cannot dynamically transpile with React.NET/Babel because of missing JS engines for their
+            platform or having issue with it, typically like ARM32v7 OS's.
             </summary>
         </member>
         <member name="M:Blazor.Polyfill.Server.HttpRequestExtensions.IsInternetExplorer(Microsoft.AspNetCore.Http.HttpRequest)">

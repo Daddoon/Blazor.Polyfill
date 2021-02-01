@@ -51,7 +51,8 @@ namespace MyApp
 
             app.UseBlazorPolyfill((options) =>
             {
-                options.ForceES5Fallback = false;
+                options.UsePackagedBlazorServerLibrary = false;
+                options.ForceES5Fallback = true;
                 options.JavascriptModuleImportEmulation = true;
                 options.JavascriptModuleImportEmulationLibraryPath = "/es5module.min.js";
             });
