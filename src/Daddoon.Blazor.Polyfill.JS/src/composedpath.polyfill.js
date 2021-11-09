@@ -3,10 +3,13 @@
 // Possibly normalize to add window to Safari's chain, as it does not?
 (function(E, d, w) {
   if(!E.composedPath) {
-    E.composedPath = function() {
-      if (this.path) {
-        return this.path;
-      } 
+      E.composedPath = function () {
+
+        //Return empty on IE11
+        //if (this.path) {
+        //    return this.path;
+        //}
+
     var target = this.target;
     
     this.path = [];
