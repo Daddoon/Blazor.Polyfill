@@ -1,6 +1,7 @@
 ﻿/* BLAZOR.POLYFILL Version 5.0.100.1 */
 
-import 'core-js/es';
+import 'core-js/stable';
+import "regenerator-runtime/runtime";
 import 'web-animations-js';
 import 'whatwg-fetch';
 import 'abortcontroller-polyfill/dist/polyfill-patch-fetch';
@@ -12,6 +13,12 @@ import '../src/canvas-to-blob.js';
 
 //Polyfill for 'after' method not existing on ChildNode on IE9+
 import '../src/after.js';
+
+//Polyfill for composedPath on IE
+import '../src/composedpath.polyfill.js';
+
+//Polyfill getRootNode
+import "get-root-node-polyfill/implement";
 
 declare var Symbol;
 declare var document;
