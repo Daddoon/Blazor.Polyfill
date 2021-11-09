@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>5.0.100.6</Version>
+    <Version>5.0.102.0</Version>
     <Authors>Guillaume ZAHRA</Authors>
     <Company>Daddoon</Company>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
@@ -13,7 +13,13 @@
     <RepositoryType>Git</RepositoryType>
     <RepositoryUrl>https://github.com/Daddoon/Blazor.Polyfill</RepositoryUrl>
     <PackageTags>blazor blazor-server ie11 edgeHTML edge-legacy polyfill</PackageTags>
-    <PackageReleaseNotes>5.0.100.6:
+    <PackageReleaseNotes>5.0.102.0:
+- Added option to disable automatic React.NET registration, to give more control to advanced scenarios.
+- Updated V8 and Native V8 dependencies to 7.1.0
+- Added V8 native dependencies for ARM64 (Linux) and ARM64 (Windows)
+- Added some conditional logics about the default JS engine used. Windows and OSX (all CPU type) and Linux (x64) uses ChakraCore. Linux (ARM64) use V8. Other platforms or failing scenarios should use the "UsePackagedBlazorServerLibrary" option instead.
+
+5.0.100.6:
 - Add configurable ES5 fallback option with a delegate validation
 - Add Javascript isolation and dynamic import emulation - See the documentation
 
@@ -51,6 +57,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="dist\blazor.server.packaged.js" />
     <None Remove="dist\fake.polyfill.js" />
   </ItemGroup>
 
@@ -67,14 +74,16 @@
     <PackageReference Include="JavaScriptEngineSwitcher.ChakraCore.Native.win-x64" Version="3.9.1" />
     <PackageReference Include="JavaScriptEngineSwitcher.ChakraCore.Native.win-x86" Version="3.9.1" />
     <PackageReference Include="JavaScriptEngineSwitcher.Extensions.MsDependencyInjection" Version="3.3.0" />
-    <PackageReference Include="JavaScriptEngineSwitcher.V8" Version="3.9.0" />
+    <PackageReference Include="JavaScriptEngineSwitcher.V8" Version="3.10.0" />
     <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.2.0" />
-    <PackageReference Include="Microsoft.ClearScript.V8.Native.linux-x64" Version="7.0.0" />
-    <PackageReference Include="Microsoft.ClearScript.V8.Native.osx-x64" Version="7.0.0" />
-    <PackageReference Include="Microsoft.ClearScript.V8.Native.win-x64" Version="7.0.0" />
-    <PackageReference Include="Microsoft.ClearScript.V8.Native.win-x86" Version="7.0.0" />
-    <PackageReference Include="NUglify" Version="1.13.1" />
+    <PackageReference Include="Microsoft.ClearScript.V8.Native.linux-arm64" Version="7.1.0" />
+    <PackageReference Include="Microsoft.ClearScript.V8.Native.linux-x64" Version="7.1.0" />
+    <PackageReference Include="Microsoft.ClearScript.V8.Native.osx-x64" Version="7.1.0" />
+    <PackageReference Include="Microsoft.ClearScript.V8.Native.win-arm64" Version="7.1.0" />
+    <PackageReference Include="Microsoft.ClearScript.V8.Native.win-x64" Version="7.1.0" />
+    <PackageReference Include="Microsoft.ClearScript.V8.Native.win-x86" Version="7.1.0" />
+    <PackageReference Include="NUglify" Version="1.13.2" />
     <PackageReference Include="React.AspNet" Version="5.2.11" />
   </ItemGroup>
 
@@ -87,6 +96,7 @@
   <ItemGroup>
     <EmbeddedResource Include="..\Daddoon.Blazor.Polyfill.JS\dist\blazor.polyfill.js" Link="dist\blazor.polyfill.js" />
     <EmbeddedResource Include="..\Daddoon.Blazor.Polyfill.JS\dist\blazor.polyfill.min.js" Link="dist\blazor.polyfill.min.js" />
+    <EmbeddedResource Include="dist\blazor.server.packaged.js" />
     <EmbeddedResource Include="dist\fake.polyfill.js" />
   </ItemGroup>
 

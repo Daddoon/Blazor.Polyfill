@@ -5,6 +5,10 @@ Blazor server-side Polyfills and fixes for **Internet Explorer 11** & **Edge Leg
 # SUMMARY
 
 - [Installation](#installation)
+- [Recommendations & Troubleshooting](#recommendations--troubleshooting)
+  - [OS & CPU Compatibilities](#os--cpu-compatibilities)
+  - [What should i do if i'm on an unsupported environment ?](#what-should-i-do-if-im-on-an-unsupported-environment-)
+  - [I would like instead to choose the JS engine for transpilation by myself](#i-would-like-instead-to-choose-the-js-engine-for-transpilation-by-myself)
 - [About](#about)
 - [Using Telerik Blazor Component or MatBlazor on IE11](#using-telerik-blazor-component-or-matblazor-on-ie11)
 
@@ -12,7 +16,7 @@ Blazor server-side Polyfills and fixes for **Internet Explorer 11** & **Edge Leg
 
 - [.NET 5.0+](#net-50)
   - [Installation](#installation)
-  - [(Optional) Javascript isolation & module import support](#)
+  - [(Optional) Javascript isolation & module import support](#optional-javascript-isolation--module-import-support)
   - [Additional options](#additional-options)
 - [.NET 3.1](#net-31)
 
@@ -67,7 +71,7 @@ Install-Package BlazorPolyfill.Server
 
 ### (Optional) Javascript isolation & module import support
 
-Due to the lack ES6 and dynamic module import support on old browsers like Internet Explorer 11, some powerful functionalities like javascript isolation is note available.
+Due to the lack ES6 and dynamic module import support on old browsers like Internet Explorer 11, some powerful functionalities like javascript isolation is not available.
 This cannot be polyfilled directly as it's a missing browser and language feature.
 
 However this can be done by creating a ES5 compatible bundle library, that will mimic the dynamic import behavior at runtime.
@@ -92,11 +96,11 @@ Here are the step to install it:
                 options.JavascriptModuleImportEmulationLibraryPath = "/es5module.min.js";
             });
     ```
-- Replace any **import** keyword by **\_import\_** instead.
+- Replace any **import** keyword in your web project by **\_import\_** instead.
 - Launch your web application. If your browser need ES5 fallback, or if your have forced it through the additional options (See [Additional options](#additional-options)), the **es5module.min.js** will be automatically loaded in the page, and will try to emulate module import calls. If the browser is not in ES5 falback mode, it will call the regular **import** keyword instead.
 - Here an example like on this [Microsoft documentation: Blazor JavaScript isolation and object references](https://docs.microsoft.com/en-us/aspnet/core/blazor/call-javascript-from-dotnet?view=aspnetcore-5.0#blazor-javascript-isolation-and-object-references) should now work, with our little changes:
 
-  Assuming a js file called **exampleJSInterop.js** placed in **/wwwroot/js/modules** folder:
+  Assuming a js file called **exampleJsInterop.js** placed in **/wwwroot/js/modules** folder:
   ```js
   export function showPrompt(message) {
     return prompt(message, 'Type anything here');
@@ -114,6 +118,8 @@ Here are the step to install it:
   With the **es5module.js** library loaded, when the expected module path and name is detected, it will internally return an object scoped on what it should have exported with a native import call. It has also converted all ES6/ES2015 syntax back to ES5.
 
 #### Limitations
+
+- File path and name are case-sensitive, but this may be changed in the future.
 
 - All given path with **\_import\_** are considered as absolute path. Any other kind of input will be internally converted to an absolute path format. You should take this into consideration while calling your JS file in code.
 
@@ -176,6 +182,13 @@ public bool JavascriptModuleImportEmulation { get; set; }
 // generated from the BlazorPolyfill.Build package. The path given will be used to load your modules after the polyfill
 // initialization. Default value is: "/es5module.min.js"
 public string JavascriptModuleImportEmulationLibraryPath { get; set; }
+
+// If set to true, the returned blazor.server.js file for ES5 compatibility will be a packaged one in this library
+// instead of the one generated dynamically. It's not recommended in the sense that this usage prevent the automatic update
+// of the blazor.server.js library if you install newer version of Blazor Server, and would maybe add issue. This option
+// is a convenience for users who cannot dynamically transpile with React.NET/Babel because of missing JS engines for their
+// platform or having issue with it, typically like ARM32v7 OS's.
+public bool UsePackagedBlazorServerLibrary { get; set; }
 ```
 
 
@@ -200,6 +213,76 @@ public string JavascriptModuleImportEmulationLibraryPath { get; set; }
 </script>
 <script src="_framework/blazor.server.js"></script>
 ```
+
+# RECOMMENDATIONS & TROUBLESHOOTING
+
+## OS & CPU Compatibilities
+
+Not all OS's or CPU architectures are supported for the dynamic transpilation, or some environments like Azure, base Docker images, or else, may miss some required dependencies.
+
+**Everything should work out of the box on:**
+
+- Windows (x86, x64, ARM64, ARM)
+- OSX (x64)
+- Linux (x64)
+
+**Theses platforms are supported but the environment requirements may have issue depending the configuration:**
+
+- Linux (ARM64)
+- Microsoft Azure
+
+**Theses platforms are unsupported:**
+
+- Linux (x86)
+- Any Docker Linux image on ARM64 or Linux on ARM64 that don't have the **GLIBCXX_3.4.26** lib installed on the system.
+  This lib is required by the V8 JS Engine. ChakraCore does not support ARM64 on Linux at all.
+- Any ARM32v7 environment, except Windows ARM.
+
+### What should i do if i'm on an unsupported environment ?
+
+If you are on an unsupported environment, consider disabling the transpilation process with BlazorPolyfill, and use a packaged versions of the fixed **blazor.server.js**. Here are the steps:
+
+- In your **Startup** class, set the **preventReactServicesRegistration** parameter to true on **AddBlazorPolyfill**, like below:
+  ```csharp
+    public class Startup
+    {
+        public void ConfigureServices(IServiceCollection services)
+        {
+            /* Other services registrations */
+            services.AddBlazorPolyfill(true);
+        }
+    }
+  ```
+- In your **Startup** class, set the **UsePackagedBlazorServerLibrary** option on **UseBlazorPolyfill** to true, like below:
+  ```csharp
+    public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+    {
+        /* Other method calls */
+        app.UseBlazorPolyfill((options) =>
+        {
+            options.UsePackagedBlazorServerLibrary = true;
+        });
+    }
+  ```
+### I would like instead to choose the JS engine for transpilation by myself
+
+- As stated for unsupported platforms, you may stop the automatic behavior by disabling automatic registration by setting the **preventReactServicesRegistration** parameter to true:
+
+  ```csharp
+    public class Startup
+    {
+        public void ConfigureServices(IServiceCollection services)
+        {
+            /* Other services registrations */
+            services.AddBlazorPolyfill(true);
+        }
+    }
+  ```
+  
+- Then you will have to do all the registration by yourself. This include calling in your **Startup** class:
+  - **AddReact** (ConfigureServices)
+  - **AddJsEngineSwitcher** (ConfigureServices)
+  - **UseReact** (Configure), ideally before **UseBlazorPolyfill**
 
 # ABOUT
 
