@@ -1,7 +1,8 @@
 "use strict";
 /* BLAZOR.POLYFILL Version 5.0.100.1 */
 Object.defineProperty(exports, "__esModule", { value: true });
-require("core-js/es");
+require("core-js/stable");
+require("regenerator-runtime/runtime");
 require("web-animations-js");
 require("whatwg-fetch");
 require("abortcontroller-polyfill/dist/polyfill-patch-fetch");
@@ -11,6 +12,10 @@ require("../src/navigator.sendbeacon.js");
 require("../src/canvas-to-blob.js");
 //Polyfill for 'after' method not existing on ChildNode on IE9+
 require("../src/after.js");
+//Polyfill for composedPath on IE
+require("../src/composedpath.polyfill.js");
+//Polyfill getRootNode
+require("get-root-node-polyfill/implement");
 (function () {
     function IsIE() {
         if (/MSIE \d|Trident.*rv:/.test(navigator.userAgent)) {

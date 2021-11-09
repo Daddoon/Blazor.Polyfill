@@ -1,26 +1,24 @@
-﻿using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.DependencyInjection;
-using System;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Net.Http.Headers;
-using System.IO;
-using System.Reflection;
-using System.Linq;
-using Microsoft.AspNetCore.Components.Server;
-using React;
-using React.AspNet;
+﻿using Blazor.Polyfill.Server.Model;
+using JavaScriptEngineSwitcher.ChakraCore;
 using JavaScriptEngineSwitcher.Extensions.MsDependencyInjection;
 using JavaScriptEngineSwitcher.V8;
-using React.Exceptions;
-using System.Text.RegularExpressions;
-using NUglify;
-using System.Globalization;
-using System.Net;
-using Blazor.Polyfill.Server.Model;
-using JavaScriptEngineSwitcher.ChakraCore;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Components.Server;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using NUglify;
+using React;
+using React.AspNet;
+using React.Exceptions;
+using System;
+using System.Globalization;
+using System.IO;
+using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 
 namespace Blazor.Polyfill.Server
 {
@@ -360,15 +358,32 @@ namespace Blazor.Polyfill.Server
                         {
                             string js = reader.ReadToEnd();
 
+
+                            #region Patch Regex
+
                             //Patch Descriptor Regex as it make Babel crash during transform
                             js = js.Replace("/\\W*Blazor:[^{]*(?<descriptor>.*)$/;", @"/[\0-\/:-@\[-\^`\{-\uFFFF]*Blazor:(?:(?!\{)[\s\S])*(.*)$/;");
 
+                            js = js.Replace("/^\\s*Blazor-Component-State:(?<state>[a-zA-Z0-9\\+\\/=]+)$/", @"/^[\t-\r \xA0\u1680\u2000-\u200A\u2028\u2029\u202F\u205F\u3000\uFEFF]*Blazor\x2DComponent\x2DState:([\+\/-9=A-Za-z]+)$/");
+
+                            js = js.Replace("/^\\s*Blazor:[^{]*(?<descriptor>.*)$/", @"/^[\t-\r \xA0\u1680\u2000-\u200A\u2028\u2029\u202F\u205F\u3000\uFEFF]*Blazor:(?:(?!\{)[\s\S])*(.*)$/");
+
+                            #endregion Patch Regex
+
                             //Transpile code to ES5 for IE11 before manual patching
-                            js = Transform(js, "blazor.server.js", "{\"plugins\":[\"proposal-class-properties\",\"proposal-object-rest-spread\"],\"presets\":[[\"env\",{\"targets\":{\"browsers\":[\"ie 11\"]}}], \"es2015\",\"es2016\",\"es2017\",\"stage-3\"], \"sourceType\": \"script\"}");
+                            js = Transform(js, "blazor.server.js", "{\"plugins\":[\"proposal-class-properties\",\"proposal-object-rest-spread\"],\"presets\":[[\"env\",{\"targets\":{\"browsers\":[\"ie 11\",\"Chrome 78\"]}}], \"es2015\",\"es2016\",\"es2017\",\"stage-3\"], \"sourceType\": \"script\"}");
+
+                            #region Regex named groups fix
 
                             //At this point, Babel has unminified the code, and fixed IE11 issues, like 'import' method calls.
+
                             //We still need to fix 'descriptor' regex evaluation code, as it was expecting a named capture group.
-                            js = Regex.Replace(js, "([a-zA-Z]+)(.groups[ ]*&&[ ]*[a-zA-Z]+.groups.descriptor)", "$1[1]");
+                            js = Regex.Replace(js, "([_a-zA-Z0-9]+)(.groups[ ]*&&[ ]*[_a-zA-Z0-9]+.groups.descriptor)", "$1[1]");
+
+                            //We still need to fix 'state' regex evaluation code, as it was expecting a named capture group.
+                            js = Regex.Replace(js, "([_a-zA-Z0-9]+)(.groups[ ]*&&[ ]*[_a-zA-Z0-9]+.groups.state)", "$1[1]");
+
+                            #endregion Regex named groups fix
 
                             //Minify with AjaxMin (we don't want an additional external tool with NPM or else for managing this
                             //kind of thing here...
@@ -399,6 +414,118 @@ namespace Blazor.Polyfill.Server
         }
 
         #endregion PATCHED BLAZOR.SERVER.JS
+
+        #region PATCHED ASPNETCORE-BROWSER-REFRESH.JS
+
+        //private static FileContentReference _patchedAspNetCoreBrowserRefreshFile = null;
+
+        //private static FileContentReference GetPatchedAspNetCoreBrowserRefreshFile()
+        //{
+        //    if (_patchedAspNetCoreBrowserRefreshFile == null)
+        //    {
+        //        BlazorPolyfillOptions option = GetOptions();
+
+        //        if (option.UsePackagedBlazorServerLibrary)
+        //        {
+        //            //Get packaged blazor.server.js
+        //            var assembly = GetBlazorPolyfillAssembly();
+
+        //            var resources = assembly.GetManifestResourceNames();
+        //            var resourceName = resources.Single(str => str.EndsWith("blazor.server.packaged.js"));
+
+        //            using (Stream stream = assembly.GetManifestResourceStream(resourceName))
+        //            {
+        //                using (StreamReader reader = new StreamReader(stream))
+        //                {
+        //                    string js = reader.ReadToEnd();
+
+        //                    string Etag = EtagGenerator.GenerateEtagFromString(js);
+
+        //                    //Computing Build time for the Last-Modified Http Header
+        //                    //We should rely on the creation date of the Microsoft API
+        //                    //not the Blazor.Polyfill.Server one as the Microsoft.AspNetCore.Components.Server
+        //                    //assembly may be updated in time. We will rely on the current creation/modification date on disk
+        //                    DateTime buildTime = GetAssemblyCreationDate(assembly);
+
+        //                    _patchedBlazorServerFile = new FileContentReference()
+        //                    {
+        //                        Value = js,
+        //                        ETag = Etag,
+        //                        LastModified = buildTime,
+        //                        ContentLength = System.Text.UTF8Encoding.UTF8.GetByteCount(js).ToString(CultureInfo.InvariantCulture)
+        //                    };
+        //                }
+        //            }
+        //        }
+        //        else
+        //        {
+        //            var assembly = GetAspNetCoreComponentsServerAssembly();
+
+        //            var resources = assembly.GetManifestResourceNames();
+        //            var resourceName = resources.Single(str => str.EndsWith("blazor.server.js"));
+
+        //            using (Stream stream = assembly.GetManifestResourceStream(resourceName))
+        //            {
+        //                using (StreamReader reader = new StreamReader(stream))
+        //                {
+        //                    string js = reader.ReadToEnd();
+
+
+        //                    #region Patch Regex
+
+        //                    //Patch Descriptor Regex as it make Babel crash during transform
+        //                    js = js.Replace("/\\W*Blazor:[^{]*(?<descriptor>.*)$/;", @"/[\0-\/:-@\[-\^`\{-\uFFFF]*Blazor:(?:(?!\{)[\s\S])*(.*)$/;");
+
+        //                    js = js.Replace("/^\\s*Blazor-Component-State:(?<state>[a-zA-Z0-9\\+\\/=]+)$/", @"/^[\t-\r \xA0\u1680\u2000-\u200A\u2028\u2029\u202F\u205F\u3000\uFEFF]*Blazor\x2DComponent\x2DState:([\+\/-9=A-Za-z]+)$/");
+
+        //                    js = js.Replace("/^\\s*Blazor:[^{]*(?<descriptor>.*)$/", @"/^[\t-\r \xA0\u1680\u2000-\u200A\u2028\u2029\u202F\u205F\u3000\uFEFF]*Blazor:(?:(?!\{)[\s\S])*(.*)$/");
+
+        //                    #endregion Patch Regex
+
+        //                    //Transpile code to ES5 for IE11 before manual patching
+        //                    js = Transform(js, "blazor.server.js", "{\"plugins\":[\"proposal-class-properties\",\"proposal-object-rest-spread\"],\"presets\":[[\"env\",{\"targets\":{\"browsers\":[\"ie 11\",\"Chrome 78\"]}}], \"es2015\",\"es2016\",\"es2017\",\"stage-3\"], \"sourceType\": \"script\"}");
+
+        //                    #region Regex named groups fix
+
+        //                    //At this point, Babel has unminified the code, and fixed IE11 issues, like 'import' method calls.
+
+        //                    //We still need to fix 'descriptor' regex evaluation code, as it was expecting a named capture group.
+        //                    js = Regex.Replace(js, "([a-zA-Z]+)(.groups[ ]*&&[ ]*[a-zA-Z]+.groups.descriptor)", "$1[1]");
+
+        //                    //We still need to fix 'state' regex evaluation code, as it was expecting a named capture group.
+        //                    js = Regex.Replace(js, "([a-zA-Z]+)(.groups[ ]*&&[ ]*[a-zA-Z]+.groups.state)", "$1[1]");
+
+        //                    #endregion Regex named groups fix
+
+        //                    //Minify with AjaxMin (we don't want an additional external tool with NPM or else for managing this
+        //                    //kind of thing here...
+        //                    js = Uglify.Js(js).Code;
+
+        //                    //Computing ETag. Should be computed last !
+        //                    string Etag = EtagGenerator.GenerateEtagFromString(js);
+
+        //                    //Computing Build time for the Last-Modified Http Header
+        //                    //We should rely on the creation date of the Microsoft API
+        //                    //not the Blazor.Polyfill.Server one as the Microsoft.AspNetCore.Components.Server
+        //                    //assembly may be updated in time. We will rely on the current creation/modification date on disk
+        //                    DateTime buildTime = GetAssemblyCreationDate(assembly);
+
+        //                    _patchedBlazorServerFile = new FileContentReference()
+        //                    {
+        //                        Value = js,
+        //                        ETag = Etag,
+        //                        LastModified = buildTime,
+        //                        ContentLength = System.Text.UTF8Encoding.UTF8.GetByteCount(js).ToString(CultureInfo.InvariantCulture)
+        //                    };
+        //                }
+        //            }
+        //        }
+        //    }
+
+        //    return _patchedBlazorServerFile;
+        //}
+
+        #endregion PATCHED ASPNETCORE-BROWSER-REFRESH.JS
 
         #region IE11 BLAZOR.POLYFILL.JS
 
