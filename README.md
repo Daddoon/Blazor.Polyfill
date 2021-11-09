@@ -14,7 +14,7 @@ Blazor server-side Polyfills and fixes for **Internet Explorer 11** & **Edge Leg
 
 # INSTALLATION
 
-- [.NET 5.0+](#net-50--net-60)
+- [.NET 5.0 / .NET 6.0](#net-50--net-60)
   - [Installation](#installation)
   - [(Optional) Javascript isolation & module import support](#optional-javascript-isolation--module-import-support)
   - [Additional options](#additional-options)
