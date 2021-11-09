@@ -3,17 +3,21 @@
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>5.0.102.0</Version>
+    <Version>6.0.100.0</Version>
     <Authors>Guillaume ZAHRA</Authors>
     <Company>Daddoon</Company>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <Description>Support of Blazor server-side for Internet Explorer 11, Edge Legacy and more on .NET 5.0.100</Description>
+    <Description>Support of Blazor server-side for Internet Explorer 11, Edge Legacy and more on .NET 6.0.100</Description>
     <PackageProjectUrl>https://github.com/Daddoon/Blazor.Polyfill</PackageProjectUrl>
     <PackageIcon>logo_blazorpolyfill_128.png</PackageIcon>
     <RepositoryType>Git</RepositoryType>
     <RepositoryUrl>https://github.com/Daddoon/Blazor.Polyfill</RepositoryUrl>
     <PackageTags>blazor blazor-server ie11 edgeHTML edge-legacy polyfill</PackageTags>
-    <PackageReleaseNotes>5.0.102.0:
+    <PackageReleaseNotes>
+6.0.100.0:
+- Support for .NET 6.0.100
+
+5.0.102.0:
 - Added option to disable automatic React.NET registration, to give more control to advanced scenarios.
 - Updated V8 and Native V8 dependencies to 7.1.0
 - Added V8 native dependencies for ARM64 (Linux) and ARM64 (Windows)
