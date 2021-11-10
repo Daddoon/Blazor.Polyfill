@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>6.0.100.0</Version>
+    <Version>6.0.100.1</Version>
     <Authors>Guillaume ZAHRA</Authors>
     <Company>Daddoon</Company>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
