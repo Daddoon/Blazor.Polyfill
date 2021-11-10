@@ -72,7 +72,7 @@ Blazor server-side Polyfills and fixes for **Internet Explorer 11** & **Edge Leg
         }
 ```
 
-- You are good to go ! Blazor server-side with .NET 5 should be able load on Internet Explorer 11 & Edge
+- You are good to go ! Blazor server-side with .NET 5 / .NET 6 should be able load on Internet Explorer 11 & Edge
 
 **NOTE:** blazor.polyfill.js content will be kind of empty automatically if the detected browser, through the user-agent, is something else than Internet Explorer or Edge Legacy.
 
