@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "abortcontroller-polyfill": "^1.4.0",
-    "core-js": "^3.8.2",
+    "core-js": "^3.19.1",
     "get-root-node-polyfill": "^1.0.0",
     "regenerator-runtime": "^0.13.9",
     "web-animations-js": "^2.3.2",

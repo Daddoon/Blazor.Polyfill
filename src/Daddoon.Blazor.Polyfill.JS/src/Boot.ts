@@ -1,4 +1,4 @@
-﻿/* BLAZOR.POLYFILL Version 5.0.100.1 */
+﻿/* BLAZOR.POLYFILL Version 6.0.100.1 */
 
 import 'core-js/stable';
 import "regenerator-runtime/runtime";

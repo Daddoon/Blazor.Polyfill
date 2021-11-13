@@ -11,7 +11,7 @@
     <iconUrl>https://raw.githubusercontent.com/Daddoon/Blazor.Polyfill/master/logo_blazorpolyfill_128.png</iconUrl>
     <requireLicenseAcceptance>true</requireLicenseAcceptance>
     <description>Build mechanism for Blazor.Polyfill if you intend to emulate the module import and javascript isolation in your project. This package will create a transpiled version of your javascript modules with babel and webpack, that must be loaded for your older browsers support. This must be referenced in your Blazor server web application project. Read the Blazor.Polyfill documentation for the usage and limitations.</description>
-    <releaseNotes>First release</releaseNotes>
+    <releaseNotes>Added support for webroot path parameter in the es5 emulation API</releaseNotes>
     <copyright>Copyright 2021</copyright>
     <tags>Blazor Blazor.Polyfill ie11 edge es5 module import</tags>
     <dependencies></dependencies>
@@ -20,6 +20,6 @@
     <file src="lib/netstandard2.0/_._" target="lib/netstandard2.0/_._" />
     <file src="build/netstandard2.0/BlazorPolyfill.Build.targets" target="build/netstandard2.0/BlazorPolyfill.Build.targets" />
     <file src="tools/GenerateBlazorPolyfillBuild.targets" target="tools/GenerateBlazorPolyfillBuild.targets" />
-    <file src="tools/net5.0/**/*" target="/" />
+    <file src="tools/net5.0/**/*" target="tools/net5.0/" />
   </files>
 </package>

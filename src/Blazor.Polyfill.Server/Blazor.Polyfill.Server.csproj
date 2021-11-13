@@ -14,6 +14,9 @@
     <RepositoryUrl>https://github.com/Daddoon/Blazor.Polyfill</RepositoryUrl>
     <PackageTags>blazor blazor-server ie11 edgeHTML edge-legacy polyfill</PackageTags>
     <PackageReleaseNotes>
+6.0.100.1:
+- Added 'webRootPath' parameter on _import_ javascript isolation emulation method. See the documentation for usage.
+
 6.0.100.0:
 - Support for .NET 6.0.100
 
