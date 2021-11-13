@@ -119,6 +119,22 @@ Here are the step to install it:
   var module = await js.InvokeAsync<IJSObjectReference>(
     "_import_", "/js/modules/exampleJsInterop.js");
   ```
+  
+  **However** due to some context limitation, the **\_import\_** may fail if the current app root path you are targeting is not a rooted URL.
+  This mean:
+  
+  - This should work by default: https://127.0.0.1/[blazorpage]
+  - This should not work by default: https://127.0.0.1/myotherapp/managingsomeurl/[blazorpage]
+
+  In order to workaround this limitation, you may have to compute the relative path by yourself in C# before calling \_import\_, and give it in addition, as a second parameter, the webRootPath.
+  For our second URL example, https://127.0.0.1/myotherapp/managingsomeurl/[blazorpage], this would be instead:
+  
+  ```razor
+  var module = await js.InvokeAsync<IJSObjectReference>(
+    "_import_", "/js/modules/exampleJsInterop.js", "/myotherapp/managingsomeurl/");
+  ```
+  
+  You should find some hint with the **NavigationManager.BaseURI** service / property.
 
   See the Microsoft documentation for the Blazor API usage.
 
