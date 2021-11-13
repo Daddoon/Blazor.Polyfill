@@ -72,7 +72,7 @@
   </Target>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="set nugetVersion=5.0.100.6&#xD;&#xA;echo NuGet artifact version is: %25nugetVersion%25&#xD;&#xA;&#xD;&#xA;nuget pack .\Blazor.Polyfill.Build.nuspec -Version &quot;%25nugetVersion%25&quot; -OutputDirectory .\artifacts&#xD;&#xA;" />
+    <Exec Command="set nugetVersion=6.0.100.1&#xD;&#xA;echo NuGet artifact version is: %25nugetVersion%25&#xD;&#xA;&#xD;&#xA;nuget pack .\Blazor.Polyfill.Build.nuspec -Version &quot;%25nugetVersion%25&quot; -OutputDirectory .\artifacts&#xD;&#xA;" />
   </Target>
 
 </Project>
