@@ -1,6 +1,8 @@
 "use strict";
-/* BLAZOR.POLYFILL Version 6.0.100.1 */
+/* BLAZOR.POLYFILL Version 6.0.100.2 */
 Object.defineProperty(exports, "__esModule", { value: true });
+//Polyfill for Object.assign on IE (used for SyncFusion)
+require("../src/assign.polyfill.js");
 require("core-js/stable");
 require("regenerator-runtime/runtime");
 require("web-animations-js");

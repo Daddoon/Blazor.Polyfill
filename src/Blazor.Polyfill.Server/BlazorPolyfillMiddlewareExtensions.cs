@@ -13,6 +13,7 @@ using React;
 using React.AspNet;
 using React.Exceptions;
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -255,6 +256,28 @@ namespace Blazor.Polyfill.Server
                 });
             });
 
+
+            foreach (string customES5Path in options.CustomES5PathList)
+            {
+                //BrowserNeedES5Fallback is written hiere and not in the builder
+                //because we only want to use MapWhen when we need ES5 fallback.
+                //If this is false, the request will be redirected to the Microsoft
+                //default request management for this file.
+                builder.MapWhen(ctx =>
+                ctx.Request.BrowserNeedES5Fallback()
+                && ctx.Request.Path.StartsWithSegments(customES5Path.TrimEnd('/')) //In case user write it as /this/, StartWithSegments will be true only if /this is written
+                && ctx.Request.Path.HasValue
+                && ctx.Request.Path.Value.EndsWith(".js"),
+                subBuilder =>
+                {
+                    subBuilder.Run(async (context) =>
+                    {
+                        var fileContent = ConvertToES5((string)context.Request.Path.Value);
+                        await HttpRequestManager.ManageRequest(context, fileContent);
+                    });
+                });
+            }
+                
             return builder;
         }
 
@@ -302,6 +325,52 @@ namespace Blazor.Polyfill.Server
 
             return str;
         }
+
+        #region ConvertToES5
+
+        private static Dictionary<string, FileContentReference> _CustomES5Cache = new Dictionary<string, FileContentReference>();
+
+        private static FileContentReference ConvertToES5(string filePath)
+        {
+            if (_CustomES5Cache.ContainsKey(filePath))
+            {
+                return _CustomES5Cache[filePath];
+            }
+
+            //TODO: Manage Invalid or 404
+            //TODO: Seek wwwroot from environment (same for fallback on Azure) => https://stackoverflow.com/questions/32198371/get-wwwroot-folder-path-from-asp-net-5-controller-vs-2015
+
+
+            //HACK JUST FOR DEBUG => TO REMOVE
+            string physicalPath = System.IO.Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", filePath.TrimStart('/'));
+
+            string js = File.ReadAllText(physicalPath);
+            DateTime lastModifiedTime = File.GetLastWriteTime(physicalPath);
+
+
+            //Transpile code to ES5 for IE11
+            js = Transform(js, Path.GetFileName(physicalPath), "{\"plugins\":[\"proposal-class-properties\",\"proposal-object-rest-spread\"],\"presets\":[[\"env\",{\"targets\":{\"browsers\":[\"ie 11\",\"Chrome 78\"]}}], \"es2015\",\"es2016\",\"es2017\",\"stage-3\"], \"sourceType\": \"script\"}");
+
+            //Minify with AjaxMin (we don't want an additional external tool with NPM or else for managing this
+            //kind of thing here...
+            js = Uglify.Js(js).Code;
+
+            //Computing ETag. Should be computed last !
+            string Etag = EtagGenerator.GenerateEtagFromString(js);
+
+            FileContentReference _patchedDynamicFile = new FileContentReference()
+            {
+                Value = js,
+                ETag = Etag,
+                LastModified = lastModifiedTime,
+                ContentLength = System.Text.UTF8Encoding.UTF8.GetByteCount(js).ToString(CultureInfo.InvariantCulture)
+            };
+
+            _CustomES5Cache.Add(filePath, _patchedDynamicFile);
+            return _patchedDynamicFile;
+        }
+
+        #endregion ConvertToES5
 
         #region PATCHED BLAZOR.SERVER.JS
 

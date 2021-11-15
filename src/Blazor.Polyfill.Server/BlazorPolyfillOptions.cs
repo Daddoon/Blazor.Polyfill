@@ -31,6 +31,7 @@ namespace Blazor.Polyfill.Server
             ES5FallbackValidation = null;
             JavascriptModuleImportEmulation = false;
             JavascriptModuleImportEmulationLibraryPath = DefaultJSModuleImportEmulationLibraryPath;
+            CustomES5PathList = new List<string>();
         }
 
         /// <summary>
@@ -80,5 +81,12 @@ namespace Blazor.Polyfill.Server
         /// platform or having issue with it, typically like ARM32v7 OS's.
         /// </summary>
         public bool UsePackagedBlazorServerLibrary { get; set; }
+
+        /// <summary>
+        /// A list of JS absolute path for your app that need to be transpiled to ES5 when fetched.
+        /// This usage can workaround some third party JS libraries that are not directly compliant to ES6 that would return
+        /// from a server request.
+        /// </summary>
+        public List<string> CustomES5PathList { get; set; }
     }
 }

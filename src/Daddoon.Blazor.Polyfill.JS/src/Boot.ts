@@ -1,4 +1,7 @@
-﻿/* BLAZOR.POLYFILL Version 6.0.100.1 */
+﻿/* BLAZOR.POLYFILL Version 6.0.100.2 */
+
+//Polyfill for Object.assign on IE (used for SyncFusion)
+import '../src/assign.polyfill.js';
 
 import 'core-js/stable';
 import "regenerator-runtime/runtime";

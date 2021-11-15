@@ -90,6 +90,13 @@
             platform or having issue with it, typically like ARM32v7 OS's.
             </summary>
         </member>
+        <member name="P:Blazor.Polyfill.Server.BlazorPolyfillOptions.CustomES5PathList">
+            <summary>
+            A list of JS absolute path for your app that need to be transpiled to ES5 when fetched.
+            This usage can workaround some third party JS libraries that are not directly compliant to ES6 that would return
+            from a server request.
+            </summary>
+        </member>
         <member name="M:Blazor.Polyfill.Server.HttpRequestExtensions.IsInternetExplorer(Microsoft.AspNetCore.Http.HttpRequest)">
             <summary>
             If Internet Explorer is detected, return true
