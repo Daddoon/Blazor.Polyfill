@@ -16,16 +16,48 @@ namespace Blazor.Polyfill.Server
         internal static async Task ManageRequest(HttpContext context, FileContentReference fileContent, string contentType = "application/javascript")
         {
             context.Response.ContentType = contentType;
-            context.Response.Headers.Append(HeaderNames.CacheControl, "no-cache");
-            context.Response.Headers.Append(HeaderNames.LastModified, fileContent.LastModified.ToString("r"));
-            context.Response.Headers.Append(HeaderNames.ETag, fileContent.ETag);
+            if (!context.Response.Headers.ContainsKey(HeaderNames.CacheControl))
+            {
+                context.Response.Headers.Append(HeaderNames.CacheControl, "no-cache");
+            }
+            else
+            {
+                context.Response.Headers[HeaderNames.CacheControl] = "no-cache";
+            }
+
+            //We will try to only rely on ETag checksum
+            //if (!context.Response.Headers.ContainsKey(HeaderNames.LastModified))
+            //{
+            //    context.Response.Headers.Append(HeaderNames.LastModified, fileContent.LastModified.ToString("r"));
+            //}
+            //else
+            //{
+            //    context.Response.Headers[HeaderNames.LastModified] = fileContent.LastModified.ToString("r");
+            //}
+
+            if (!context.Response.Headers.ContainsKey(HeaderNames.ETag))
+            {
+                context.Response.Headers.Append(HeaderNames.ETag, fileContent.ETag);
+            }
+            else
+            {
+                context.Response.Headers[HeaderNames.ETag] = fileContent.ETag;
+            }
 
             //In this case we should return the entire response
             if (RequestHasTheNoCacheHeaderSet(context.Request)
             || RequestHasNoCachingFeatureSet(context.Request)
             || RequestHasCacheFeaturesExpired(context.Request, fileContent))
             {
-                context.Response.Headers.Append(HeaderNames.ContentLength, fileContent.ContentLength);
+                if (!context.Response.Headers.ContainsKey(HeaderNames.ContentLength))
+                {
+                    context.Response.Headers.Append(HeaderNames.ContentLength, fileContent.ContentLength);
+                }
+                else
+                {
+                    context.Response.Headers[HeaderNames.ContentLength] = fileContent.ContentLength;
+                }
+
                 context.Response.StatusCode = (int)HttpStatusCode.OK;
                 await context.Response.WriteAsync(fileContent.Value);
             }

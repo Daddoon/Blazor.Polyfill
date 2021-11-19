@@ -1,4 +1,5 @@
-﻿using Blazor.Polyfill.Server.Model;
+﻿using Blazor.Polyfill.Server.Middleware;
+using Blazor.Polyfill.Server.Model;
 using JavaScriptEngineSwitcher.ChakraCore;
 using JavaScriptEngineSwitcher.Extensions.MsDependencyInjection;
 using JavaScriptEngineSwitcher.V8;
@@ -217,6 +218,9 @@ namespace Blazor.Polyfill.Server
                 return next();
             });
 
+            //This is used in order to transpile dynamically StaticFiles to ES5 when needed
+            builder.UseMiddleware<ECMAScript5Middleware>();
+
             //BrowserNeedES5Fallback is written hiere and not in the builder
             //because we only want to use MapWhen when we need ES5 fallback.
             //If this is false, the request will be redirected to the Microsoft
@@ -308,7 +312,16 @@ namespace Blazor.Polyfill.Server
             }
         }
 
-        private static string Transform(string input, string filename, string babelrcJSON)
+        /// <summary>
+        /// Transform the current JS input to an ES5 compliant JS code thanks to Babel through ReactNET.
+        /// TODO: Move this method in an helper
+        /// </summary>
+        /// <param name="input"></param>
+        /// <param name="filename"></param>
+        /// <param name="babelrcJSON"></param>
+        /// <returns></returns>
+        /// <exception cref="BabelException"></exception>
+        internal static string Transform(string input, string filename, string babelrcJSON)
         {
             string str;
             try
@@ -723,7 +736,7 @@ namespace Blazor.Polyfill.Server
 
         #endregion IE11 BLAZOR.POLYFILL.JS
 
-        private static DateTime GetBlazorPolyfillServerBuildDate()
+        internal static DateTime GetBlazorPolyfillServerBuildDate()
         {
             //This class Assembly
             var thisAssembly = GetBlazorPolyfillAssembly();
@@ -734,8 +747,15 @@ namespace Blazor.Polyfill.Server
 
         #region ASSEMBLY RELATED
 
-        public static DateTime GetAssemblyCreationDate(Assembly assembly)
+        private static DateTime? _assemblyCreationDate = null;
+
+        internal static DateTime GetAssemblyCreationDate(Assembly assembly)
         {
+            if (_assemblyCreationDate != null)
+            {
+                return (DateTime)_assemblyCreationDate;
+            }
+
             if (assembly == null)
             {
                 throw new NullReferenceException(nameof(assembly));
@@ -752,7 +772,9 @@ namespace Blazor.Polyfill.Server
                     throw new InvalidOperationException($"Unable to stat '{assembly.GetName()}' assembly file. Check file existence at this location and permissions");
                 }
 
-                return fi.LastWriteTime != DateTime.MinValue ? fi.LastWriteTime : fi.CreationTime;
+                _assemblyCreationDate = fi.LastWriteTime != DateTime.MinValue ? fi.LastWriteTime : fi.CreationTime;
+
+                return (DateTime)_assemblyCreationDate;
             }
             catch (Exception)
             {

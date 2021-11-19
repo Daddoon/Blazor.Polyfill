@@ -31,6 +31,17 @@
             <param name="services"></param>
             <returns></returns>
         </member>
+        <member name="M:Blazor.Polyfill.Server.BlazorPolyfillMiddlewareExtensions.Transform(System.String,System.String,System.String)">
+            <summary>
+            Transform the current JS input to an ES5 compliant JS code thanks to Babel through ReactNET.
+            TODO: Move this method in an helper
+            </summary>
+            <param name="input"></param>
+            <param name="filename"></param>
+            <param name="babelrcJSON"></param>
+            <returns></returns>
+            <exception cref="T:React.Exceptions.BabelException"></exception>
+        </member>
         <member name="F:Blazor.Polyfill.Server.BlazorPolyfillMiddlewareExtensions._fakeie11Polyfill">
             <summary>
             Used to return an empty file but hashed with some dummy valid values in order to generate a usable Hash/ETag for browser caching
@@ -97,6 +108,14 @@
             from a server request.
             </summary>
         </member>
+        <member name="M:Blazor.Polyfill.Server.Helper.CryptographyHelper.CreateMD5(System.String)">
+            <summary>
+            Get MD5 from string content
+            Source: https://stackoverflow.com/a/24031467
+            </summary>
+            <param name="input"></param>
+            <returns></returns>
+        </member>
         <member name="M:Blazor.Polyfill.Server.HttpRequestExtensions.IsInternetExplorer(Microsoft.AspNetCore.Http.HttpRequest)">
             <summary>
             If Internet Explorer is detected, return true
@@ -131,6 +150,22 @@
             </summary>
             <param name="request"></param>
             <returns></returns>
+        </member>
+        <member name="T:Blazor.Polyfill.Server.Middleware.ECMAScript5Middleware">
+            <summary>
+            Inspiration from:
+            This: https://github.com/saturn72/tethys/blob/851ac6d6235c5e2d2f62c3d4343b8e862062a3c2/src/Tethys.Server/Middlewares/RequestResponseLoggingMiddleware.cs
+            Linking this: https://www.carlrippon.com/adding-useful-information-to-asp-net-core-web-api-serilog-logs/
+            </summary>
+        </member>
+        <member name="M:Blazor.Polyfill.Server.Middleware.ECMAScript5Middleware.CopyStreamAsync(System.IO.Stream,System.IO.Stream)">
+            <summary>
+            Like copy stream but with automatic Seek Handling.
+            Assuming the Source can be read
+            Return the Destination Stream
+            </summary>
+            <param name="source"></param>
+            <param name="destination"></param>
         </member>
         <member name="T:Blazor.Polyfill.Server.Model.FileContentReference">
             <summary>

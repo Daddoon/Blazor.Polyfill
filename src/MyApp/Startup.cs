@@ -50,9 +50,8 @@ namespace MyApp
                 options.JavascriptModuleImportEmulation = true;
                 options.JavascriptModuleImportEmulationLibraryPath = "/es5module.min.js";
             });
-            //app.UseBlazorPolyfill();
-            app.UseStaticFiles();
 
+            app.UseStaticFiles();
 
             app.UseRouting();
 
