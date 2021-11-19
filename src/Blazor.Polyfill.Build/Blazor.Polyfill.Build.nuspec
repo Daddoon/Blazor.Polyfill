@@ -20,6 +20,6 @@
     <file src="lib/netstandard2.0/_._" target="lib/netstandard2.0/_._" />
     <file src="build/netstandard2.0/BlazorPolyfill.Build.targets" target="build/netstandard2.0/BlazorPolyfill.Build.targets" />
     <file src="tools/GenerateBlazorPolyfillBuild.targets" target="tools/GenerateBlazorPolyfillBuild.targets" />
-    <file src="tools/net5.0/**/*" target="tools/net5.0/" />
+    <file src="tools/net6.0/**/*" target="tools/net6.0/" />
   </files>
 </package>

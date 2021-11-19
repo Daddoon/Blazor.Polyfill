@@ -71,9 +71,54 @@ require("get-root-node-polyfill/implement");
         }
         return false;
     }
+    function findBlazorServerJSNode() {
+        var scriptNodes = window.document.getElementsByTagName("script");
+        for (var i = 0; i < scriptNodes.length; i++) {
+            var currentNode = scriptNodes[i];
+            if (currentNode.attributes !== undefined
+                && currentNode.attributes !== null) {
+                for (var j = 0; j < currentNode.attributes.length; j++) {
+                    var currentAttribute = currentNode.attributes[j];
+                    if (currentAttribute.name.toLowerCase() == "src"
+                        && currentAttribute.value.toLowerCase() == "_framework/blazor.server.js") {
+                        return currentNode;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+    function getBlazorServerJSNodeAutoStartValue() {
+        var blazorServerNode = findBlazorServerJSNode();
+        if (blazorServerNode === null) {
+            //Unlikely. Must return autostart to true in this case
+            return true;
+        }
+        if (blazorServerNode.attributes !== undefined
+            && blazorServerNode.attributes !== null) {
+            for (var j = 0; j < blazorServerNode.attributes.length; j++) {
+                var currentAttribute = blazorServerNode.attributes[j];
+                if (currentAttribute.name.toLowerCase() == "autostart") {
+                    if (currentAttribute.value.toLowerCase() === "false") {
+                        return false;
+                    }
+                    //If any other value assuming true.
+                    break;
+                }
+            }
+        }
+        //Here if we don't have found any attribute or autostart attribute on the node or if the node is any other value than false
+        return true;
+    }
     function forceBlazorLoadOnIE(counter) {
         if (BlazorObjectIsFound()) {
-            Blazor.start();
+            //Actually we will do nothing if the "autostart" attribute is present and set to false on the blazor.server.js tag
+            //But due to the lack of currentScript on IE for blazor.server.js, we must wait here first in order to find when the Blazor object
+            //is available in order to enforce or not the autostart behavior
+            if (getBlazorServerJSNodeAutoStartValue()) {
+                Blazor.start();
+            }
+            //Nothing to do if the AutoStartValue returned false;
         }
         else if (counter <= 200) {
             window.setTimeout(function () {
