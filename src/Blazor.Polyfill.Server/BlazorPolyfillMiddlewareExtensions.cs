@@ -1,4 +1,5 @@
-﻿using Blazor.Polyfill.Server.Middleware;
+﻿using Blazor.Polyfill.Server.Helper;
+using Blazor.Polyfill.Server.Middleware;
 using Blazor.Polyfill.Server.Model;
 using JavaScriptEngineSwitcher.ChakraCore;
 using JavaScriptEngineSwitcher.Extensions.MsDependencyInjection;
@@ -226,8 +227,7 @@ namespace Blazor.Polyfill.Server
             //If this is false, the request will be redirected to the Microsoft
             //default request management for this file.
             builder.MapWhen(ctx =>
-            ctx.Request.Path.StartsWithSegments("/_framework")
-            && ctx.Request.Path.StartsWithSegments("/_framework/blazor.server.js")
+            ECMAScript5Middleware.RequestedFileIsBlazorServerJS(ctx.Request)
             && ctx.Request.BrowserNeedES5Fallback(),
             subBuilder =>
             {
@@ -243,44 +243,18 @@ namespace Blazor.Polyfill.Server
             //we should intercept them at any time with MapWhen, but change the result
             //behavior lately in the builder. Otherwise this would return a 404 error.
             builder.MapWhen(ctx =>
-            ctx.Request.Path.StartsWithSegments("/_framework")
-            && (
-                ctx.Request.Path.StartsWithSegments("/_framework/blazor.polyfill.js")
-                || ctx.Request.Path.StartsWithSegments("/_framework/blazor.polyfill.min.js")
-            ),
+            ECMAScript5Middleware.RequestedFileIsBlazorPolyfill(ctx.Request, out bool isMinified),
             subBuilder =>
             {
                 subBuilder.Run(async (context) =>
                 {
-                    //Eval if the requested file is the minified version or not
-                    bool isMinified = context.Request.Path.StartsWithSegments("/_framework/blazor.polyfill.min.js");
+                    ECMAScript5Middleware.RequestedFileIsBlazorPolyfill(context.Request, out bool isMinified);
 
+                    //Eval if the requested file is the minified version or not
                     var fileContent = GetBlazorPolyfillFile(context.Request.BrowserNeedES5Fallback(), isMinified);
                     await HttpRequestManager.ManageRequest(context, fileContent);
                 });
             });
-
-
-            foreach (string customES5Path in options.CustomES5PathList)
-            {
-                //BrowserNeedES5Fallback is written hiere and not in the builder
-                //because we only want to use MapWhen when we need ES5 fallback.
-                //If this is false, the request will be redirected to the Microsoft
-                //default request management for this file.
-                builder.MapWhen(ctx =>
-                ctx.Request.BrowserNeedES5Fallback()
-                && ctx.Request.Path.StartsWithSegments(customES5Path.TrimEnd('/')) //In case user write it as /this/, StartWithSegments will be true only if /this is written
-                && ctx.Request.Path.HasValue
-                && ctx.Request.Path.Value.EndsWith(".js"),
-                subBuilder =>
-                {
-                    subBuilder.Run(async (context) =>
-                    {
-                        var fileContent = ConvertToES5((string)context.Request.Path.Value);
-                        await HttpRequestManager.ManageRequest(context, fileContent);
-                    });
-                });
-            }
                 
             return builder;
         }
@@ -312,79 +286,6 @@ namespace Blazor.Polyfill.Server
             }
         }
 
-        /// <summary>
-        /// Transform the current JS input to an ES5 compliant JS code thanks to Babel through ReactNET.
-        /// TODO: Move this method in an helper
-        /// </summary>
-        /// <param name="input"></param>
-        /// <param name="filename"></param>
-        /// <param name="babelrcJSON"></param>
-        /// <returns></returns>
-        /// <exception cref="BabelException"></exception>
-        internal static string Transform(string input, string filename, string babelrcJSON)
-        {
-            string str;
-            try
-            {
-                object[] args = new object[] { input, babelrcJSON, filename };
-
-                var env = React.AssemblyRegistration.Container.Resolve<IReactEnvironment>();
-                str = env.ExecuteWithBabel<string>("ReactNET_transform", args);
-            }
-            catch (Exception exception)
-            {
-                throw new BabelException(exception.Message, exception);
-            }
-
-            return str;
-        }
-
-        #region ConvertToES5
-
-        private static Dictionary<string, FileContentReference> _CustomES5Cache = new Dictionary<string, FileContentReference>();
-
-        private static FileContentReference ConvertToES5(string filePath)
-        {
-            if (_CustomES5Cache.ContainsKey(filePath))
-            {
-                return _CustomES5Cache[filePath];
-            }
-
-            //TODO: Manage Invalid or 404
-            //TODO: Seek wwwroot from environment (same for fallback on Azure) => https://stackoverflow.com/questions/32198371/get-wwwroot-folder-path-from-asp-net-5-controller-vs-2015
-
-
-            //HACK JUST FOR DEBUG => TO REMOVE
-            string physicalPath = System.IO.Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", filePath.TrimStart('/'));
-
-            string js = File.ReadAllText(physicalPath);
-            DateTime lastModifiedTime = File.GetLastWriteTime(physicalPath);
-
-
-            //Transpile code to ES5 for IE11
-            js = Transform(js, Path.GetFileName(physicalPath), "{\"plugins\":[\"proposal-class-properties\",\"proposal-object-rest-spread\"],\"presets\":[[\"env\",{\"targets\":{\"browsers\":[\"ie 11\",\"Chrome 78\"]}}], \"es2015\",\"es2016\",\"es2017\",\"stage-3\"], \"sourceType\": \"script\"}");
-
-            //Minify with AjaxMin (we don't want an additional external tool with NPM or else for managing this
-            //kind of thing here...
-            js = Uglify.Js(js).Code;
-
-            //Computing ETag. Should be computed last !
-            string Etag = EtagGenerator.GenerateEtagFromString(js);
-
-            FileContentReference _patchedDynamicFile = new FileContentReference()
-            {
-                Value = js,
-                ETag = Etag,
-                LastModified = lastModifiedTime,
-                ContentLength = System.Text.UTF8Encoding.UTF8.GetByteCount(js).ToString(CultureInfo.InvariantCulture)
-            };
-
-            _CustomES5Cache.Add(filePath, _patchedDynamicFile);
-            return _patchedDynamicFile;
-        }
-
-        #endregion ConvertToES5
-
         #region PATCHED BLAZOR.SERVER.JS
 
         private static FileContentReference _patchedBlazorServerFile = null;
@@ -409,12 +310,9 @@ namespace Blazor.Polyfill.Server
                         {
                             string js = reader.ReadToEnd();
 
-                            string Etag = EtagGenerator.GenerateEtagFromString(js);
+                            string Etag = CryptographyHelper.CreateSHA256(js);
 
-                            //Computing Build time for the Last-Modified Http Header
-                            //We should rely on the creation date of the Microsoft API
-                            //not the Blazor.Polyfill.Server one as the Microsoft.AspNetCore.Components.Server
-                            //assembly may be updated in time. We will rely on the current creation/modification date on disk
+                            //We should rely on ETag and not on LastModifed informations
                             DateTime buildTime = GetAssemblyCreationDate(assembly);
 
                             _patchedBlazorServerFile = new FileContentReference()
@@ -453,7 +351,7 @@ namespace Blazor.Polyfill.Server
                             #endregion Patch Regex
 
                             //Transpile code to ES5 for IE11 before manual patching
-                            js = Transform(js, "blazor.server.js", "{\"plugins\":[\"proposal-class-properties\",\"proposal-object-rest-spread\"],\"presets\":[[\"env\",{\"targets\":{\"browsers\":[\"ie 11\",\"Chrome 78\"]}}], \"es2015\",\"es2016\",\"es2017\",\"stage-3\"], \"sourceType\": \"script\"}");
+                            js = BabelHelper.Transform(js, "blazor.server.js");
 
                             #region Regex named groups fix
 
@@ -472,7 +370,7 @@ namespace Blazor.Polyfill.Server
                             js = Uglify.Js(js).Code;
 
                             //Computing ETag. Should be computed last !
-                            string Etag = EtagGenerator.GenerateEtagFromString(js);
+                            string Etag = CryptographyHelper.CreateSHA256(js);
 
                             //Computing Build time for the Last-Modified Http Header
                             //We should rely on the creation date of the Microsoft API
@@ -496,118 +394,6 @@ namespace Blazor.Polyfill.Server
         }
 
         #endregion PATCHED BLAZOR.SERVER.JS
-
-        #region PATCHED ASPNETCORE-BROWSER-REFRESH.JS
-
-        //private static FileContentReference _patchedAspNetCoreBrowserRefreshFile = null;
-
-        //private static FileContentReference GetPatchedAspNetCoreBrowserRefreshFile()
-        //{
-        //    if (_patchedAspNetCoreBrowserRefreshFile == null)
-        //    {
-        //        BlazorPolyfillOptions option = GetOptions();
-
-        //        if (option.UsePackagedBlazorServerLibrary)
-        //        {
-        //            //Get packaged blazor.server.js
-        //            var assembly = GetBlazorPolyfillAssembly();
-
-        //            var resources = assembly.GetManifestResourceNames();
-        //            var resourceName = resources.Single(str => str.EndsWith("blazor.server.packaged.js"));
-
-        //            using (Stream stream = assembly.GetManifestResourceStream(resourceName))
-        //            {
-        //                using (StreamReader reader = new StreamReader(stream))
-        //                {
-        //                    string js = reader.ReadToEnd();
-
-        //                    string Etag = EtagGenerator.GenerateEtagFromString(js);
-
-        //                    //Computing Build time for the Last-Modified Http Header
-        //                    //We should rely on the creation date of the Microsoft API
-        //                    //not the Blazor.Polyfill.Server one as the Microsoft.AspNetCore.Components.Server
-        //                    //assembly may be updated in time. We will rely on the current creation/modification date on disk
-        //                    DateTime buildTime = GetAssemblyCreationDate(assembly);
-
-        //                    _patchedBlazorServerFile = new FileContentReference()
-        //                    {
-        //                        Value = js,
-        //                        ETag = Etag,
-        //                        LastModified = buildTime,
-        //                        ContentLength = System.Text.UTF8Encoding.UTF8.GetByteCount(js).ToString(CultureInfo.InvariantCulture)
-        //                    };
-        //                }
-        //            }
-        //        }
-        //        else
-        //        {
-        //            var assembly = GetAspNetCoreComponentsServerAssembly();
-
-        //            var resources = assembly.GetManifestResourceNames();
-        //            var resourceName = resources.Single(str => str.EndsWith("blazor.server.js"));
-
-        //            using (Stream stream = assembly.GetManifestResourceStream(resourceName))
-        //            {
-        //                using (StreamReader reader = new StreamReader(stream))
-        //                {
-        //                    string js = reader.ReadToEnd();
-
-
-        //                    #region Patch Regex
-
-        //                    //Patch Descriptor Regex as it make Babel crash during transform
-        //                    js = js.Replace("/\\W*Blazor:[^{]*(?<descriptor>.*)$/;", @"/[\0-\/:-@\[-\^`\{-\uFFFF]*Blazor:(?:(?!\{)[\s\S])*(.*)$/;");
-
-        //                    js = js.Replace("/^\\s*Blazor-Component-State:(?<state>[a-zA-Z0-9\\+\\/=]+)$/", @"/^[\t-\r \xA0\u1680\u2000-\u200A\u2028\u2029\u202F\u205F\u3000\uFEFF]*Blazor\x2DComponent\x2DState:([\+\/-9=A-Za-z]+)$/");
-
-        //                    js = js.Replace("/^\\s*Blazor:[^{]*(?<descriptor>.*)$/", @"/^[\t-\r \xA0\u1680\u2000-\u200A\u2028\u2029\u202F\u205F\u3000\uFEFF]*Blazor:(?:(?!\{)[\s\S])*(.*)$/");
-
-        //                    #endregion Patch Regex
-
-        //                    //Transpile code to ES5 for IE11 before manual patching
-        //                    js = Transform(js, "blazor.server.js", "{\"plugins\":[\"proposal-class-properties\",\"proposal-object-rest-spread\"],\"presets\":[[\"env\",{\"targets\":{\"browsers\":[\"ie 11\",\"Chrome 78\"]}}], \"es2015\",\"es2016\",\"es2017\",\"stage-3\"], \"sourceType\": \"script\"}");
-
-        //                    #region Regex named groups fix
-
-        //                    //At this point, Babel has unminified the code, and fixed IE11 issues, like 'import' method calls.
-
-        //                    //We still need to fix 'descriptor' regex evaluation code, as it was expecting a named capture group.
-        //                    js = Regex.Replace(js, "([a-zA-Z]+)(.groups[ ]*&&[ ]*[a-zA-Z]+.groups.descriptor)", "$1[1]");
-
-        //                    //We still need to fix 'state' regex evaluation code, as it was expecting a named capture group.
-        //                    js = Regex.Replace(js, "([a-zA-Z]+)(.groups[ ]*&&[ ]*[a-zA-Z]+.groups.state)", "$1[1]");
-
-        //                    #endregion Regex named groups fix
-
-        //                    //Minify with AjaxMin (we don't want an additional external tool with NPM or else for managing this
-        //                    //kind of thing here...
-        //                    js = Uglify.Js(js).Code;
-
-        //                    //Computing ETag. Should be computed last !
-        //                    string Etag = EtagGenerator.GenerateEtagFromString(js);
-
-        //                    //Computing Build time for the Last-Modified Http Header
-        //                    //We should rely on the creation date of the Microsoft API
-        //                    //not the Blazor.Polyfill.Server one as the Microsoft.AspNetCore.Components.Server
-        //                    //assembly may be updated in time. We will rely on the current creation/modification date on disk
-        //                    DateTime buildTime = GetAssemblyCreationDate(assembly);
-
-        //                    _patchedBlazorServerFile = new FileContentReference()
-        //                    {
-        //                        Value = js,
-        //                        ETag = Etag,
-        //                        LastModified = buildTime,
-        //                        ContentLength = System.Text.UTF8Encoding.UTF8.GetByteCount(js).ToString(CultureInfo.InvariantCulture)
-        //                    };
-        //                }
-        //            }
-        //        }
-        //    }
-
-        //    return _patchedBlazorServerFile;
-        //}
-
-        #endregion PATCHED ASPNETCORE-BROWSER-REFRESH.JS
 
         #region IE11 BLAZOR.POLYFILL.JS
 
@@ -637,7 +423,7 @@ namespace Blazor.Polyfill.Server
                             string js = reader.ReadToEnd();
 
                             //Computing ETag. Should be computed last !
-                            string Etag = EtagGenerator.GenerateEtagFromString(js);
+                            string Etag = CryptographyHelper.CreateSHA256(js);
 
                             //Computing Build time for the Last-Modified Http Header
                             DateTime buildTime = GetBlazorPolyfillServerBuildDate();
@@ -676,7 +462,7 @@ namespace Blazor.Polyfill.Server
                                 js = GetOptions().GetJavascriptToInject() + js;
 
                                 //Computing ETag. Should be computed last !
-                                string Etag = EtagGenerator.GenerateEtagFromString(js);
+                                string Etag = CryptographyHelper.CreateSHA256(js);
 
                                 //Computing Build time for the Last-Modified Http Header
                                 DateTime buildTime = GetBlazorPolyfillServerBuildDate();
@@ -713,7 +499,7 @@ namespace Blazor.Polyfill.Server
                                 js = GetOptions().GetJavascriptToInject() + js;
 
                                 //Computing ETag. Should be computed last !
-                                string Etag = EtagGenerator.GenerateEtagFromString(js);
+                                string Etag = CryptographyHelper.CreateSHA256(js);
 
                                 //Computing Build time for the Last-Modified Http Header
                                 DateTime buildTime = GetBlazorPolyfillServerBuildDate();

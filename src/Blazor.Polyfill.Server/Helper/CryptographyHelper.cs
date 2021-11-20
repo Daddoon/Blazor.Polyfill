@@ -1,34 +1,36 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Blazor.Polyfill.Server.Helper
 {
     internal class CryptographyHelper
     {
         /// <summary>
-        /// Get MD5 from string content
-        /// Source: https://stackoverflow.com/a/24031467
+        /// Get SHA256 from string content
+        /// https://docs.microsoft.com/fr-fr/dotnet/api/system.security.cryptography.hashalgorithm.computehash?view=net-6.0
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
-        public static string CreateMD5(string input)
+        public static string CreateSHA256(string input)
         {
-            // Use input string to calculate MD5 hash
-            using (System.Security.Cryptography.MD5 md5 = System.Security.Cryptography.MD5.Create())
+            using (SHA256 sha256Hash = SHA256.Create())
             {
-                byte[] inputBytes = System.Text.Encoding.ASCII.GetBytes(input);
-                byte[] hashBytes = md5.ComputeHash(inputBytes);
+                // Convert the input string to a byte array and compute the hash.
+                byte[] data = sha256Hash.ComputeHash(Encoding.UTF8.GetBytes(input));
 
-                // Convert the byte array to hexadecimal string
-                StringBuilder sb = new StringBuilder();
-                for (int i = 0; i < hashBytes.Length; i++)
+                // Create a new Stringbuilder to collect the bytes
+                // and create a string.
+                var sBuilder = new StringBuilder();
+
+                // Loop through each byte of the hashed data
+                // and format each one as a hexadecimal string.
+                for (int i = 0; i < data.Length; i++)
                 {
-                    sb.Append(hashBytes[i].ToString("X2"));
+                    sBuilder.Append(data[i].ToString("x2"));
                 }
-                return sb.ToString();
+
+                // Return the hexadecimal string.
+                return sBuilder.ToString();
             }
         }
     }

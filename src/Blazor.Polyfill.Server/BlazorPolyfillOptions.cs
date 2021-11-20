@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Blazor.Polyfill.Server.Enums;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,10 +30,18 @@ namespace Blazor.Polyfill.Server
             UsePackagedBlazorServerLibrary = false;
             ForceES5Fallback = false;
             ES5FallbackValidation = null;
+            ES5ConversionScope = ES5ConversionScope.None;
             JavascriptModuleImportEmulation = false;
             JavascriptModuleImportEmulationLibraryPath = DefaultJSModuleImportEmulationLibraryPath;
-            CustomES5PathList = new List<string>();
         }
+
+        /// <summary>
+        /// Specify the conversion scope of Javascript files to ES5 during application lifetime.
+        /// Read the enum description for the detailled behaviors.
+        /// 
+        /// Default value is <see cref="ES5ConversionScope.None"/>
+        /// </summary>
+        public ES5ConversionScope ES5ConversionScope { get; set; }
 
         /// <summary>
         /// If the <see cref="BlazorPolyfillOptions.ForceES5Fallback"/> parameter is set to <see cref="true"/>,
@@ -81,12 +90,5 @@ namespace Blazor.Polyfill.Server
         /// platform or having issue with it, typically like ARM32v7 OS's.
         /// </summary>
         public bool UsePackagedBlazorServerLibrary { get; set; }
-
-        /// <summary>
-        /// A list of JS absolute path for your app that need to be transpiled to ES5 when fetched.
-        /// This usage can workaround some third party JS libraries that are not directly compliant to ES6 that would return
-        /// from a server request.
-        /// </summary>
-        public List<string> CustomES5PathList { get; set; }
     }
 }

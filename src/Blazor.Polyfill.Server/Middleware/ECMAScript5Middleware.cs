@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Blazor.Polyfill.Server.Enums;
 using Blazor.Polyfill.Server.Helper;
 using Blazor.Polyfill.Server.Model;
 using Microsoft.AspNetCore.Builder;
@@ -32,15 +33,117 @@ namespace Blazor.Polyfill.Server.Middleware
         }
         #endregion
 
-        private bool ShouldInterceptRequest(HttpContext context)
+        public static bool RequestedFileIsBlazorServerJS(HttpRequest request)
         {
-            if (context.Request.Path.HasValue
-                && context.Request.Path.StartsWithSegments("/_content")
-                && context.Request.Path.Value.EndsWith(".js"))
+            if (request.Path.StartsWithSegments("/_framework", StringComparison.InvariantCultureIgnoreCase)
+                && request.Path.StartsWithSegments("/_framework/blazor.server.js", StringComparison.InvariantCultureIgnoreCase))
             {
                 return true;
             }
+
             return false;
+        }
+
+        public static bool RequestedFileIsBlazorPolyfill(HttpRequest request, out bool isMinified)
+        {
+            isMinified = false;
+
+            if (request.Path.StartsWithSegments("/_framework", StringComparison.InvariantCultureIgnoreCase))
+            {
+                if (request.Path.StartsWithSegments("/_framework/blazor.polyfill.js", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    isMinified = false;
+                    return true;
+                }
+                else if (request.Path.StartsWithSegments("/_framework/blazor.polyfill.min.js", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    isMinified = true;
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        public static bool RequestedFileIsRazorClassLibraryFile(HttpRequest request)
+        {
+            if (request.Path.StartsWithSegments("/_content", StringComparison.InvariantCultureIgnoreCase) && request.Path.Value.EndsWith(".js", StringComparison.InvariantCultureIgnoreCase))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        public static bool RequestedFileIsJavascriptFile(HttpRequest request)
+        {
+            if (request.Path.HasValue && request.Path.Value.EndsWith(".js", StringComparison.InvariantCultureIgnoreCase))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        public static bool RequestedFileIsJavascriptModuleImportEmulationLibraryFile(HttpRequest request, BlazorPolyfillOptions options)
+        {
+            if (options.JavascriptModuleImportEmulation
+                && !string.IsNullOrEmpty(options.JavascriptModuleImportEmulationLibraryPath)
+                && options.JavascriptModuleImportEmulationLibraryPath.EndsWith(".js", StringComparison.InvariantCultureIgnoreCase))
+            {
+                if (request.Path.HasValue && request.Path.StartsWithSegments(options.JavascriptModuleImportEmulationLibraryPath, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private bool ShouldInterceptRequest(HttpContext context)
+        {
+            var options = BlazorPolyfillMiddlewareExtensions.GetOptions();
+
+            //Some specific case before the standard checking:
+            //We must not intercept BlazorPolyfill and BlazorServer files
+            //as they are managed differently with a terminal pipeline with
+            //a IApplicationBuilder.MapWhen. See UseBlazorPolyfill method
+            //in BlazorPolyfillMiddlewareExtension.
+            //We want to avoid the pre-caching mecanism specially on blazor.server.js
+            //file just in case a future update invalidate the file features, we don't
+            //want to have to ask people to clear the cache if the file is then fixed
+            //in a next version but with the original source checksum unchanged.
+
+            //Also we must not transpile the JavascriptModuleImportEmulationLibrary file
+            //as it should be already transpiled and packed by BlazorPolyfill.Build if used.
+            if (RequestedFileIsBlazorPolyfill(context.Request, out bool bmin)
+                || RequestedFileIsBlazorServerJS(context.Request)
+                || RequestedFileIsJavascriptModuleImportEmulationLibraryFile(context.Request, options))
+            {
+                return false;
+            }
+
+            switch (options.ES5ConversionScope)
+            {
+                case ES5ConversionScope.None:
+                    //Should never go here as the specific previous case is targeted
+                    //for ES5ConversionScope.None
+                    return false;
+                case ES5ConversionScope.RazorClassLibrary:
+                    if (RequestedFileIsRazorClassLibraryFile(context.Request))
+                    {
+                        return true;
+                    }
+                    return false;
+                case ES5ConversionScope.All:
+                    if (RequestedFileIsJavascriptFile(context.Request))
+                    {
+                        return true;
+                    }
+                    return false;
+                default:
+                    return false;
+            }
         }
 
         public async Task Invoke(HttpContext context)
@@ -49,11 +152,11 @@ namespace Blazor.Polyfill.Server.Middleware
             if (!context.Request.BrowserNeedES5Fallback())
             {
                 await _next(context);
+                return;
             }
 
             //Should intercept if any .js request.
             //Behavior may change depending the ES5 transpilation option.
-            //TODO: Allow ES5 transpilation option. Actually we just transpile _content (RCL) .js files detected on the fly
             if (ShouldInterceptRequest(context))
                 await ManageES5Conversion(context);
             else
@@ -74,47 +177,43 @@ namespace Blazor.Polyfill.Server.Middleware
             return destination;
         }
 
-        private async Task<FileContentReference> ES5Convert(RequestFileMetadata source)
+        private RequestFileMetadata ES5Convert(RequestFileMetadata source)
         {
-            FileContentReference _fileContent = null;
+            RequestFileMetadata destination = null;
 
             try
             {
                 //Transpile code to ES5 for IE11
-                source.ES5Content = BlazorPolyfillMiddlewareExtensions.Transform(source.SourceContent, Path.GetFileName(source.SourcePath), "{\"plugins\":[\"proposal-class-properties\",\"proposal-object-rest-spread\"],\"presets\":[[\"env\",{\"targets\":{\"browsers\":[\"ie 11\",\"Chrome 78\"]}}], \"es2015\",\"es2016\",\"es2017\",\"stage-3\"], \"sourceType\": \"script\"}");
+                source.ES5Content = BabelHelper.Transform(source.SourceContent, Path.GetFileName(source.SourcePath));
 
                 //Minify with AjaxMin (we don't want an additional external tool with NPM or else for managing this
                 //kind of thing here...
                 source.ES5Content = Uglify.Js(source.ES5Content).Code;
-
-                DateTime buildTime = BlazorPolyfillMiddlewareExtensions.GetBlazorPolyfillServerBuildDate();
-
-                //Computing ETag. Should be computed last !
-                string Etag = EtagGenerator.GenerateEtagFromString(source.ES5Content);
-
-                _fileContent = new FileContentReference()
-                {
-                    Value = source.ES5Content,
-                    ETag = Etag,
-                    LastModified = buildTime,
-                    ContentLength = System.Text.UTF8Encoding.UTF8.GetByteCount(source.ES5Content).ToString(CultureInfo.InvariantCulture)
-                };
-
-                source.ConversionSucceed = true;
+                destination = source;
             }
             catch (Exception ex)
             {
                 //TODO: Need to add a file logger ?
-                Console.WriteLine($"ERROR: On path '{source.SourcePath}': {ex.Message}");
+                Console.WriteLine($"ERROR: On path '{source.SourcePath}': {ex.Message}.");
             }
 
-            return _fileContent;
+            return destination;
         }
 
         private async Task ManageES5Conversion(HttpContext context)
         {
-            //TODO: No need to wait for StaticFile to fill the content when we will check and have the cached file version somewhere
-            //TODO: Need MD5 checksum signature in transformed files from original file
+            //If this return true here, this mean this is a subsequent call to a file
+            //and that the file has already been cached in the internal dictionary
+            //Otherwise we must try to seek the file hash of the current request and see
+            //if it has been converted at least once in the app lifetime
+            if (ES5CacheHelper.HasES5FileInCacheByPath(context.Request.Path))
+            {
+                var fileCache = ES5CacheHelper.GetES5FileFromCache(context.Request.Path);
+
+                //Manage request specificity
+                await HttpRequestManager.ManageRequest(context, fileCache.ES5Path, fileCache.ETag, fileCache.ContentLength);
+                return;
+            }
 
             //Here we are tricking the StaticFile handler by modifying the Body Stream type before it try to write in it.
             //Using a MemoryStream in order to be able to catch and modify the content afterward
@@ -137,32 +236,40 @@ namespace Blazor.Polyfill.Server.Middleware
                     return;
                 }
 
-                //TODO: Need to add succeed value in cache
-                //TODO: Need to merge FileContentReference values and RequestFileMetadata models ?
                 var response = await ExtractResponseAsync(context.Request, context.Response);
 
-                //Convert to ES5 the current response
-                var fileContent = await ES5Convert(response);
+                RequestFileCacheMetadata _cacheMetadata = null;
 
-                if (fileContent == null)
+                //From here we must see if we have a corresponding hash for this fetched resource in the cache store. Subsequent call will short-circuit at the top of this method because
+                //the cache entry dictionary will be populated. If the data is not present we will have
+                //to cache the file in disk
+                if (ES5CacheHelper.HasES5FileInCacheWithChecksum(context.Request.Path, response.SourceCheckSum))
                 {
-                    //If the converter is unable to convert, we must assume to return the original file value
-                    DateTime buildTime = BlazorPolyfillMiddlewareExtensions.GetBlazorPolyfillServerBuildDate();
-                    fileContent = new FileContentReference()
+                    _cacheMetadata = ES5CacheHelper.GetES5FileFromCache(context.Request.Path);
+                }
+                else
+                {
+                    //Convert to ES5 the current response
+                    var fileContent = ES5Convert(response);
+
+                    if (fileContent == null)
                     {
-                        Value = response.SourceContent,
-                        ETag = EtagGenerator.GenerateEtagFromString(response.SourceContent),
-                        LastModified = buildTime,
-                        ContentLength = System.Text.UTF8Encoding.UTF8.GetByteCount(response.SourceContent).ToString(CultureInfo.InvariantCulture)
-                    };
+                        //If here that mean that conversion failed.
+                        //We will take the original object but will add
+                        //current content as ES5 even if not
+                        fileContent = response;
+                        fileContent.ES5Content = fileContent.SourceContent;
+                    }
+
+                    _cacheMetadata = ES5CacheHelper.SetES5FileInCache(fileContent);
                 }
 
-                //As we have the result, we must restore the original stream for the request
-                //As we will provide the data to return here
+                //As we have interverted the original Http Stream in our 'using' above, we
+                //must restore it in order to make the thing work normally
                 context.Response.Body = originalResponseStream;
 
                 //Manage request specificity
-                await HttpRequestManager.ManageRequest(context, fileContent);
+                await HttpRequestManager.ManageRequest(context, _cacheMetadata.ES5Path, _cacheMetadata.ETag, _cacheMetadata.ContentLength);
             }
         }
 
@@ -182,7 +289,7 @@ namespace Blazor.Polyfill.Server.Middleware
             {
                 SourcePath = request.Path.Value,
                 SourceContent = responseBody,
-                SourceCheckSum = CryptographyHelper.CreateMD5(responseBody)
+                SourceCheckSum = CryptographyHelper.CreateSHA256(responseBody)
             };
         }
     }

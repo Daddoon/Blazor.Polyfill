@@ -13,7 +13,16 @@ namespace Blazor.Polyfill.Server
 {
     public static class HttpRequestManager
     {
-        internal static async Task ManageRequest(HttpContext context, FileContentReference fileContent, string contentType = "application/javascript")
+        /// <summary>
+        /// Warning: onBodyWriteReady ready will only be called when the result of the method is a 200 (Statut OK)
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="contentType"></param>
+        /// <param name="ETag"></param>
+        /// <param name="ContentLength"></param>
+        /// <param name="onBodyWriteReady"></param>
+        /// <returns></returns>
+        private static async Task ManageRequestHeaders(HttpContext context, string contentType, string ETag, string ContentLength, Func<Task> onBodyWriteReady)
         {
             context.Response.ContentType = contentType;
             if (!context.Response.Headers.ContainsKey(HeaderNames.CacheControl))
@@ -26,45 +35,63 @@ namespace Blazor.Polyfill.Server
             }
 
             //We will try to only rely on ETag checksum
-            //if (!context.Response.Headers.ContainsKey(HeaderNames.LastModified))
-            //{
-            //    context.Response.Headers.Append(HeaderNames.LastModified, fileContent.LastModified.ToString("r"));
-            //}
-            //else
-            //{
-            //    context.Response.Headers[HeaderNames.LastModified] = fileContent.LastModified.ToString("r");
-            //}
+            //Removing LastModified header
+            if (context.Response.Headers.ContainsKey(HeaderNames.LastModified))
+            {
+                context.Response.Headers.Remove(HeaderNames.LastModified);
+            }
 
             if (!context.Response.Headers.ContainsKey(HeaderNames.ETag))
             {
-                context.Response.Headers.Append(HeaderNames.ETag, fileContent.ETag);
+                context.Response.Headers.Append(HeaderNames.ETag, ETag);
             }
             else
             {
-                context.Response.Headers[HeaderNames.ETag] = fileContent.ETag;
+                context.Response.Headers[HeaderNames.ETag] = ETag;
             }
 
             //In this case we should return the entire response
             if (RequestHasTheNoCacheHeaderSet(context.Request)
             || RequestHasNoCachingFeatureSet(context.Request)
-            || RequestHasCacheFeaturesExpired(context.Request, fileContent))
+            || RequestHasCacheFeaturesExpired(context.Request, ETag))
             {
                 if (!context.Response.Headers.ContainsKey(HeaderNames.ContentLength))
                 {
-                    context.Response.Headers.Append(HeaderNames.ContentLength, fileContent.ContentLength);
+                    context.Response.Headers.Append(HeaderNames.ContentLength, ContentLength);
                 }
                 else
                 {
-                    context.Response.Headers[HeaderNames.ContentLength] = fileContent.ContentLength;
+                    context.Response.Headers[HeaderNames.ContentLength] = ContentLength;
                 }
 
                 context.Response.StatusCode = (int)HttpStatusCode.OK;
-                await context.Response.WriteAsync(fileContent.Value);
+
+                //onBodyWriteReady should only be called if the statut is OK, at least for the moment.
+                if (onBodyWriteReady != null)
+                {
+                    await onBodyWriteReady();
+                }
             }
             else
             {
                 context.Response.StatusCode = (int)HttpStatusCode.NotModified;
             }
+        }
+
+        internal static async Task ManageRequest(HttpContext context, FileContentReference fileContent, string contentType = "application/javascript")
+        {
+            await ManageRequestHeaders(context, contentType, fileContent.ETag, fileContent.ContentLength, async () =>
+            {
+                await context.Response.WriteAsync(fileContent.Value);
+            });
+        }
+
+        internal static async Task ManageRequest(HttpContext context, string filePath, string ETag, string ContentLength, string contentType = "application/javascript")
+        {
+            await ManageRequestHeaders(context, contentType, ETag, ContentLength, async () =>
+            {
+                await context.Response.SendFileAsync(filePath);
+            });
         }
 
         private static bool RequestHasTheNoCacheHeaderSet(HttpRequest request)
@@ -79,41 +106,21 @@ namespace Blazor.Polyfill.Server
             return !request.Headers.ContainsKey(HeaderNames.IfModifiedSince) && !request.Headers.ContainsKey(HeaderNames.IfNoneMatch);
         }
 
-        private static bool RequestHasCacheFeaturesExpired(HttpRequest request, FileContentReference fileContent)
+        private static bool RequestHasCacheFeaturesExpired(HttpRequest request, string ETag)
         {
-            string IfModifiedSince = null;
             string IfNoneMatch = null;
 
-            DateTime IfModifiedSinceDate = default;
-
-            //Must be in first check, as the library may update in the future but we can't be totally aware of the modification
-            //date as it's related to the Microsoft library, not this one.
             if (request.Headers.ContainsKey(HeaderNames.IfNoneMatch))
             {
                 IfNoneMatch = request.Headers[HeaderNames.IfNoneMatch].ToString();
 
-                if (fileContent.ETag == IfNoneMatch)
+                if (ETag == IfNoneMatch)
                 {
                     return false;
                 }
                 else
                 {
                     return true;
-                }
-            }
-            else if (request.Headers.ContainsKey(HeaderNames.IfModifiedSince))
-            {
-                IfModifiedSince = request.Headers[HeaderNames.IfModifiedSince].ToString();
-                if (DateTime.TryParseExact(IfModifiedSince, "r", CultureInfo.InvariantCulture, DateTimeStyles.None, out IfModifiedSinceDate))
-                {
-                    if (IfModifiedSinceDate == fileContent.LastModified)
-                    {
-                        return false;
-                    }
-                    else
-                    {
-                        return true;
-                    }
                 }
             }
 

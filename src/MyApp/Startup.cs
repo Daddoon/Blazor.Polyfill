@@ -1,4 +1,5 @@
 using Blazor.Polyfill.Server;
+using Blazor.Polyfill.Server.Enums;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -45,6 +46,7 @@ namespace MyApp
 
             app.UseBlazorPolyfill((options) =>
             {
+                options.ES5ConversionScope = ES5ConversionScope.All;
                 options.UsePackagedBlazorServerLibrary = false;
                 options.ForceES5Fallback = true;
                 options.JavascriptModuleImportEmulation = true;

@@ -11,11 +11,12 @@ namespace Blazor.Polyfill.Server.Model
         public string SourcePath { get; set; }
 
         public string SourceContent { get; set; }
-
+        
+        /// <summary>
+        /// The file Checksum hashed with SHA256
+        /// </summary>
         public string SourceCheckSum { get; set; }
 
         public string ES5Content { get; set; }
-
-        public bool ConversionSucceed { get; set; }
     }
 }
