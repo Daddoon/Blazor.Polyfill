@@ -1,0 +1,79 @@
+﻿@page "/datagrid/reorder"
+
+@using Syncfusion.Blazor.Grids
+@using Syncfusion.Blazor.DropDowns
+@using BlazorDemos
+@using blazor_griddata
+@inherits SampleBaseComponent;
+
+<SampleDescription>
+   <p>This sample demonstrates reordering of the DataGrid columns.You can reorder columns by simply drag and drop in the desired column position.</p> 
+</SampleDescription>
+<ActionDescription>
+   <p>Reordering can be enabled by setting <code><a target='_blank' class='code' href='https://help.syncfusion.com/cr/blazor/Syncfusion.Blazor.Grids.SfGrid-1.html#Syncfusion_Blazor_Grids_SfGrid_1_AllowReordering'>AllowReordering</a></code> property as true. Reordering can be done by dragging and dropping the column header from one index to another index within the DataGrid.</p>
+   <p>The location where the column will be placed is indicated by two arrow symbols.</p>
+  <p>In this demo, you can reorder the columns by drag and drop.</p>
+  <p>More information on the column reorder can be found in this <a target='_blank' href='https://blazor.syncfusion.com/documentation/datagrid/columns/#reorder'>documentation section</a>.</p>
+</ActionDescription>
+
+<div class="col-lg-12 control-section">
+    <div class="content-wrapper">
+        <div class="row">
+            <SfGrid DataSource="@GridData" AllowReordering="true" AllowPaging="true">
+                <GridPageSettings PageCount="5"></GridPageSettings>
+                <GridColumns>
+                    <GridColumn Field=@nameof(OrdersDetails.OrderID) HeaderText="Order ID" IsPrimaryKey="true" TextAlign="TextAlign.Right"  Width="120"></GridColumn>
+                    <GridColumn Field=@nameof(OrdersDetails.CustomerID) HeaderText="Customer ID" Width="150"></GridColumn>
+                    <GridColumn Field=@nameof(OrdersDetails.Freight) HeaderText="Freight" TextAlign="TextAlign.Right"  Width="120" Format="C2"></GridColumn>
+                    <GridColumn Field=@nameof(OrdersDetails.ShipCity) HeaderText="Ship City" Width="150"></GridColumn>
+                    <GridColumn Field=@nameof(OrdersDetails.ShipCountry) HeaderText="Ship Country" Width="150"></GridColumn>
+                </GridColumns>
+            </SfGrid>
+
+        </div>
+    </div>
+</div>
+
+
+@code{
+
+    public List<OrdersDetails> GridData { get; set; }
+
+    public class Columns
+    {
+        public string id { get; set; }
+
+        public string name { get; set; }
+    }
+
+    private List<Columns> columns = new List<Columns>()
+    {
+        new Columns(){ id= "Order ID", name= "Order ID" },
+        new Columns(){ id= "Customer ID", name= "Customer ID" },
+        new Columns(){ id= "Freight", name= "Freight" },
+        new Columns(){ id= "Ship City", name= "Ship City" },
+        new Columns(){ id= "Ship Country", name= "Ship Country" },
+    };
+
+    public class Index
+    {
+        public string id { get; set; }
+
+        public string index { get; set; }
+    }
+
+    private List<Index> indexes = new List<Index>()
+    {
+        new Index(){ id= "1", index= "1" },
+        new Index(){ id= "2", index= "2" },
+        new Index(){ id= "3", index= "3" },
+        new Index(){ id= "4", index= "4" },
+        new Index(){ id= "5", index= "5" },
+    };
+
+
+    protected override void OnInitialized()
+    {
+        GridData = OrdersDetails.GetAllRecords();
+    }
+}

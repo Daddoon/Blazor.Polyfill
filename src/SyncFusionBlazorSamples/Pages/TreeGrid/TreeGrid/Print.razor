@@ -1,0 +1,48 @@
+﻿@page "/tree-grid/print"
+
+@using Syncfusion.Blazor.TreeGrid
+@using Syncfusion.Blazor.Grids;
+@using Syncfusion.Blazor
+@*Hidden:Lines*@
+@using BlazorDemos
+@using ej2_blazor_selfdata
+@inherits SampleBaseComponent;
+@*End:Hidden*@
+
+<SampleDescription>
+    <p>This sample demonstrates the option to print the Tree Grid. Click the print button from the toolbar item to print the Tree Grid.</p>
+</SampleDescription>
+<ActionDescription>
+   <p>The Tree Grid can be printed using the <code>Print</code> method. While printing, the pager and scrollbar will be removed if they are enabled in Tree Grid.</p>
+   <p>By default, all pages will be printed.  We can print current page alone by setting the <code>PrintMode</code>property value as <code>CurrentPage</code>.</p>
+   <p>In this demo, click the print icon to print the Tree Grid.</p>
+   <p>More information on the print feature can be found in this <a target='_blank' href='https://blazor.syncfusion.com/documentation/treegrid/print/'> documentation</a>section.</p>
+</ActionDescription>
+
+
+<div class="col-lg-12 control-section">
+    <div class="content-wrapper">
+        <div class="row">
+            <SfTreeGrid Height="315" DataSource="@TreeGridData" IdMapping="TaskID" ParentIdMapping="ParentID" TreeColumnIndex="1" Toolbar="@(new List<string>() { "Print" })">
+                <TreeGridColumns>
+                    <TreeGridColumn Field="TaskID" HeaderText="Task ID" IsPrimaryKey="true" Width="80" TextAlign="TextAlign.Right"></TreeGridColumn>
+                    <TreeGridColumn Field="TaskName" HeaderText="Task Name" EditType=EditType.DefaultEdit Width="200"></TreeGridColumn>
+                    <TreeGridColumn Field="StartDate" HeaderText="Start Date" EditType=EditType.DatePickerEdit Format="d" Type=ColumnType.Date Width="100" TextAlign="TextAlign.Right"></TreeGridColumn>
+                    <TreeGridColumn Field="EndDate" HeaderText=" End Date" EditType=EditType.DatePickerEdit Format="d" Type=ColumnType.Date Width="100" TextAlign="TextAlign.Right"></TreeGridColumn>
+                    <TreeGridColumn Field="Progress" HeaderText="Progress" Width="100" TextAlign="TextAlign.Left"></TreeGridColumn>
+                    <TreeGridColumn Field="Priority" HeaderText="Priority" EditType=EditType.DefaultEdit Width="100"></TreeGridColumn>
+                </TreeGridColumns>
+            </SfTreeGrid>
+        </div>
+    </div>
+</div>
+
+@code{
+
+    public List<SelfReferenceData> TreeGridData { get; set; }
+
+    protected override void OnInitialized()
+    {
+        this.TreeGridData = SelfReferenceData.GetTree().Take(12).ToList();
+    }
+}

@@ -1,0 +1,46 @@
+﻿@page "/datagrid/auto-wrap"
+
+@using Syncfusion.Blazor.Grids
+@using BlazorDemos
+@using blazor_inventordata
+
+@inherits SampleBaseComponent;
+
+<SampleDescription>
+  <p>This sample demonstrates the DataGrid component with the auto wrap column cell. In this sample, you can see that the <strong>Main fields of invention</strong> column cell content exceeded the available width hence it has been wrapped into multiple lines. </p>  
+</SampleDescription>
+<ActionDescription>
+   <p>Auto wrap cell content can be enabled using <code><a target='_blank' class='code' href='https://help.syncfusion.com/cr/blazor/Syncfusion.Blazor.Grids.SfGrid-1.html#Syncfusion_Blazor_Grids_SfGrid_1_AllowTextWrap'>AllowTextWrap</a></code> property of theDataGrid. Enabling this property will wrap the cell text in multiple lines. When the cell content exceeds the cell width this feature is useful to view the content.</p>
+   <p>Enabling this property will wrap both the content cell and header cell text.</p>
+   <p>In this demo, the <code><a target='_blank' class='code' href='https://help.syncfusion.com/cr/blazor/Syncfusion.Blazor.Grids.SfGrid-1.html#Syncfusion_Blazor_Grids_SfGrid_1_AllowTextWrap'>AllowTextWrap</a></code> property is enabled which can be seen in the <strong>Main fields of invention</strong> column whose content is wrapped into multiple lines as it exceeds the cell width.</p>
+   <p>More information on AutoWrap feature can be found in this <a target='_blank' href='https://blazor.syncfusion.com/documentation/datagrid/cell/#auto-wrap'>documentation section</a>.</p>
+</ActionDescription>
+
+
+<div class="col-lg-12 control-section">
+    <div class="content-wrapper">
+        <div class="row">
+
+            <SfGrid DataSource="@GridData" AllowTextWrap="true" AllowPaging="true">
+                <GridColumns>
+                    <GridColumn Field=@nameof(InventorDetails.Inventor) IsPrimaryKey="true" HeaderText="Inventor Name" Width="140"></GridColumn>
+                    <GridColumn Field=@nameof(InventorDetails.NumberofPatentFamilies) HeaderText="Number of Patent Families" TextAlign="TextAlign.Right"  Width="185"></GridColumn>
+                    <GridColumn Field=@nameof(InventorDetails.Country) HeaderText="Country" Width="120"></GridColumn>
+                    <GridColumn Field=@nameof(InventorDetails.Active) HeaderText="Active" Width="130"></GridColumn>
+                    <GridColumn Field=@nameof(InventorDetails.Mainfieldsofinvention) HeaderText="Main fields of invention" AllowGrouping="false" Width="180"></GridColumn>
+                </GridColumns>
+            </SfGrid>
+
+        </div>
+    </div>
+</div>
+
+@code{
+
+    public List<InventorDetails> GridData { get; set; }
+
+    protected override void OnInitialized()
+    {
+        GridData = InventorDetails.GetAllRecords();
+    }
+}

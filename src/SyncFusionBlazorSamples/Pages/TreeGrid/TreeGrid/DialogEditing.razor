@@ -1,0 +1,58 @@
+﻿@page "/tree-grid/dialog-editing"
+
+@using Syncfusion.Blazor.TreeGrid
+
+@*Hidden:Lines*@
+@using ej2_blazor_selfdata
+@inherits SampleBaseComponent;
+@*End:Hidden*@
+
+<SampleDescription>
+    <p>This sample demonstrates the Dialog Editing.</p>
+</SampleDescription>
+<ActionDescription>
+   <p>The Tree Grid supports CRUD operations. This CRUD operations can be configured in Tree Grid using <code>TreeGridEditSettings</code>. Also, it has different modes to manipulate the datasource.</p>
+   <p>The available modes are,</p>
+       <ul><li><code>EditMode.Row</code></li>
+          <li><code>EditMode.Cell</code></li>
+          <li><code>EditMode.Dialog</code></li>
+          <li><code>EditMode.Batch</code></li>
+        </ul>
+    <p>In this demo, Dialog mode is enabled for editing by defining <code>Mode</code> as <code>EditMode.Dialog</code>. You can start editing by double clicking a row or clicking on toolbar's Edit button, then the currently selected row will be shown on a dialog and you can change the row values and save edited data to the datasource.</p>
+    <p>More information on the dialog editing can be found in this <a target='_blank' href='https://blazor.syncfusion.com/documentation/treegrid/edit/#dialog'>documentation section</a>.</p>
+</ActionDescription>
+
+<div class="col-lg-12 control-section">
+    <div class="content-wrapper">
+        <div class="row">
+            <SfTreeGrid DataSource="@TreeData" IdMapping="TaskID" ParentIdMapping="ParentID" TreeColumnIndex="1" AllowPaging="true" Toolbar="@(new List<string>() { "Add", "Edit", "Delete", "Update", "Cancel" })" Height="400">
+                <TreeGridPageSettings PageSize="2"></TreeGridPageSettings>
+                <TreeGridEditSettings AllowAdding="true" AllowEditing="true" AllowDeleting="true" Mode="EditMode.Dialog"></TreeGridEditSettings>
+                <TreeGridColumns>
+                    <TreeGridColumn Field="TaskID" HeaderText="Task ID" ValidationRules="@(new Syncfusion.Blazor.Grids.ValidationRules() { Required = true, Number = true })"  IsPrimaryKey="true" Width="80" TextAlign="Syncfusion.Blazor.Grids.TextAlign.Right"></TreeGridColumn>
+                    <TreeGridColumn Field="TaskName" HeaderText="Task Name" ValidationRules="@(new Syncfusion.Blazor.Grids.ValidationRules() { Required = true })" Width="165"></TreeGridColumn>
+                    <TreeGridColumn Field="StartDate" HeaderText="Start Date" Format="d" Type=Syncfusion.Blazor.Grids.ColumnType.Date Width="100" TextAlign="Syncfusion.Blazor.Grids.TextAlign.Right" EditType=Syncfusion.Blazor.Grids.EditType.DatePickerEdit></TreeGridColumn>
+                    <TreeGridColumn Field="Duration" HeaderText="Duration" ValidationRules="@(new Syncfusion.Blazor.Grids.ValidationRules() { Number = true, Min = 0 })" Width="100" TextAlign="Syncfusion.Blazor.Grids.TextAlign.Right" EditType="Syncfusion.Blazor.Grids.EditType.NumericEdit" EditorSettings="DurationParams"></TreeGridColumn>
+                    <TreeGridColumn Field="Progress" HeaderText="Progress" Width="100"></TreeGridColumn>
+                    <TreeGridColumn Field="Priority" HeaderText="Priority" Width="100"></TreeGridColumn>
+                </TreeGridColumns>
+            </SfTreeGrid>
+        </div>
+    </div>
+</div>
+
+@code{
+
+    public List<SelfReferenceData> TreeData { get; set; }
+
+    private Syncfusion.Blazor.Grids.NumericEditCellParams DurationParams = new Syncfusion.Blazor.Grids.NumericEditCellParams()
+    {
+        Params = new Syncfusion.Blazor.Inputs.NumericTextBoxModel<object>() { Format = "N2", ShowSpinButton = true }
+    };
+
+    protected override void OnInitialized()
+    {
+            
+            this.TreeData = SelfReferenceData.GetTree().ToList();
+    }
+}

@@ -1,0 +1,57 @@
+﻿@page "/datagrid/inline-editing"
+
+@using Syncfusion.Blazor.Grids
+@using Syncfusion.Blazor.DropDowns
+@using BlazorDemos
+@using blazor_griddata
+@inherits SampleBaseComponent;
+
+<SampleDescription>
+    <p>This sample demonstrates CRUD operations in DataGrid. You can perform CRUD operations as follows,</p>
+</SampleDescription>
+<ActionDescription>
+  <ul>
+       <li><strong>Add</strong> -  To add new record, click Add toolbar button </li>
+       <li><strong>Edit</strong> - To edit record, double click a row or click toolbar Edit button after selected a row </li>
+       <li><strong>Delete</strong> - To delete record, click toolbar Delete button after selected a row </li>
+       <li><strong>Update</strong>,<strong>Cancel</strong> - You can save or discard changes by click toolbar Update and Cancel button respectively</li>
+   </ul>
+   <p>By default, a new row will be added at the top of the DataGrid. You can change it by defining the <code><a target='_blank' class='code' href='https://help.syncfusion.com/cr/blazor/Syncfusion.Blazor.Grids.GridEditSettings.html#Syncfusion_Blazor_Grids_GridEditSettings_NewRowPosition'>NewRowPosition</a></code> in <code><a target='_blank' class='code' href='https://help.syncfusion.com/cr/aspnetcore-blazor/Syncfusion.Blazor.Grids.GridEditSettings.html'>GridEditSettings</a></code> as <strong>Bottom</strong></p>
+   <p>You can refer to our <a target='_blank' href='https://www.syncfusion.com/blazor-components/blazor-datagrid/editing'>Blazor Editable Grid</a> page to know more about editing and its feature representations. </p>
+</ActionDescription>
+
+
+<div class="col-lg-12 control-section">
+    <div class="content-wrapper">
+        <div class="row">
+
+            <SfGrid DataSource="@GridData" Toolbar="@(new List<string>() { "Add", "Edit", "Delete", "Update", "Cancel" })" AllowPaging="true">
+                <GridEditSettings AllowAdding="true" AllowDeleting="true" AllowEditing="true"></GridEditSettings>
+                <GridColumns>
+                    <GridColumn Field=@nameof(OrdersDetails.OrderID) HeaderText="Order ID" IsPrimaryKey="true" ValidationRules="@(new ValidationRules{ Required=true, Number=true})" TextAlign="TextAlign.Right" Width="140"></GridColumn>
+                    <GridColumn Field=@nameof(OrdersDetails.CustomerID) HeaderText="Customer Name" ValidationRules="@(new ValidationRules{ Required=true})" Width="150">
+                        <EditTemplate>
+                            <SfAutoComplete TItem="OrdersDetails" TValue="string" ID="CustomerID" @bind-Value="@((context as OrdersDetails).CustomerID)" DataSource="@GridData">
+                                <AutoCompleteFieldSettings Value="CustomerID"></AutoCompleteFieldSettings>
+                            </SfAutoComplete>
+                        </EditTemplate>
+                    </GridColumn>
+                    <GridColumn Field=@nameof(OrdersDetails.Freight) HeaderText="Freight" ValidationRules="@(new ValidationRules{ Required=true, Range = new double[]{1, 1000}})" EditType="EditType.NumericEdit" Format="C2" TextAlign="TextAlign.Right" Width="140"></GridColumn>
+                    <GridColumn Field=@nameof(OrdersDetails.OrderDate) HeaderText="Order Date" EditType="EditType.DatePickerEdit" Format="d" Type="ColumnType.Date" TextAlign="TextAlign.Right" Width="160"></GridColumn>
+                    <GridColumn Field=@nameof(OrdersDetails.ShipCountry) HeaderText="Ship Country" EditType="EditType.DropDownEdit" Width="150"></GridColumn>
+                </GridColumns>
+            </SfGrid>
+
+        </div>
+    </div>
+</div>
+
+@code{
+
+    public List<OrdersDetails> GridData { get; set; }
+
+    protected override void OnInitialized()
+    {
+        GridData = OrdersDetails.GetAllRecords();
+    }
+}

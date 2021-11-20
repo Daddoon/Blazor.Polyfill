@@ -1,0 +1,188 @@
+﻿@page "/range-selector/print-export"
+@using Syncfusion.Blazor.Charts
+@using Syncfusion.Blazor
+@using Newtonsoft.Json
+@using System.IO
+@using System.Net.Http.Json
+@inject NavigationManager NavigationManager
+@inject HttpClient Http
+@inherits SampleBaseComponent;
+
+<SampleDescription>
+    <p>This sample represents the print and export options available in the range navigator.</p>
+</SampleDescription>
+<ActionDescription>
+    <p></p>
+</ActionDescription>
+
+@if (ExportData == null)
+{
+    <div class="stockchartloader"></div>
+}
+else
+{
+    <div class="row">
+        <div class="col-lg-9 control-section" align="center">
+            <h4 align="center" style="font-family: Segoe UI;font-weight: 500; font-style:normal; font-size:15px;"> Mobile Sales Trends - 2017</h4>
+            <div>
+                <SfRangeNavigator @ref="RangeObj" @bind-Value="@RangeValue" LabelFormat="MMM" Theme="@RangeNavigatorTheme" EnableGrouping="true" IntervalType="RangeIntervalType.Months"
+                                  DataSource="@ExportData" XName="xDate" YName="Close" ValueType="Syncfusion.Blazor.Charts.RangeValueType.DateTime">
+                </SfRangeNavigator>
+            </div>
+        </div>
+        <div class="col-lg-3 property-section" style="margin-top:40px">
+            <table>
+                <tbody>
+                    <tr align="center">
+                        <td>
+                            <div>
+                                <Syncfusion.Blazor.Buttons.SfButton Content="Print" @onclick="PrintRangeNavigator" IsPrimary="true" CssClass="e-info"></Syncfusion.Blazor.Buttons.SfButton>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr align='center'>
+                        <td colspan="2">
+                            <div>
+                                <Syncfusion.Blazor.Buttons.SfButton Content="Export" @onclick="ExportRangeNavigator" IsPrimary="true" CssClass="e-info"></Syncfusion.Blazor.Buttons.SfButton>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+@code{
+    public ChartData[] ExportData { get; set; }
+    public SfRangeNavigator RangeObj { get; set; }
+    public Theme RangeNavigatorTheme { get; set; }
+    public object RangeValue { get; set; } = new object[] { new DateTime(2013, 05, 01), new DateTime(2013, 08, 01) };
+    private string currentUri;
+
+    protected override async Task OnInitializedAsync()
+    {
+	    if(File.Exists("./wwwroot/data/range-navigator/export-data.json"))
+        {
+            ExportData = JsonConvert.DeserializeObject<ChartData[]>(System.IO.File.ReadAllText("./wwwroot/data/range-navigator/export-data.json"));
+        }
+        else
+        {
+            ExportData = await Http.GetFromJsonAsync<ChartData[]>("data/range-navigator/export-data.json");
+        }
+    }
+
+    public class ChartData
+    {
+        public DateTime xDate { get; set; }
+        public double Open { get; set; }
+        public double High { get; set; }
+        public double Low { get; set; }
+        public double Close { get; set; }
+    }
+
+    public async Task PrintRangeNavigator(MouseEventArgs args)
+    {
+        await RangeObj.PrintAsync();
+    }
+
+    public async Task ExportRangeNavigator(MouseEventArgs args)
+    {
+        await RangeObj.ExportAsync(ExportType.PNG, "Chart");
+    }
+
+    protected override void OnInitialized()
+    {
+        currentUri = NavigationManager.Uri;
+        if (currentUri.IndexOf("material") > -1)
+        {
+            if (currentUri.IndexOf("dark") > -1)
+            {
+                RangeNavigatorTheme = Theme.MaterialDark;
+            }
+            else
+            {
+                RangeNavigatorTheme = Theme.Material;
+            }
+        }
+        else if (currentUri.IndexOf("fabric") > -1)
+        {
+            if (currentUri.IndexOf("dark") > -1)
+            {
+                RangeNavigatorTheme = Theme.FabricDark;
+            }
+            else
+            {
+                RangeNavigatorTheme = Theme.Fabric;
+            }
+        }
+        else if (currentUri.IndexOf("bootstrap5") > -1)
+        {
+            if (currentUri.IndexOf("dark") > -1)
+            {
+                RangeNavigatorTheme = Theme.Bootstrap5Dark;
+            }
+            else
+            {
+                RangeNavigatorTheme = Theme.Bootstrap5;
+            }
+        }
+        else if (currentUri.IndexOf("bootstrap4") > -1)
+        {
+            RangeNavigatorTheme = Theme.Bootstrap4;
+        }
+        else if (currentUri.IndexOf("bootstrap") > -1)
+        {
+            if (currentUri.IndexOf("dark") > -1)
+            {
+                RangeNavigatorTheme = Theme.BootstrapDark;
+            }
+            else
+            {
+                RangeNavigatorTheme = Theme.Bootstrap;
+            }
+        }
+        else if (currentUri.IndexOf("highcontrast") > -1)
+        {
+            RangeNavigatorTheme = Theme.HighContrast;
+        }
+        else if (currentUri.IndexOf("tailwind") > -1)
+        {
+            if (currentUri.IndexOf("dark") > -1)
+            {
+                RangeNavigatorTheme = Theme.TailwindDark;
+            }
+            else
+            {
+                RangeNavigatorTheme = Theme.Tailwind;
+            }
+        }
+        else
+        {
+            RangeNavigatorTheme = Theme.Bootstrap4;
+        }
+    }
+}
+
+<style>
+    #button-control {
+        width: 100%;
+        text-align: center;
+    }
+
+    #control-container {
+        padding: 0px !important;
+    }
+
+    .e-export-icon::before {
+        content: '\e728';
+    }
+
+    .e-print-icon::before {
+        content: '\e813';
+    }
+
+    .btn-style {
+        margin: 5px;
+        width: 75px;
+    }
+</style>
