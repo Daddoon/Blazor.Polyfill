@@ -42,6 +42,14 @@
             </summary>
             <returns></returns>
         </member>
+        <member name="P:Blazor.Polyfill.Server.BlazorPolyfillOptions.ES5ConversionScope">
+            <summary>
+            Specify the conversion scope of Javascript files to ES5 during application lifetime.
+            Read the enum description for the detailled behaviors.
+            
+            Default value is <see cref="F:Blazor.Polyfill.Server.Enums.ES5ConversionScope.None"/>
+            </summary>
+        </member>
         <member name="P:Blazor.Polyfill.Server.BlazorPolyfillOptions.ForceES5Fallback">
             <summary>
             If the <see cref="P:Blazor.Polyfill.Server.BlazorPolyfillOptions.ForceES5Fallback"/> parameter is set to <see cref="!:true"/>,
@@ -90,6 +98,99 @@
             platform or having issue with it, typically like ARM32v7 OS's.
             </summary>
         </member>
+        <member name="T:Blazor.Polyfill.Server.Enums.ES5ConversionScope">
+            <summary>
+            Specify the Javascript conversion scope to ES5
+            </summary>
+        </member>
+        <member name="F:Blazor.Polyfill.Server.Enums.ES5ConversionScope.None">
+            <summary>
+            If None is selected, only the blazor.server.js file will be converted to ES5.
+            This is the minimum requirement and goal of this library.
+            </summary>
+        </member>
+        <member name="F:Blazor.Polyfill.Server.Enums.ES5ConversionScope.RazorClassLibrary">
+            <summary>
+            If RazorClassLibraries is selected, only the blazor.server.js file and any Razor Class Library loaded in the project will be converted to ES5.
+            Razor Class Library are any library loaded from a package that you reference through a special URI starting by '_content/' in your project.
+            </summary>
+        </member>
+        <member name="F:Blazor.Polyfill.Server.Enums.ES5ConversionScope.All">
+            <summary>
+            If All is selected, any Javascript file will be converted to ES5
+            </summary>
+        </member>
+        <member name="F:Blazor.Polyfill.Server.Helper.BabelHelper.BabelrcJSON">
+            <summary>
+            The babelrc.json config equivalence used internally
+            </summary>
+        </member>
+        <member name="M:Blazor.Polyfill.Server.Helper.BabelHelper.Transform(System.String,System.String)">
+            <summary>
+            Transform the current JS input to an ES5 compliant JS code thanks to Babel through ReactNET.
+            </summary>
+            <param name="input">Javascript code</param>
+            <param name="filename">A filename to specify to Babel. Not sure if used</param>
+            <returns></returns>
+            <exception cref="T:React.Exceptions.BabelException"></exception>
+        </member>
+        <member name="M:Blazor.Polyfill.Server.Helper.CryptographyHelper.CreateSHA256(System.String)">
+            <summary>
+            Get SHA256 from string content
+            https://docs.microsoft.com/fr-fr/dotnet/api/system.security.cryptography.hashalgorithm.computehash?view=net-6.0
+            </summary>
+            <param name="input"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Blazor.Polyfill.Server.Helper.ES5CacheHelper.GetES5CacheStoreFolder">
+            <summary>
+            Return the ES5 Cache Store folder
+            </summary>
+            <returns></returns>
+        </member>
+        <!-- Badly formed XML comment ignored for member "M:Blazor.Polyfill.Server.Helper.ES5CacheHelper.RationalizePath(System.String)" -->
+        <member name="F:Blazor.Polyfill.Server.Helper.ES5CacheHelper._cachedFiles">
+            <summary>
+            The internal ES5 cached files dictionnary in memory.
+            </summary>
+        </member>
+        <member name="M:Blazor.Polyfill.Server.Helper.ES5CacheHelper.HasES5FileInCacheByPath(System.String)">
+            <summary>
+            This return a ES5 file cached by his path.
+            As we cannot detect if a file is in cache just by path,
+            this method will only return something on subsequent call
+            when the file with it's path and checksum will be provided
+            in order to know if a real cached version exist of it a new
+            file creation is needed, then added to this cache entry.
+            </summary>
+            <param name="path"></param>
+            <returns></returns>
+            <exception cref="T:System.NullReferenceException"></exception>
+        </member>
+        <member name="M:Blazor.Polyfill.Server.Helper.ES5CacheHelper.GetETagForES5File(System.String)">
+            <summary>
+            Actually the source ETag with an alternate ending
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Blazor.Polyfill.Server.Helper.ES5CacheHelper.GetES5FileFromCache(System.String)">
+            <summary>
+            Please call <see cref="M:Blazor.Polyfill.Server.Helper.ES5CacheHelper.HasES5FileInCacheByPath(System.String)"/> and <see cref="M:Blazor.Polyfill.Server.Helper.ES5CacheHelper.HasES5FileInCacheWithChecksum(System.String,System.String)"/> before calling this method, as
+            theses method may populate the cache the first time.
+            </summary>
+            <param name="path"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Blazor.Polyfill.Server.Helper.ES5CacheHelper.IsFileChecksumEqual(System.String,System.String)">
+            <summary>
+            Return true if the file given with <paramref name="fileSystemPathToFileWithChecksum"/> contain a Checksum header that match
+            the <paramref name="sourceChecksum"/> checksum.
+            <paramref name="sourceChecksum"/> parameter does not need to be formatted as a header, only the raw checksum is expected.
+            </summary>
+            <param name="fileSystemPathToFileWithChecksum"></param>
+            <param name="sourceChecksum"></param>
+            <returns></returns>
+        </member>
         <member name="M:Blazor.Polyfill.Server.HttpRequestExtensions.IsInternetExplorer(Microsoft.AspNetCore.Http.HttpRequest)">
             <summary>
             If Internet Explorer is detected, return true
@@ -125,10 +226,54 @@
             <param name="request"></param>
             <returns></returns>
         </member>
+        <member name="M:Blazor.Polyfill.Server.HttpRequestManager.ManageRequestHeaders(Microsoft.AspNetCore.Http.HttpContext,System.String,System.String,System.String,System.Func{System.Threading.Tasks.Task})">
+            <summary>
+            Warning: onBodyWriteReady ready will only be called when the result of the method is a 200 (Statut OK)
+            </summary>
+            <param name="context"></param>
+            <param name="contentType"></param>
+            <param name="ETag"></param>
+            <param name="ContentLength"></param>
+            <param name="onBodyWriteReady"></param>
+            <returns></returns>
+        </member>
+        <member name="T:Blazor.Polyfill.Server.Middleware.ECMAScript5Middleware">
+            <summary>
+            Inspiration from:
+            This: https://github.com/saturn72/tethys/blob/851ac6d6235c5e2d2f62c3d4343b8e862062a3c2/src/Tethys.Server/Middlewares/RequestResponseLoggingMiddleware.cs
+            Linking this: https://www.carlrippon.com/adding-useful-information-to-asp-net-core-web-api-serilog-logs/
+            </summary>
+        </member>
+        <member name="F:Blazor.Polyfill.Server.Middleware.ECMAScript5Middleware._env">
+            <summary>
+            Cached IWebHostEnvironment configuration
+            </summary>
+        </member>
+        <member name="M:Blazor.Polyfill.Server.Middleware.ECMAScript5Middleware.GetWebHostEnvironment">
+            <summary>
+            Return a cached IWebHostEnvironment set from the middleware.
+            Mainly used if some informations are needed in an internal helper
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Blazor.Polyfill.Server.Middleware.ECMAScript5Middleware.CopyStreamAsync(System.IO.Stream,System.IO.Stream)">
+            <summary>
+            Like copy stream but with automatic Seek Handling.
+            Assuming the Source can be read
+            Return the Destination Stream
+            </summary>
+            <param name="source"></param>
+            <param name="destination"></param>
+        </member>
         <member name="T:Blazor.Polyfill.Server.Model.FileContentReference">
             <summary>
             This class is intentionally a kind of placeholder in order to avoid "value" copy of the file stored
             with the string class. We want a kind of "ref" behavior, with the value copied/written only 
+            </summary>
+        </member>
+        <member name="P:Blazor.Polyfill.Server.Model.RequestFileMetadata.SourceCheckSum">
+            <summary>
+            The file Checksum hashed with SHA256
             </summary>
         </member>
     </members>

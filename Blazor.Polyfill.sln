@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30709.64
+# Visual Studio Version 17
+VisualStudioVersion = 17.1.31903.286
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Daddoon.Blazor.Polyfill.JS", "src\Daddoon.Blazor.Polyfill.JS\Daddoon.Blazor.Polyfill.JS.csproj", "{A0860159-2B9E-4103-A8DE-3B5F43269128}"
 EndProject
@@ -10,6 +10,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MyApp", "src\MyApp\MyApp.csproj", "{6DC7DFBC-3865-44F8-9B54-1FD449FB2982}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Blazor.Polyfill.Build", "src\Blazor.Polyfill.Build\Blazor.Polyfill.Build.csproj", "{1F8B1351-F28F-4361-A0A7-F577D6E77378}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorDemos", "src\SyncFusionBlazorSamples\BlazorDemos.csproj", "{E97C0CB0-FE4F-4E6F-9AA7-BA6C460A6B40}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{1F8B1351-F28F-4361-A0A7-F577D6E77378}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1F8B1351-F28F-4361-A0A7-F577D6E77378}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1F8B1351-F28F-4361-A0A7-F577D6E77378}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E97C0CB0-FE4F-4E6F-9AA7-BA6C460A6B40}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E97C0CB0-FE4F-4E6F-9AA7-BA6C460A6B40}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E97C0CB0-FE4F-4E6F-9AA7-BA6C460A6B40}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E97C0CB0-FE4F-4E6F-9AA7-BA6C460A6B40}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

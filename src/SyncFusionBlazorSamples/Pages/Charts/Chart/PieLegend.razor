@@ -1,0 +1,57 @@
+﻿@page "/chart/pie-legend"
+
+@using Syncfusion.Blazor
+@using ThemeHelper
+@using Syncfusion.Blazor.Charts
+
+@inject NavigationManager NavigationManager
+@inherits SampleBaseComponent;
+
+<SampleDescription>
+    <p>This sample shows statistics on expenditure made in a year using the donut chart, as well as smooth animation on dynamic data source updates. The legend is shown on the right side of the chart.</p>
+</SampleDescription>
+<ActionDescription>
+    <p>In this example, you can see how to render doughnut chart. You can use <code>radius</code> and <code>innerRadius</code> properties to render the doughnut and also use <code>border</code>, <code>fill</code> properties to customize the point. <code>dataLabel</code> is used to represent individual data and its value.</p>
+    <p><code>Tooltip</code> is enabled in this example, to see the tooltip in action, hover a point or tap on a point in touch enabled devices.</p>
+</ActionDescription>
+
+<div class="control-section">
+    <SfAccumulationChart Title="Expense In Year" SelectionMode="AccumulationSelectionMode.Point" SelectionPattern="SelectionPattern.DiagonalForward" Theme="@Theme">
+        <AccumulationChartTooltipSettings Enable="false"></AccumulationChartTooltipSettings>
+        <AccumulationChartLegendSettings ToggleVisibility=false Position="LegendPosition.Right" Height="28%" Width="44%"></AccumulationChartLegendSettings>
+        <AccumulationChartSeriesCollection>
+            <AccumulationChartSeries DataSource="@PieChartPoints" XName="ExpenseCategory" YName="ExpensePercentage" Name="Revenue" InnerRadius="40%">
+                <AccumulationDataLabelSettings Name="DataLabelMappingName" Visible="true">
+                    <AccumulationChartDataLabelFont FontWeight="600" Color="white"></AccumulationChartDataLabelFont>
+                </AccumulationDataLabelSettings>
+            </AccumulationChartSeries>
+        </AccumulationChartSeriesCollection>
+    </SfAccumulationChart>
+</div>
+
+@code{
+
+    private Theme Theme { get; set; }
+    public List<PieData> PieChartPoints { get; set; } = new List<PieData>
+    {
+         new PieData { ExpenseCategory =  "Net-tution and Fees", ExpensePercentage = 21, DataLabelMappingName = "21%" },
+         new PieData { ExpenseCategory =  "Self-supporting Operations", ExpensePercentage = 21, DataLabelMappingName = "21%" },
+         new PieData { ExpenseCategory =  "Private Gifts", ExpensePercentage = 8, DataLabelMappingName = "8%" },
+         new PieData { ExpenseCategory =  "All Other", ExpensePercentage = 9, DataLabelMappingName = "9%" },
+         new PieData { ExpenseCategory =  "Local Revenue", ExpensePercentage = 4, DataLabelMappingName = "4%" },
+         new PieData { ExpenseCategory =  "State Revenue", ExpensePercentage = 21, DataLabelMappingName = "21%" },
+         new PieData { ExpenseCategory =  "Federal Revenue", ExpensePercentage = 16, DataLabelMappingName = "16%" },
+    };
+
+    protected override void OnInitialized()
+    {
+        Theme = ThemeHelper.GetCurrentTheme(NavigationManager.Uri);
+    }
+
+    public class PieData
+    {
+        public string ExpenseCategory { get; set; }
+        public double ExpensePercentage { get; set; }
+        public string DataLabelMappingName { get; set; }
+    }
+}

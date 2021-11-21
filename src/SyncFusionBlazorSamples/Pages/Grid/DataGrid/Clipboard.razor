@@ -1,0 +1,61 @@
+﻿@page "/datagrid/clipboard"
+
+@using Syncfusion.Blazor.Grids
+@using Syncfusion.Blazor.Navigations
+@using Syncfusion.Blazor.Popups
+@using Syncfusion.Blazor.Buttons
+
+@using blazor_griddata
+
+@inherits SampleBaseComponent;
+
+<SampleDescription>
+    <p>This sample demonstrates copy to clipboard functionality of the DataGrid component. Select rows and click Copy button from toolbar to copy content. To copy with header click Copy with header button from toolbar.</p>
+</SampleDescription>
+<ActionDescription>
+   <p>Selected row or cell data in the DataGrid can be copied into the clipboard using the Keyboard shortcuts and <code><a target='_blank' class='code' href='https://help.syncfusion.com/cr/blazor/Syncfusion.Blazor.Grids.SfGrid-1.html#Syncfusion_Blazor_Grids_SfGrid_1_Copy_System_Nullable_System_Boolean'>Copy</a></code> method.</p>
+   <p>In this demo, selected rows data can be copied into the clipboard using the below Keyboard shortcuts or toolbar interactions.</p>
+   <ul><li><strong>Ctrl + C</strong> - Selected rows or cells data without header.</li>
+      <li><strong>Ctrl + Shift + H</strong> - Selected rows or cells data with header.</li>
+    </ul>
+    <p>More information on the clipboard feature can be found in this <a target='_blank' href='https://blazor.syncfusion.com/documentation/datagrid/clipboard/'>documentation section</a>.</p>
+</ActionDescription>
+
+
+@{
+    List<ItemModel> Toolbar = new List<ItemModel>();
+    Toolbar.Add(new ItemModel { Text = "Copy", TooltipText = "Copy", PrefixIcon = "e-copy", Id = "copy" });
+    Toolbar.Add(new ItemModel { Text = "Copy With Header", TooltipText = "Copy With Header", PrefixIcon = "e-copy", Id = "copyheader" });
+}
+
+<div class="col-lg-12 control-section">
+    <div class="content-wrapper">
+        <div class="row">
+
+            <SfGrid @ref="@Grid" DataSource="@GridData" AllowSelection="true" Toolbar="Toolbar" AllowPaging="true">
+                <GridSelectionSettings Type="Syncfusion.Blazor.Grids.SelectionType.Multiple"></GridSelectionSettings>
+                <GridEvents TValue="OrdersDetails"></GridEvents>
+                <GridColumns>
+                    <GridColumn Field=@nameof(OrdersDetails.OrderID) HeaderText="Order ID" TextAlign="TextAlign.Right" Width="120"></GridColumn>
+                    <GridColumn Field=@nameof(OrdersDetails.CustomerID) HeaderText="Customer Name" Width="150"></GridColumn>
+                    <GridColumn Field=@nameof(OrdersDetails.OrderDate) HeaderText=" Order Date" Format="d" Type="ColumnType.Date" TextAlign="TextAlign.Right" Width="150"></GridColumn>
+                    <GridColumn Field=@nameof(OrdersDetails.Freight) HeaderText="Freight" Format="C2" TextAlign="TextAlign.Right" Width="120"></GridColumn>
+                    <GridColumn Field=@nameof(OrdersDetails.ShipCountry) HeaderText="Ship Country" Width="150"></GridColumn>
+                </GridColumns>
+            </SfGrid>
+
+        </div>
+    </div>
+</div>
+
+
+@code{
+    SfGrid<OrdersDetails> Grid;
+
+    public List<OrdersDetails> GridData { get; set; }
+
+    protected override void OnInitialized()
+    {
+        GridData = OrdersDetails.GetAllRecords();
+    }
+}

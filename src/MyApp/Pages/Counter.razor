@@ -6,6 +6,8 @@ Enter your name:
 <input @bind="name" />
 <button @onclick="Submit">Submit</button>
 
+ <RadzenSlider @bind-Value=@value TValue="int" Min="0" Max="100" Change=@(args => OnChange(args, "Slider from 0 to 100")) />
+
 @code {
     private string name;
 
@@ -27,5 +29,15 @@ Enter your name:
             var module = await _module;
             await module.DisposeAsync();
         }
+    }
+
+    IEnumerable<int> values = new int[] { 14, 78 };
+    IEnumerable<int> negativeValues = new int[] { -100, 100 };
+    int value = 67;
+    int negativeValue = 0;
+    int valueWithStep = 30;
+
+    void OnChange(dynamic value, string name)
+    {
     }
 }

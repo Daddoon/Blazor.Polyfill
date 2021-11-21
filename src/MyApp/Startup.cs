@@ -1,10 +1,13 @@
 using Blazor.Polyfill.Server;
+using Blazor.Polyfill.Server.Enums;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using MyApp.Data;
+using System;
+using System.IO;
 
 namespace MyApp
 {
@@ -30,6 +33,7 @@ namespace MyApp
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -45,14 +49,14 @@ namespace MyApp
 
             app.UseBlazorPolyfill((options) =>
             {
+                options.ES5ConversionScope = ES5ConversionScope.All;
                 options.UsePackagedBlazorServerLibrary = false;
                 options.ForceES5Fallback = true;
                 options.JavascriptModuleImportEmulation = true;
                 options.JavascriptModuleImportEmulationLibraryPath = "/es5module.min.js";
             });
-            //app.UseBlazorPolyfill();
-            app.UseStaticFiles();
 
+            app.UseStaticFiles();
 
             app.UseRouting();
 

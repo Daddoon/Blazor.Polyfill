@@ -1,0 +1,175 @@
+﻿@page "/kanban/dialog-editing"
+@inherits SampleBaseComponent;
+
+@using ej2_blazor_kanban_data_models
+@using Syncfusion.Blazor.Buttons
+@using Syncfusion.Blazor.DropDowns
+@using Syncfusion.Blazor.Inputs
+@using Syncfusion.Blazor.Kanban
+
+<SampleDescription>
+    <p>This sample showcases the CRUD (Create, Read, Update, and Delete) operations of the Kanban component. You can add a new card using the button from the property panel and read, update, or delete a card by opening the card details in dialog by double-clicking it.</p>
+</SampleDescription>
+<ActionDescription>
+    <p>The sample is designed to showcase the CRUD operations of the Kanban board. The Kanban provides the essential methods to handle the CRUD operation from the application-end.</p>
+    <ol>
+        <li>UpdateCard</li>
+        <li>AddCard</li>
+        <li>DeleteCard</li>
+    </ol>
+    <p>The double click event of the card is used to open the card details in a dialog and read, edit, or delete a card.</p>
+</ActionDescription>
+
+<div class="col-lg-9 control-section">
+    <SfKanban @ref="KanbanRef" KeyField="Status" DataSource="@cardData">
+        <KanbanColumns>
+            @foreach (ColumnModel item in columnData)
+            {
+                <KanbanColumn HeaderText="@item.HeaderText" KeyField="@item.KeyField"></KanbanColumn>
+            }
+        </KanbanColumns>
+        <KanbanCardSettings HeaderField="Id" ContentField="Summary"></KanbanCardSettings>
+        <KanbanDialogSettings>
+            <Template>
+                @{
+                    KanbanDataModel data = (KanbanDataModel)context;
+                    <table>
+                        <tbody>
+                            <tr>
+                                <td class="e-label">ID</td>
+                                <td>
+                                    <SfTextBox CssClass="e-field" Value="@data.Id" Enabled="false"></SfTextBox>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="e-label">Status</td>
+                                <td>
+                                    <SfDropDownList @ref="StatusRef" TValue="string" TItem="DropDownModel" CssClass="e-field" DataSource="@StatusData" @bind-Value="@data.Status">
+                                        <DropDownListFieldSettings Text="Value" Value="Value"></DropDownListFieldSettings>
+                                    </SfDropDownList>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="e-label">Assignee</td>
+                                <td>
+                                    <SfDropDownList @ref="AssigneeRef" TValue="string" TItem="DropDownModel" CssClass="e-field" DataSource="@AssigneeData" @bind-Value="@data.Assignee">
+                                        <DropDownListFieldSettings Text="Value" Value="Value"></DropDownListFieldSettings>
+                                    </SfDropDownList>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="e-label">Priority</td>
+                                <td>
+                                    <SfDropDownList @ref="PriorityRef" TValue="string" TItem="DropDownModel" CssClass="e-field" DataSource="@PriorityData" @bind-Value="@data.Priority">
+                                        <DropDownListFieldSettings Text="Value" Value="Value"></DropDownListFieldSettings>
+                                    </SfDropDownList>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="e-label">Summary</td>
+                                <td>
+                                    <SfTextBox @ref="SummaryRef" CssClass="e-field" Multiline="true" @bind-Value="@data.Summary"></SfTextBox>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                }
+            </Template>
+        </KanbanDialogSettings>
+    </SfKanban>
+</div>
+<div class="col-lg-3 property-section">
+    <div class="property-panel-section">
+        <div class="property-panel-header">Properties</div>
+        <div class="property-panel-content">
+            <table class="property-panel-table" title="Properties">
+                <tbody>
+                    <tr>
+                        <td>
+                            <SfButton Content="Add New Card" OnClick="ShowAddCardDialog"></SfButton>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<style>
+    .property-panel-section table {
+        width: 100%;
+    }
+
+        .property-panel-section table tr {
+            height: 50px;
+        }
+
+        .property-panel-section table td {
+            padding-left: 10px;
+            width: 50%;
+        }
+</style>
+
+@code{
+    SfKanban<KanbanDataModel> KanbanRef;
+    SfDropDownList<string, DropDownModel> StatusRef;
+    SfDropDownList<string, DropDownModel> AssigneeRef;
+    SfDropDownList<string, DropDownModel> PriorityRef;
+    SfTextBox SummaryRef;
+
+    private List<KanbanDataModel> cardData = new KanbanDataModel().GetTasks();
+    private List<ColumnModel> columnData = new List<ColumnModel>() {
+        new ColumnModel(){ HeaderText= "Backlog", KeyField= new List<string>() { "Open" } },
+        new ColumnModel(){ HeaderText= "In Progress", KeyField= new List<string>() { "In Progress" } },
+        new ColumnModel(){ HeaderText= "Testing", KeyField= new List<string>() { "Testing" } },
+        new ColumnModel(){ HeaderText= "Done", KeyField=new List<string>() { "Close" } }
+    };
+
+    private class DropDownModel
+    {
+        public int Id { get; set; }
+        public string Value { get; set; }
+    }
+
+    private List<DropDownModel> StatusData = new List<DropDownModel>() {
+        new DropDownModel { Id = 0, Value = "Open" },
+        new DropDownModel { Id = 1, Value = "In Progress" },
+        new DropDownModel { Id = 2, Value = "Testing" },
+        new DropDownModel { Id = 3, Value = "Close" }
+    };
+
+    private List<DropDownModel> AssigneeData = new List<DropDownModel>() {
+        new DropDownModel { Id = 0, Value = "Nancy Davloio" },
+        new DropDownModel { Id = 1, Value = "Andrew Fuller" },
+        new DropDownModel { Id = 2, Value = "Janet Leverling" },
+        new DropDownModel { Id = 3, Value = "Steven walker" },
+        new DropDownModel { Id = 4, Value = "Robert King" },
+        new DropDownModel { Id = 5, Value = "Margaret hamilt" },
+        new DropDownModel { Id = 6, Value = "Michael Suyama" }
+    };
+
+    private List<DropDownModel> PriorityData = new List<DropDownModel>() {
+        new DropDownModel { Id = 0, Value = "Low" },
+        new DropDownModel { Id = 1, Value = "Normal" },
+        new DropDownModel { Id = 2, Value = "Critical" },
+        new DropDownModel { Id = 3, Value = "Release Breaker" },
+        new DropDownModel { Id = 4, Value = "High" }
+    };
+
+    private async void ShowAddCardDialog()
+    {
+        KanbanDataModel data = new KanbanDataModel()
+        {
+            Id = "Task " + (this.cardData.Count + 1).ToString(),
+            Title = "",
+            Tags = "",
+            Estimate = 0,
+            Summary = "",
+            Status = "Open",
+            Type = "Story",
+            Priority = "Low",
+            Assignee = "Nancy Davloio"
+        };
+        await this.KanbanRef.OpenDialogAsync(CurrentAction.Add, data);
+    }
+}

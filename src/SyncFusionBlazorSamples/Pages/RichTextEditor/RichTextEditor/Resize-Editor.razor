@@ -1,0 +1,31 @@
+﻿
+@page "/rich-text-editor/resize-editor"
+
+@using Syncfusion.Blazor.RichTextEditor
+
+@inherits SampleBaseComponent;
+
+<SampleDescription>
+    <p>This sample demonstrates the resize operation of the Rich Text Editor control. To resize the rich text editor, select and resize the editor using its handle (grip) at the bottom right corner of the content panel.</p>
+</SampleDescription>
+<ActionDescription>
+   <p>Users can create resizable Rich Text Editor by setting the <code>EnableResize</code> property to true, which is used to change the size of the Rich Text Editor dynamically.</p>
+</ActionDescription>
+
+<div class="control-section">
+    <SfRichTextEditor EnableResize="true" Height="250px">
+        <p>
+            The Rich Text Editor component is a WYSIWYG ("what you see is what you get") editor that provides the best user experience to create and update the content.
+            Users can format their content using standard toolbar commands.
+        </p>
+    </SfRichTextEditor>
+</div>
+
+<style>
+    .e-richtexteditor {
+        max-width: 880px;
+        min-width: 200px;
+        min-height: 170px;
+        max-height: 400px;
+    }
+</style>
