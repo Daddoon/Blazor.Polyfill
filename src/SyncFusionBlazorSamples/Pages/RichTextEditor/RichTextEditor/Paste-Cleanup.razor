@@ -1,0 +1,199 @@
+﻿
+@page "/rich-text-editor/paste-cleanup"
+
+@using Syncfusion.Blazor.DropDowns
+@using Syncfusion.Blazor.RichTextEditor
+
+@inherits SampleBaseComponent;
+
+<SampleDescription>
+    <p>This example demonstrates the paste cleanup feature of the Rich Text Editor control. Copy your content from MS Word or other website, and paste it within the editor to cleanup.</p>
+</SampleDescription>
+<ActionDescription>
+    <p>The Rich Text Editor allows to paste the HTML content from MS Word or other websites. The editor cleanup the pasted HTML content by considering the following items.</p>
+    <ul>
+        <li>The unformatted HTML element (MOS XML format) content to standard HTML elements.</li>
+        <li>The MS Office prefixed style properties is converted to proper CSS style properties.</li>
+        <li>The unwanted tags, CSS styles, and comments are removed from the copied content.</li>
+    </ul>
+    <p>The following settings are available to cleanup the content in pasteCleanup settings property:</p>
+    <ul>
+        <li>
+            Select any option in <code>Format Option</code> drop down list for the paste content.
+            <ul>
+                <li>Select the <code>Prompt</code> option to invoke prompt dialog with paste options on pasting the content in editor.</li>
+                <li>Select the <code>Plain Text</code> option to paste the content as plain text.</li>
+                <li>Select the <code>Keep Format</code> option to keep the same format in the copied content.</li>
+                <li>Select the <code>Clean Format</code> option to remove the style format in the copied content.</li>
+            </ul>
+        </li>
+        <li>
+            Fill the <code>Denied Tags</code> text box to ignore the tags when pasting HTML content. For example:
+            <ul>
+                <li><b>['a[!href]']</b> - paste the content by filtering anchor tags that don’t have the 'href' attribute.</li>
+                <li><b>['a[href, target]']</b> - paste the content by filtering anchor tags that have the 'href' and 'target' attributes.</li>
+            </ul>
+        </li>
+        <br />
+        <li>
+            Fill the <code>Denied Attributes</code> to paste the content by filtering out these attributes from the content. For example:
+            <ul><b>['id', 'title']</b> - This will remove the attributes 'id' and 'title' from all tags.</ul>
+        </li>
+        <br />
+        <li>
+            Fill the <code>Allowed Style properties</code> to paste the content by accepting these style attributes and removing other attributes. For example:<ul>
+                <b>['color', 'margin']</b> - This will allow only the style properties 'color' and 'margin' in each pasted element.
+            </ul>
+        </li>
+    </ul>
+</ActionDescription>
+
+<div class="col-lg-8 control-section">
+    <div class="">
+        <SfRichTextEditor Value="@Value">
+            <RichTextEditorPasteCleanupSettings Prompt="@Prompt" PlainText="@Plaintext" KeepFormat="@Keepformat" DeniedAttributes="@Deniedattr"
+                                                AllowedStyleProperties="@Allowedstyle" DeniedTags="@Deniedtags" />
+        </SfRichTextEditor>
+    </div>
+</div>
+<div class="col-lg-4 property-section">
+    <div title="Properties">
+        <table id="property" title="Properties">
+            <tbody>
+                <tr>
+                    <td>
+                        <div>Format Option</div>
+                    </td>
+                    <td>
+                        <div>
+                            <SfDropDownList @ref="DropObj" TItem="GameFields" TValue="string" PopupHeight="200px" @bind-Value="pasteDefaultValue" DataSource="@Options">
+                                <DropDownListFieldSettings Text="Text" Value="ID" />
+                                <DropDownListEvents TValue="string" TItem="GameFields" ValueChange="valueChange" />
+                            </SfDropDownList>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div>Denied Tags </div>
+                    </td>
+                    <td>
+                        <div>
+                            <input type="text" @bind="@DeniedTagsvalue" class="e-input" @onblur="deniedTagsblur" placeholder="img[!href], h1" />
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div>Denied Attributes </div>
+                    </td>
+                    <td>
+                        <div>
+                            <input type="text" @bind="@DeniedAttributesvalue" class="e-input" @onblur="deniedAttributesblur" placeholder="id, title" />
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <div>Allowed Style Properties </div>
+                    </td>
+                    <td>
+                        <div>
+                            <input type="text" @bind="@AllowedStylePropertiesvalue" class="e-input" @onblur="allowedStylePropertiesblur" placeholder="href, style" />
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<style>
+    .property-section table td {
+        width: 50%;
+    }
+
+    .property-section table div {
+        padding-left: 10px;
+        padding-top: 10px;
+    }
+</style>
+
+@code {
+	SfDropDownList<string, GameFields> DropObj;
+
+    private string pasteDefaultValue { get; set; } = "prompt";
+    private bool Prompt = true;
+    private string DeniedTagsvalue;
+    private bool Plaintext = false;
+    private bool Keepformat = false;
+    private string DeniedAttributesvalue;
+    private string[] Deniedtags { get; set; }
+    private string[] Deniedattr { get; set; }
+    private string AllowedStylePropertiesvalue;
+    private string[] Allowedstyle { get; set; }
+    private string Value { get; set; } = @"<p>Rich Text Editor is a WYSIWYG editing control that will reduce the effort for users while trying to express their formatting word content as HTML or Markdown format.</p><p><b>Paste Cleanup properties:</b></p><ul><li><p>Prompt - specifies whether to enable the prompt when pasting in Rich Text Editor.</p></li><li><p>PlainText - specifies whether to paste as plain text or not in Rich Text Editor.</p></li><li><p>KeepFormat- specifies whether to keep or remove the format when pasting in Rich Text Editor.</p></li><li><p>DeniedTags - specifies the tags to restrict when pasting in Rich Text Editor.</p></li><li><p>DeniedAttributes - specifies the attributes to restrict when pasting in Rich Text Editor.</p></li><li><p>AllowedStyleProperties - specifies the allowed style properties when pasting in Rich Text Editor.</p></li></ul>";
+
+    private class GameFields
+    {
+        public string ID { get; set; }
+        public string Text { get; set; }
+    }
+
+    private List<GameFields> Options = new List<GameFields>()
+        {
+        new GameFields(){ ID= "prompt", Text= "Prompt" },
+        new GameFields(){ ID= "plainText", Text= "Plain Text" },
+        new GameFields(){ ID= "keepFormat", Text= "Keep Format" },
+        new GameFields(){ ID= "cleanFormat", Text= "Clean Format" },
+    };
+
+    private void valueChange(@Syncfusion.Blazor.DropDowns.ChangeEventArgs<string, GameFields> args)
+    {
+        if (args.Value == "prompt")
+        {
+            this.Prompt = true;
+        }
+        else if (args.Value == "plainText")
+        {
+            this.Prompt = false;
+            this.Plaintext = true;
+        }
+        else if (args.Value == "keepFormat")
+        {
+            this.Prompt = false;
+            this.Plaintext = false;
+            this.Keepformat = true;
+        }
+        else if (args.Value == "cleanFormat")
+        {
+            this.Prompt = false;
+            this.Plaintext = false;
+            this.Keepformat = false;
+        }
+    }
+
+    private void deniedTagsblur(Microsoft.AspNetCore.Components.Web.FocusEventArgs e)
+    {
+        if (this.DeniedTagsvalue != null)
+        {
+            this.Deniedtags = this.DeniedTagsvalue.Split(',');
+        }
+    }
+
+    private void deniedAttributesblur(Microsoft.AspNetCore.Components.Web.FocusEventArgs e)
+    {
+        if (this.DeniedAttributesvalue != null)
+        {
+            this.Deniedattr = this.DeniedAttributesvalue.Split(',');
+        }
+    }
+
+    private void allowedStylePropertiesblur(Microsoft.AspNetCore.Components.Web.FocusEventArgs e)
+    {
+        if (this.AllowedStylePropertiesvalue != null)
+        {
+            this.Allowedstyle = this.AllowedStylePropertiesvalue.Split(',');
+        }
+    } 
+}

@@ -1,0 +1,90 @@
+﻿@page "/DropDown-List/Default-Functionalities"
+
+@using Syncfusion.Blazor.DropDowns
+@using Newtonsoft.Json
+@inherits SampleBaseComponent;
+
+<SampleDescription>
+    <p>This sample demonstrates the default functionalities of the DropDownList in Blazor application. Click the DropDownList element and select an item from the <code>options</code> list.</p>
+</SampleDescription>
+<ActionDescription>
+   <p>The <code>DropDownList</code> component contains a list of predefined values from that the user can choose a single value.</p>
+   <p>The default sample illustrates the use of DropDownList that allows the end-users to select an item from the <code>options</code> list.</p>
+   <p>More information on the DropDownList instantiation can be found in the <a href='https://blazor.syncfusion.com/documentation/dropdown-list/getting-started/' target='_blank'> documentation section</a>.</p>
+</ActionDescription>
+
+<div class="control-section col-lg-12">
+    <div class="col-lg-8">
+        <div class="control-wrapper">
+            <SfDropDownList TItem="GameFields" TValue="string" PopupHeight="230px"  Placeholder="Select a game" @bind-Value="@DropDownValue" DataSource="@Games">
+                <DropDownListEvents TItem="GameFields" TValue="string" ValueChange="OnChange"></DropDownListEvents>
+                <DropDownListFieldSettings Text="Text" Value="ID"></DropDownListFieldSettings>
+            </SfDropDownList>
+        </div>
+    </div>
+    <div class="col-lg-4 property-section">
+        <div class="property-panel-header">Properties</div>
+        <table id="property" title="Properties">
+            <tr>
+                <td class="property-label">Value</td>
+                <td>:<span id='value' class="property-value">@DropDownValue</span></td>
+            </tr>
+            <tr>
+                <td class="property-label">Text</td>
+                <td>:<span id='text' class="property-value">@ChangeValue</span></td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<style>
+    .control-wrapper {
+        width: 250px;
+        margin: 0 auto;
+        padding-top: 70px;
+    }
+
+    .property-section .property-value {
+        padding-left: 10px;
+    }
+
+    .property-section .property-label {
+        padding: 5px;
+        width: 25%
+    }
+
+    #property {
+        width: 100%;
+        margin: 10px
+    }
+</style>
+
+@code{
+    public class GameFields
+    {
+        public string ID { get; set; }
+
+        public string Text { get; set; }
+    }
+
+    private List<GameFields> Games = new List<GameFields>() 
+    {
+        new GameFields(){ ID= "Game1", Text= "American Football" },
+        new GameFields(){ ID= "Game2", Text= "Badminton" },
+        new GameFields(){ ID= "Game3", Text= "Basketball" },
+        new GameFields(){ ID= "Game4", Text= "Cricket" },
+        new GameFields(){ ID= "Game5", Text= "Football" },
+        new GameFields(){ ID= "Game6", Text= "Golf" },
+        new GameFields(){ ID= "Game7", Text= "Hockey" },
+        new GameFields(){ ID= "Game8", Text= "Rugby"},
+        new GameFields(){ ID= "Game9", Text= "Snooker" },
+        new GameFields(){ ID= "Game10", Text= "Tennis"},
+     };
+    public string DropDownValue = "Game3";
+    public string ChangeValue { get; set; } = "Basketball";
+
+    public void OnChange(Syncfusion.Blazor.DropDowns.ChangeEventArgs<string, GameFields> args)
+    {
+        this.ChangeValue = args.ItemData.Text;
+    }
+}

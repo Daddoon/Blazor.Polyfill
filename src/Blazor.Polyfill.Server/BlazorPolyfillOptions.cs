@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Blazor.Polyfill.Server.Enums;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,9 +30,18 @@ namespace Blazor.Polyfill.Server
             UsePackagedBlazorServerLibrary = false;
             ForceES5Fallback = false;
             ES5FallbackValidation = null;
+            ES5ConversionScope = ES5ConversionScope.None;
             JavascriptModuleImportEmulation = false;
             JavascriptModuleImportEmulationLibraryPath = DefaultJSModuleImportEmulationLibraryPath;
         }
+
+        /// <summary>
+        /// Specify the conversion scope of Javascript files to ES5 during application lifetime.
+        /// Read the enum description for the detailled behaviors.
+        /// 
+        /// Default value is <see cref="ES5ConversionScope.None"/>
+        /// </summary>
+        public ES5ConversionScope ES5ConversionScope { get; set; }
 
         /// <summary>
         /// If the <see cref="BlazorPolyfillOptions.ForceES5Fallback"/> parameter is set to <see cref="true"/>,

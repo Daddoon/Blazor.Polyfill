@@ -1,0 +1,61 @@
+﻿@page "/gantt-chart/unscheduled-task"
+
+@using Syncfusion.Blazor.Gantt
+@using BlazorDemos
+@using ej2_blazor_unscheduledata
+
+@inherits SampleBaseComponent;
+
+<SampleDescription>
+    <p>This sample visualize the various types of unscheduled taskbars in Gantt with quick add support of task with custom toolbar in Gantt.</p>
+</SampleDescription>
+<ActionDescription>
+    <p>Unscheduled tasks are tasks in a project that are not scheduled with proper dates or duration at the commencement of the project.  These tasks can be scheduled properly at any time during project implementation based on factors such as resource availability, dependent tasks, and more.</p>
+    <p>
+        This example shows how to display the unscheduled tasks in Gantt by enabling the <code>AllowUnscheuldedTask</code> property.
+        This also shows how to add an empty row in Gantt by using a custom toolbar button click action.
+    </p>
+    <p>By using the <code>OnToolbarClick</code> event and <code>AddRecord</code> method, an empty row can be added at the top of the rows with undefined task details. </p>
+</ActionDescription>
+
+<div class="col-lg-12 control-section">
+    <div class="content-wrapper">
+        <div class="row">
+            <SfGantt DataSource="@TaskCollection" Height="450px" Width="100%" HighlightWeekends="true"
+                     Toolbar="@(new List<string>(){ "Add", "Edit", "Update", "Delete", "Cancel"})"
+                     ProjectStartDate="@ProjectStart" ProjectEndDate="@ProjectEnd" AllowUnscheduledTasks="true">
+                <GanttTaskFields Id="TaskId" Name="TaskName" StartDate="StartDate" EndDate="EndDate" Duration="Duration" Progress="Progress"
+                                 ParentID="ParentId"></GanttTaskFields>
+                <GanttEditSettings AllowAdding="true" AllowDeleting="true" AllowEditing="true"></GanttEditSettings>
+                <GanttLabelSettings LeftLabel="TaskName" TValue="UnscheduleData.TaskData">
+                </GanttLabelSettings>
+                <GanttSplitterSettings Position="30%"></GanttSplitterSettings>
+            </SfGantt>
+        </div>
+    </div>
+</div>
+
+@code{
+    public DateTime ProjectStart = new DateTime(2019, 3, 24);
+    public DateTime ProjectEnd = new DateTime(2019, 7, 6);
+
+    public List<UnscheduleData.TaskData> TaskCollection { get; set; }
+
+    protected override void OnInitialized()
+    {
+        this.TaskCollection = UnscheduleData.GetTaskCollection();
+    }
+
+}
+
+
+<style>
+
+    #Unscheduled .e-add-icon:before {
+        content: "\e506"
+    }
+
+    .bootstrap4 #Unscheduled .e-add-icon:before {
+        content: "\e783"
+    }
+</style>

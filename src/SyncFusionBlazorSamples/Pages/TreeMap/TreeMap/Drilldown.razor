@@ -1,0 +1,415 @@
+@page "/treemap/drill-down"
+
+@using Syncfusion.Blazor
+@using Syncfusion.Blazor.TreeMap
+@using Syncfusion.Blazor.DropDowns
+@using Syncfusion.Blazor.Buttons
+@using ThemeHelper
+@inject NavigationManager NavigationManager
+@inherits SampleBaseComponent;
+
+<SampleDescription>
+    <p>This sample demonstrates drill-down, beginning with continents and progressing to countries and regions. By selecting a continent from the TreeMap, you can clearly see all of the countries available in that continent. Similarly, by selecting a country, you can view all of its regions.</p>
+</SampleDescription>
+<ActionDescription>
+    <p>In this example, you can see how to render and configure a TreeMap with multiple items, as well as drill-down and drill-up functionality. You can also change the drill down view, customize the breadcrumb, and change the header alignment using the options in the properties panel.</p>
+    <p>More information about drilldown can be found in this <a target='_blank' href='https://blazor.syncfusion.com/documentation/treemap/drill-down'>documentation section</a>.</p>
+</ActionDescription>
+
+<div class="col-lg-9 control-section sb-property-border">
+    <SfTreeMap WeightValuePath="Population" EnableDrillDown="true" DrillDownView="@DrilldownCheckBoxValue" EnableBreadcrumb="@AllowBreadcrumb" BreadcrumbConnector="@BreadCrumbConnector" Palette="@Palette"
+               DataSource="@LevelDataSource" Theme="@Theme">
+        <TreeMapTitleSettings Text="List of countries by population">
+            <TreeMapTitleTextStyle Size="15px" FontFamily="Segoe UI" />
+        </TreeMapTitleSettings>
+        <TreeMapLeafItemSettings LabelPath=Name Fill="6699cc" ShowLabels="false">
+            <TreeMapLeafLabelStyle Size="0px" />
+            <TreeMapLeafBorder Color="#000000" Width="0.5" />
+        </TreeMapLeafItemSettings>
+        <TreeMapLevels>
+            <TreeMapLevel GroupPath="Continent" HeaderAlignment="@Header">
+                <TreeMapLevelBorder Color="#000000" Width="0.5" />
+                <TreeMapHeaderStyle FontFamily="Segoe UI"></TreeMapHeaderStyle>
+            </TreeMapLevel>
+            <TreeMapLevel GroupPath=States HeaderAlignment="@Header">
+                <TreeMapLevelBorder Color="#000000" Width="0.5" />
+                <TreeMapHeaderStyle FontFamily="Segoe UI"></TreeMapHeaderStyle>
+            </TreeMapLevel>
+            <TreeMapLevel GroupPath="Region" ShowHeader="false" HeaderAlignment="@Label">
+                <TreeMapLevelBorder Color="#000000" Width="0.5" />
+                <TreeMapHeaderStyle FontFamily="Segoe UI"></TreeMapHeaderStyle>
+            </TreeMapLevel>
+        </TreeMapLevels>
+    </SfTreeMap>
+    <div class="urllink">
+        Source:
+        <a href=" https=//en.wikipedia.org/wiki/United_States_presidential_election,_2016" target="_blank">en.wikipedia.org</a>
+    </div>
+</div>
+<div class="col-lg-3 property-section">
+    <div class="property-panel-section">
+        <div class="property-panel-header">Properties</div>
+        <div class="property-panel-content">
+            <table style="width:100%" title="Properties">
+                <tbody>
+                    <tr>
+                        <td class="property-text">
+                            Drilldown View
+                        </td>
+                        <td>
+                            <div style="padding-left:10px;">
+                                <SfCheckBox Checked="@DrilldownCheckBoxValue" ValueChange="DrilldownEnable" TChecked="bool" />
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="property-text">
+                            <div class="property-text">Enable Breadcrumb</div>
+                        </td>
+                        <td>
+                            <div style="padding-left:10px;">
+                                <SfCheckBox Checked="@AllowBreadcrumb" ValueChange="BreadEnable" TChecked="bool" />
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="property-text">Breadcrumb Connector</div>
+                        </td>
+                        <td>
+                            <div>
+                                <input type="text" value=" - " disabled=@Disabled @onchange="BreadcrumbChange" style="width:70px;margin-left:10px" />
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            Header Alignment
+                        </td>
+                        <td style="padding-left:10px">
+                            <SfDropDownList Placeholder="Select smartlabel mode" DataSource="@HeaderAlignment" @bind-Value="@headerAlignmentValue" Width="120px">
+                                <DropDownListEvents TValue="string" TItem="HeaderDropDownList" ValueChange="HeaderAlignmentvaluechange" />
+                                <DropDownListFieldSettings Text="Name" Value="Value" />
+                            </SfDropDownList>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<style>
+    tr {
+        height: 40px;
+    }
+
+    td {
+        width: 50%;
+    }
+</style>
+@code {
+    public Theme Theme { get; set; }
+    public bool DrilldownCheckBoxValue;
+    public string BreadCrumbConnector = " - ";
+    public bool Disabled = true;
+    public bool AllowBreadcrumb;
+    public Alignment Label = Alignment.Near;
+    public Alignment Header = Alignment.Near;
+    public string headerAlignmentValue = "Near";
+    protected override void OnInitialized()
+    {
+        Theme = ThemeHelper.GetCurrentTheme(NavigationManager.Uri);
+    }
+    public void HeaderAlignmentvaluechange(Syncfusion.Blazor.DropDowns.ChangeEventArgs<string, HeaderDropDownList> args)
+    {
+        headerAlignmentValue = args.Value;
+        if (args.Value == "Near")
+        {
+            Header = Alignment.Near;
+        }
+        else if (args.Value == "Far")
+        {
+            Header = Alignment.Far;
+        }
+        else
+        {
+            Header = Alignment.Center;
+        }
+    }
+    public void BreadcrumbChange(Microsoft.AspNetCore.Components.ChangeEventArgs args)
+    {
+        BreadCrumbConnector = args.Value.ToString();
+    }
+    public class HeaderDropDownList
+    {
+        public string Value { get; set; }
+        public string Name { get; set; }
+    };
+    public List<HeaderDropDownList> HeaderAlignment = new List<HeaderDropDownList> {
+        new HeaderDropDownList { Value="Near", Name="Near" },
+        new HeaderDropDownList { Value="Far", Name="Far" },
+        new HeaderDropDownList { Value="Center", Name="Center" }
+    };
+    public void DrilldownEnable(Syncfusion.Blazor.Buttons.ChangeEventArgs<bool> args)
+    {
+        DrilldownCheckBoxValue = args.Checked;
+    }
+    public void BreadEnable(Syncfusion.Blazor.Buttons.ChangeEventArgs<bool> args)
+    {
+        AllowBreadcrumb = args.Checked;
+        Disabled = (AllowBreadcrumb == true) ? false : true;
+    }
+    public class LevelOne
+    {
+        public List<LevelTwo> Continent { get; set; }
+    }
+    public class LevelTwo
+    {
+        public string Name { get; set; }
+        public long Population { get; set; }
+        public List<LevelThree> States { get; set; }
+    }
+    public class LevelThree
+    {
+        public string Name { get; set; }
+        public int Population { get; set; }
+        public List<LevelFour> Region { get; set; }
+    }
+    public class LevelFour
+    {
+        public string Name { get; set; }
+        public int Population { get; set; }
+    }
+    public string[] Palette = new string[] { "#9999ff", "#CCFF99", "#FFFF99", "#FF9999", "#FF99FF", "#FFCC66" };
+    public List<LevelOne> LevelDataSource { get; set; } = new List<LevelOne> {
+         new LevelOne{ Continent= new List<LevelTwo> {
+       new LevelTwo{ Name= "Africa",Population= 1216130000, States= new List<LevelThree> {
+          new LevelThree{ Name= "Eastern Africa",Population=410637987, Region=new List<LevelFour> {
+               new LevelFour{ Name="Ethiopia", Population= 107534882},
+                new LevelFour{ Name="Tanzania", Population= 59091392},
+                new LevelFour{ Name="Kenya", Population= 50950879},
+                new LevelFour{ Name="Uganda", Population= 44270563},
+                new LevelFour{ Name="Mozambique", Population= 30528673},
+                new LevelFour{ Name="Madagascar", Population= 26262810},
+                new LevelFour{ Name="Malawi", Population= 19164728},
+                new LevelFour{ Name="Zambia", Population= 17609178},
+                new LevelFour{ Name="Zimbabwe", Population= 16913261},
+                new LevelFour{ Name="Somalia", Population= 15181925},
+                new LevelFour{ Name="South, Sudan", Population= 12919053},
+                new LevelFour{ Name="Rwanda", Population= 12501156},
+                new LevelFour{ Name="Burundi", Population= 11216450},
+                new LevelFour{ Name="Eritrea", Population= 5187948},
+                new LevelFour{ Name="Mauritius", Population= 1268315},
+                new LevelFour{ Name="Djibouti", Population= 971408},
+                new LevelFour{ Name="Réunion", Population= 883247},
+                new LevelFour{ Name="Comoros", Population= 832347},
+                new LevelFour{ Name="Mayotte", Population= 259682},
+                new LevelFour{ Name="Seychelles", Population= 95235}
+            }  },
+
+       new LevelThree { Name= "Middle Africa",Population=158562976, Region=new List<LevelFour> {
+                new LevelFour { Name="Democratic, Republic of the Congo", Population= 84004989},
+                new LevelFour { Name="Angola", Population= 30774205},
+                new LevelFour { Name="Cameroon", Population= 24678234},
+                new LevelFour { Name="Chad", Population= 15353184},
+                new LevelFour { Name="Congo", Population= 5399895},
+                new LevelFour { Name="Central African, Republic", Population= 4737423},
+                new LevelFour { Name="Gabon", Population= 2067561},
+                new LevelFour { Name="Equatorial Guinea", Population= 1313894},
+                new LevelFour { Name="Sao Tome and Principe", Population= 208818}
+            } },
+        new LevelThree { Name= "Northern Africa",Population=229385603, Region= new List<LevelFour> {
+                new LevelFour { Name="Egypt", Population= 99375741},
+                new LevelFour { Name="Algeria", Population= 42008054},
+                new LevelFour { Name="Sudan", Population= 41511526},
+                new LevelFour { Name="Morocco", Population= 36191805},
+                new LevelFour { Name="Tunisia", Population= 11659174},
+                new LevelFour { Name="Libya", Population= 6470956},
+                new LevelFour { Name="Western, Sahara", Population= 567421}
+            } },
+        new LevelThree { Name= "Southern Africa",Population=64292365, Region=new List<LevelFour> {
+                new LevelFour { Name="South Africa", Population= 57398421},
+                new LevelFour { Name="Namibia", Population= 2587801},
+                new LevelFour { Name="Botswana", Population= 2333201},
+                new LevelFour { Name="Lesotho", Population= 2263010},
+                new LevelFour { Name="Swaziland", Population= 1391385}
+            } },
+        new LevelThree { Name= "Western Africa", Population=362201579, Region=new List<LevelFour> {
+                new LevelFour { Name="Nigeria", Population= 195875237},
+                new LevelFour { Name="Ghana", Population= 29463643},
+                new LevelFour { Name="Côte d'Ivoire", Population= 24905843},
+                new LevelFour { Name="Niger", Population= 22311375},
+                new LevelFour { Name="Burkina Faso", Population= 19751651},
+                new LevelFour { Name="Mali", Population= 19107706},
+                new LevelFour { Name="Senegal", Population= 16294270},
+                new LevelFour { Name="Guinea", Population= 13052608},
+                new LevelFour { Name="Benin", Population= 11485674},
+                new LevelFour { Name="Togo", Population= 7990926},
+                new LevelFour { Name="Sierra Leone", Population= 7719729},
+                new LevelFour { Name="Liberia", Population= 4853516},
+                new LevelFour { Name="Mauritania", Population= 4540068},
+                new LevelFour { Name="Gambia", Population= 2163765},
+                new LevelFour { Name="Guinea-Bissau", Population= 1907268},
+                new LevelFour { Name="Cabo Verde", Population= 553335},
+                new LevelFour { Name="Saint Helena", Population= 4074},
+                new LevelFour { Name="Mayotte", Population= 259682},
+                new LevelFour { Name="Seychelles", Population= 95235}
+            } }
+       }
+         }
+    }
+
+},
+      new LevelOne { Continent=new List<LevelTwo> {
+        new LevelTwo { Name= "Asia", Population=4436224000, States=new List<LevelThree> {
+            new LevelThree { Name= "Central Asia", Population= 69787760,Region=new List<LevelFour> {
+                new LevelFour { Name="Uzbekistan", Population= 32364996 },
+                new LevelFour { Name="Kazakhstan", Population= 18403860 },
+                new LevelFour { Name="Tajikistan", Population= 9107211 },
+                new LevelFour { Name="Kyrgyzstan", Population= 6132932 },
+                new LevelFour { Name="Turkmenistan", Population= 5851466 }
+            } },
+            new LevelThree { Name= "Eastern Asia", Population=1641908531,Region=new List<LevelFour> {
+                new LevelFour { Name="China", Population= 1415045928},
+                new LevelFour { Name="Japan", Population=  127185332 },
+                new LevelFour { Name="South Korea", Population= 51164435 },
+                new LevelFour { Name="North Korea", Population=25610672 },
+                new LevelFour { Name="Taiwan", Population= 23694089 },
+                new LevelFour { Name="Hong Kong", Population= 7428887 },
+                new LevelFour { Name="Mongolia", Population= 3121772},
+                new LevelFour { Name="Macao", Population= 632418 }
+            }  },
+            new LevelThree { Name= "Southeastern Asia", Population=641775797,Region= new List<LevelFour> {
+                new LevelFour { Name="Indonesia", Population=  266794980 },
+                new LevelFour { Name="Philippines", Population=    106512074 },
+                new LevelFour { Name="Viet Nam", Population=   96491146 },
+                new LevelFour { Name="Thailand", Population=   69183173 },
+                new LevelFour { Name="Myanmar", Population=    53855735 },
+                new LevelFour { Name="Malaysia", Population=   32042458 },
+                new LevelFour { Name="Cambodia", Population=   16245729 },
+                new LevelFour { Name="Laos", Population=   6961210 },
+                new LevelFour { Name="Singapore", Population=  5791901},
+                new LevelFour { Name="Timor-Leste", Population=    1324094},
+                new LevelFour { Name="Brunei Darussalam", Population=  434076}
+            }  },
+            new LevelThree { Name= "Southern Asia", Population= 1846266634,Region= new List<LevelFour> {
+                new LevelFour { Name="India", Population=  1354051854},
+                new LevelFour { Name="Pakistan", Population=   200813818},
+                new LevelFour { Name="Bangladesh", Population=     166368149},
+                new LevelFour { Name="Iran", Population=   82011735},
+                new LevelFour { Name="Afghanistan", Population=    36373176},
+                new LevelFour { Name="Nepal", Population=  29624035},
+                new LevelFour { Name="Sri Lanka", Population=  20950041},
+                new LevelFour { Name="Bhutan", Population=     817054},
+                new LevelFour { Name="Maldives", Population=   444259}
+            }},
+            new LevelThree { Name= "Western Asia", Population=262938009,Region= new List<LevelFour> {
+                new LevelFour { Name="Turkey", Population= 81916871},
+                new LevelFour { Name="Iraq", Population= 39339753},
+                new LevelFour { Name="Saudi Arabia", Population= 33554343},
+                new LevelFour { Name="Yemen", Population= 28915284},
+                new LevelFour { Name="Syria", Population= 18284407},
+                new LevelFour { Name="Azerbaijan", Population= 9923914},
+                new LevelFour { Name="Jordan", Population= 9903802},
+                new LevelFour { Name="United Arab Emirates", Population= 9541615},
+                new LevelFour { Name="Israel", Population= 8452841},
+                new LevelFour { Name="Lebanon", Population= 6093509},
+                new LevelFour { Name="State of Palestine", Population= 5052776},
+                new LevelFour { Name="Oman", Population= 4829946},
+                new LevelFour { Name="Kuwait", Population= 4197128},
+                new LevelFour { Name="Georgia", Population= 3907131},
+                new LevelFour { Name="Armenia", Population= 2934152},
+                new LevelFour { Name="Qatar", Population= 2694849},
+                new LevelFour { Name="Bahrain", Population= 1566993},
+                new LevelFour { Name="Cyprus", Population= 1189085}
+            } }
+       }
+        }}
+    },
+      new LevelOne { Continent=new List<LevelTwo> {
+        new LevelTwo { Name= "North America", Population=579024000, States=new List<LevelThree> {
+
+        new LevelThree { Name="Central America", Population=174988756 , Region=new List<LevelFour> {
+            new LevelFour { Name="Mexico", Population= 130759074 },
+            new LevelFour { Name="Guatemala", Population= 17245346 },
+            new LevelFour { Name="Honduras", Population= 9417167 },
+            new LevelFour { Name="El, Salvador", Population= 6411558},
+            new LevelFour { Name="Nicaragua", Population= 6284757 },
+            new LevelFour { Name="Costa, Rica", Population= 4953199},
+            new LevelFour { Name="Panama", Population= 4162618 },
+            new LevelFour { Name="Belize", Population= 382444 }
+       }},
+        new LevelThree { Name="Northern America", Population=358593810, Region=new List<LevelFour> {
+            new LevelFour { Name="U.S.", Population= 322179605 },
+            new LevelFour { Name="Canada", Population=36953765},
+            new LevelFour { Name="Bermuda", Population=61070  },
+            new LevelFour { Name="Greenland", Population=56565},
+            new LevelFour { Name="Saint Pierre & Miquelon", Population=6342   }
+        }}
+      }
+        }}
+    },
+      new LevelOne { Continent=new List<LevelTwo> {
+        new LevelTwo { Name= "Europe", Population=738849000, States=new List<LevelThree> {
+        new LevelThree { Name="Eastern Europe", Population=291953328, Region=new List<LevelFour> {
+            new LevelFour { Name="Russia", Population=143964709 },
+            new LevelFour { Name="Ukraine", Population= 44009214},
+            new LevelFour { Name="Poland", Population=38104832 },
+            new LevelFour { Name="Romania", Population=19580634 },
+            new LevelFour { Name="Crech, Republic", Population=10625250 },
+            new LevelFour { Name="Hungary", Population=9688847 },
+            new LevelFour { Name="Belarus", Population=9452113 },
+            new LevelFour { Name="Bulgaria", Population= 7036848},
+            new LevelFour { Name="Slovakia", Population= 5449816},
+            new LevelFour { Name="Moldova", Population=4041065 }
+        } },
+        new LevelThree { Name="Northern Europe", Population=103642971, Region=new List<LevelFour> {
+            new LevelFour { Name="United Kingdom", Population= 66573504},
+            new LevelFour { Name="Sweden", Population= 9982709},
+            new LevelFour { Name="Denmark", Population= 5754356},
+            new LevelFour { Name="Finland", Population= 5542517},
+            new LevelFour { Name="Norway", Population= 5353363},
+            new LevelFour { Name="Ireland", Population= 4803748},
+            new LevelFour { Name="Lithuania", Population= 2876475},
+            new LevelFour { Name="Latvia", Population= 1929938},
+            new LevelFour { Name="Estonia", Population= 1306788},
+            new LevelFour { Name="Iceland", Population= 337780},
+            new LevelFour { Name="Channel Islands", Population= 166083},
+            new LevelFour { Name="Isle of Man", Population= 84831},
+            new LevelFour { Name="Faeroe Islands", Population= 49489}
+        } },
+        new LevelThree { Name="Southern Europe", Population=152172107, Region=new List<LevelFour> {
+            new LevelFour { Name="Italy",Population=  59290969 },
+            new LevelFour { Name="Spain",Population=  46397452},
+            new LevelFour { Name="Greece",Population=  11142161 },
+            new LevelFour { Name="Portugal",Population=  10291196},
+            new LevelFour { Name="Serbia",Population=  8762027 },
+            new LevelFour { Name="Croatia",Population=  4164783 },
+            new LevelFour { Name="Bosnia and Herzegovina",Population=  3503554 },
+            new LevelFour { Name="Albania",Population=  2934363 },
+            new LevelFour { Name="Macedonia",Population=  2085051 },
+            new LevelFour { Name="Slovenia",Population=  2081260 },
+            new LevelFour { Name="Montenegro",Population=  629219},
+            new LevelFour { Name="Malta",Population=  432089 },
+            new LevelFour { Name="Andorra",Population=  76953 },
+            new LevelFour { Name="Gibraltar",Population=  34733 },
+            new LevelFour { Name="San Marino",Population=  33557 },
+            new LevelFour { Name="Holy, See",Population=  801 }
+        }},
+        new LevelThree { Name="Western Europe", Population=92746859, Region=new List<LevelFour> {
+            new LevelFour { Name="Germany", Population= 82293457 },
+            new LevelFour { Name="France", Population= 65233271 },
+            new LevelFour { Name="Netherlands", Population= 17084459 },
+            new LevelFour { Name="Belgium", Population= 11498519 },
+            new LevelFour { Name="Austria", Population= 8751820 },
+            new LevelFour { Name="Switzerland", Population= 8544034 },
+            new LevelFour { Name="Luxembourg", Population= 590321 },
+            new LevelFour { Name="Monaco", Population= 38897 },
+            new LevelFour { Name="Liechtenstein", Population= 38155 }
+        }}
+      }
+    }}
+    }
+
+    };
+}

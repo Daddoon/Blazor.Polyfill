@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>6.0.100.1</Version>
+    <Version>6.0.100.2</Version>
     <Authors>Guillaume ZAHRA</Authors>
     <Company>Daddoon</Company>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
@@ -14,6 +14,10 @@
     <RepositoryUrl>https://github.com/Daddoon/Blazor.Polyfill</RepositoryUrl>
     <PackageTags>blazor blazor-server ie11 edgeHTML edge-legacy polyfill</PackageTags>
     <PackageReleaseNotes>
+6.0.100.2:
+- Blazor.Polyfill now respect the autostart attribute value at start
+- Added the ES5ConversionScope option in Blazor.Polyfill configuration. This option is meant to transpile None, Razor Class Libraries, or All Javascript files to ES5 automatically and store it in a es5cache store for your application. Files will be used automatically at runtime when needed. Keeping them under source control is advised.
+
 6.0.100.1:
 - Added 'webRootPath' parameter on _import_ javascript isolation emulation method. See the documentation for usage.
 
@@ -36,20 +40,7 @@
 - Added BlazorPolyfillOptions parameter for UseBlazorPolyfill methods in order to configure additional behaviors at startup
 - Added the ForceES5Fallback option in order to force ES5 and Polyfill behaviors even if the browser is not Internet Explorer 11 or Edge Legacy.
 - Added ChakraCore engine image and set it as default. V8 engine is still present as fallback engine.
-
-5.0.100.4:
-- Fix InputFile Razor component not working on IE11 and possibly some legacy Edge versions.
-
-5.0.100.2:
-- Fix possible application crash if request headers do not contains the User-Agent header or value
-
-5.0.100.1:
-- Add Edge Legacy (EdgeHTML engine) support
-- Fix missing reconnection modal behavior on Internet Explorer 11 and Edge Legacy
-- Add pre-caching of all files needed for this library at the first web app request, in order to prevent further requests to wait for file generation on the server before serving the app. This mean that, now, if the app page is shown, then everything is ready.
-
-5.0.0:
-- Add .NET 5.0 support</PackageReleaseNotes>
+</PackageReleaseNotes>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageId>BlazorPolyfill.Server</PackageId>
     <Product>Blazor.Polyfill</Product>

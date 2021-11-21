@@ -5,6 +5,11 @@ Blazor server-side Polyfills and fixes for **Internet Explorer 11** & **Edge Leg
 # SUMMARY
 
 - [Installation](#installation)
+  - [.NET 5.0 / .NET 6.0](#net-50--net-60)
+    - [Installation](#installation)
+    - [(Optional) Javascript isolation & module import support](#optional-javascript-isolation--module-import-support)
+    - [Additional options](#additional-options)
+  - [.NET 3.1](#net-31)
 - [Recommendations & Troubleshooting](#recommendations--troubleshooting)
   - [OS & CPU Compatibilities](#os--cpu-compatibilities)
   - [What should i do if i'm on an unsupported environment ?](#what-should-i-do-if-im-on-an-unsupported-environment-)
@@ -13,12 +18,6 @@ Blazor server-side Polyfills and fixes for **Internet Explorer 11** & **Edge Leg
 - [Using Telerik Blazor Component or MatBlazor on IE11](#using-telerik-blazor-component-or-matblazor-on-ie11)
 
 # INSTALLATION
-
-- [.NET 5.0 / .NET 6.0](#net-50--net-60)
-  - [Installation](#installation)
-  - [(Optional) Javascript isolation & module import support](#optional-javascript-isolation--module-import-support)
-  - [Additional options](#additional-options)
-- [.NET 3.1](#net-31)
 
 ## .NET 5.0 / .NET 6.0
 
@@ -175,6 +174,31 @@ app.UseBlazorPolyfill(
 Options:
 
 ```csharp
+// Specify the conversion scope of Javascript files to ES5 during application lifetime.
+// Read the enum description for the detailled behaviors.
+// 
+// Default value is ES5ConversionScope.None
+//
+// Here are the enum descriptions:
+
+// If None is selected, only the blazor.server.js file will be converted to ES5.
+// This is the minimum requirement and goal of this library.
+// ES5ConversionScope.None = 0,
+
+// If RazorClassLibraries is selected, only the blazor.server.js file and any Razor Class Library loaded in the project will be converted to ES5.
+// Razor Class Library are any library loaded from a package that you reference through a special URI starting by '_content/' in your project.
+// ES5ConversionScope.RazorClassLibrary = 1,
+
+// If All is selected, any Javascript file will be converted to ES5
+// ES5ConversionScopeAll = 2
+
+// Additional note: If you use any third party library as Razor Class Library (RCL) for Blazor through NuGet, it's highly recommended
+// to set at least the enum level to ES5ConversionScope.RazorClassLibrary, as you don't have direct control to any packaged libraries easily.
+
+// Another note is that the ESConversionScope behavior is also linked to any ES5 fallback behavior logic, like ForceES5Fallback property or ES5FallbackValidation method.
+
+public ES5ConversionScope ES5ConversionScope { get; set; }
+
 // If the ForceES5Fallback parameter is set to true,
 // the blazor.polyfill.js library content will always be returned
 // and the blazor.server.js library will always be transpiled to ES5 with the needed fixes.
