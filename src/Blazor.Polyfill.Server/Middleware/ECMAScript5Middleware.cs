@@ -9,6 +9,7 @@ using Blazor.Polyfill.Server.Enums;
 using Blazor.Polyfill.Server.Helper;
 using Blazor.Polyfill.Server.Model;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using NUglify;
 
@@ -100,6 +101,16 @@ namespace Blazor.Polyfill.Server.Middleware
             return false;
         }
 
+        public static bool RequestFileIsFromES5CacheStore(HttpRequest request)
+        {
+            if (request.Path.StartsWithSegments($"/{ES5CacheHelper.ES5CacheFolderName}", StringComparison.InvariantCultureIgnoreCase))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
         private bool ShouldInterceptRequest(HttpContext context)
         {
             var options = BlazorPolyfillMiddlewareExtensions.GetOptions();
@@ -118,7 +129,8 @@ namespace Blazor.Polyfill.Server.Middleware
             //as it should be already transpiled and packed by BlazorPolyfill.Build if used.
             if (RequestedFileIsBlazorPolyfill(context.Request, out bool bmin)
                 || RequestedFileIsBlazorServerJS(context.Request)
-                || RequestedFileIsJavascriptModuleImportEmulationLibraryFile(context.Request, options))
+                || RequestedFileIsJavascriptModuleImportEmulationLibraryFile(context.Request, options)
+                || RequestFileIsFromES5CacheStore(context.Request))
             {
                 return false;
             }
@@ -146,8 +158,33 @@ namespace Blazor.Polyfill.Server.Middleware
             }
         }
 
-        public async Task Invoke(HttpContext context)
+        /// <summary>
+        /// Cached IWebHostEnvironment configuration
+        /// </summary>
+        private static IWebHostEnvironment _env;
+
+        /// <summary>
+        /// Return a cached IWebHostEnvironment set from the middleware.
+        /// Mainly used if some informations are needed in an internal helper
+        /// </summary>
+        /// <returns></returns>
+        internal static IWebHostEnvironment GetWebHostEnvironment()
         {
+            return _env;
+        }
+
+        private static void CacheIWebHostEnvironment(IWebHostEnvironment env)
+        {
+            if (_env == null)
+            {
+                _env = env;
+            }
+        }
+
+        public async Task Invoke(HttpContext context, IWebHostEnvironment env)
+        {
+            CacheIWebHostEnvironment(env);
+
             //Our middle must not do anything if any of the ES5Fallback option is set to off
             if (!context.Request.BrowserNeedES5Fallback())
             {

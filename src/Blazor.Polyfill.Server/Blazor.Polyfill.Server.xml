@@ -148,6 +148,7 @@
             </summary>
             <returns></returns>
         </member>
+        <!-- Badly formed XML comment ignored for member "M:Blazor.Polyfill.Server.Helper.ES5CacheHelper.RationalizePath(System.String)" -->
         <member name="F:Blazor.Polyfill.Server.Helper.ES5CacheHelper._cachedFiles">
             <summary>
             The internal ES5 cached files dictionnary in memory.
@@ -178,6 +179,16 @@
             theses method may populate the cache the first time.
             </summary>
             <param name="path"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Blazor.Polyfill.Server.Helper.ES5CacheHelper.IsFileChecksumEqual(System.String,System.String)">
+            <summary>
+            Return true if the file given with <paramref name="fileSystemPathToFileWithChecksum"/> contain a Checksum header that match
+            the <paramref name="sourceChecksum"/> checksum.
+            <paramref name="sourceChecksum"/> parameter does not need to be formatted as a header, only the raw checksum is expected.
+            </summary>
+            <param name="fileSystemPathToFileWithChecksum"></param>
+            <param name="sourceChecksum"></param>
             <returns></returns>
         </member>
         <member name="M:Blazor.Polyfill.Server.HttpRequestExtensions.IsInternetExplorer(Microsoft.AspNetCore.Http.HttpRequest)">
@@ -232,6 +243,18 @@
             This: https://github.com/saturn72/tethys/blob/851ac6d6235c5e2d2f62c3d4343b8e862062a3c2/src/Tethys.Server/Middlewares/RequestResponseLoggingMiddleware.cs
             Linking this: https://www.carlrippon.com/adding-useful-information-to-asp-net-core-web-api-serilog-logs/
             </summary>
+        </member>
+        <member name="F:Blazor.Polyfill.Server.Middleware.ECMAScript5Middleware._env">
+            <summary>
+            Cached IWebHostEnvironment configuration
+            </summary>
+        </member>
+        <member name="M:Blazor.Polyfill.Server.Middleware.ECMAScript5Middleware.GetWebHostEnvironment">
+            <summary>
+            Return a cached IWebHostEnvironment set from the middleware.
+            Mainly used if some informations are needed in an internal helper
+            </summary>
+            <returns></returns>
         </member>
         <member name="M:Blazor.Polyfill.Server.Middleware.ECMAScript5Middleware.CopyStreamAsync(System.IO.Stream,System.IO.Stream)">
             <summary>
