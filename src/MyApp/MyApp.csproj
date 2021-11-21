@@ -11,4 +11,8 @@
     <PackageReference Include="Radzen.Blazor" Version="3.12.2" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="wwwroot\es5cache\" />
+  </ItemGroup>
+
 </Project>
