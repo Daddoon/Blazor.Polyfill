@@ -101,7 +101,8 @@ namespace Blazor.Polyfill.Build.Core
                 "babel-loader@7.1.5",
                 "babel-preset-env@1.7.0",
                 "babel-preset-es2015@6.24.1",
-                "webpack@3.8.1"
+                "webpack@3.8.1",
+                "uglifyjs-webpack-plugin@1.3.0"
             };
 
             string nullOutput = " > NUL";

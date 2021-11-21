@@ -6,12 +6,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="BlazorPolyfill.Build" Version="6.0.100.1" />
+    <PackageReference Include="BlazorPolyfill.Build" Version="6.0.100.2" />
+    <PackageReference Include="BlazorPolyfill.Server" Version="6.0.100.2" />
     <PackageReference Include="Radzen.Blazor" Version="3.12.2" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\Blazor.Polyfill.Server\Blazor.Polyfill.Server.csproj" />
   </ItemGroup>
 
 </Project>
