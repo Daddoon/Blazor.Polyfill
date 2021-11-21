@@ -108,7 +108,7 @@ namespace Blazor.Polyfill.Server
                 throw new PlatformNotSupportedException(_platformNotSupportedMessage);
             }
 
-            Console.WriteLine($"BlazorPolyfill: For dependency or compatibility reasons, the current JS engine used for transpilation has been set to: {defaultEngine}.");
+            LogHelper.LogInformation($"For dependency or compatibility reasons, the current JS engine used for transpilation has been set to: {defaultEngine}.");
 
             services.AddJsEngineSwitcher(options => options.DefaultEngineName = defaultEngine)
                 .AddChakraCore()

@@ -93,4 +93,5 @@
   <ItemGroup>
     <ProjectReference Include="..\Blazor.Polyfill.Server\Blazor.Polyfill.Server.csproj" />
   </ItemGroup>
+  <ProjectExtensions><VisualStudio><UserProperties appsettings_1json__JsonSchema="" /></VisualStudio></ProjectExtensions>
 </Project>

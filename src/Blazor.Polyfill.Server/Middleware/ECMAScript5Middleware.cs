@@ -11,6 +11,7 @@ using Blazor.Polyfill.Server.Model;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 using NUglify;
 
 namespace Blazor.Polyfill.Server.Middleware
@@ -28,8 +29,13 @@ namespace Blazor.Polyfill.Server.Middleware
         #endregion
 
         #region ctor
-        public ECMAScript5Middleware(RequestDelegate next)
+        public ECMAScript5Middleware(RequestDelegate next, ILoggerFactory loggerFactory)
         {
+            if (loggerFactory != null && !LogHelper.IsLoggerSet())
+            {
+                LogHelper.SetLogger(loggerFactory.CreateLogger(LogHelper.LoggerName));
+            }
+
             _next = next;
         }
         #endregion
@@ -230,8 +236,7 @@ namespace Blazor.Polyfill.Server.Middleware
             }
             catch (Exception ex)
             {
-                //TODO: Need to add a file logger ?
-                Console.WriteLine($"ERROR: On path '{source.SourcePath}': {ex.Message}.");
+                LogHelper.LogError($"On path '{source.SourcePath}': {ex.Message}.");
             }
 
             return destination;
