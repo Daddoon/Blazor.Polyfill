@@ -363,6 +363,10 @@ namespace Blazor.Polyfill.Server
                             //We still need to fix 'state' regex evaluation code, as it was expecting a named capture group.
                             js = Regex.Replace(js, "([_a-zA-Z0-9]+)(.groups[ ]*&&[ ]*[_a-zA-Z0-9]+.groups.state)", "$1[1]");
 
+                            //Here we fix invalids interopRequireWildcard(require(''.concat(n))) to _interopRequireWildcard(''.concat(n)) (works for '' or "")
+                            //Warning: " is written "" here but must be read as " from the regex logic: We are in a verbatim string
+                            js = Regex.Replace(js, @"(require\((['""]['""].concat\([a-zA-Z]+\))\))", "$2");
+
                             #endregion Regex named groups fix
 
                             //Minify with AjaxMin (we don't want an additional external tool with NPM or else for managing this

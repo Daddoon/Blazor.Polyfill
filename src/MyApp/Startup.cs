@@ -50,8 +50,8 @@ namespace MyApp
             app.UseBlazorPolyfill((options) =>
             {
                 options.ES5ConversionScope = ES5ConversionScope.All;
-                options.UsePackagedBlazorServerLibrary = false;
-                options.ForceES5Fallback = true;
+                options.UsePackagedBlazorServerLibrary = true;
+                options.ForceES5Fallback = false;
                 options.JavascriptModuleImportEmulation = true;
                 options.JavascriptModuleImportEmulationLibraryPath = "/es5module.min.js";
             });
