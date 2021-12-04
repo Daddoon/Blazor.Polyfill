@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>6.0.100.2</Version>
+    <Version>6.0.100.3</Version>
     <Authors>Guillaume ZAHRA</Authors>
     <Company>Daddoon</Company>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
@@ -14,6 +14,9 @@
     <RepositoryUrl>https://github.com/Daddoon/Blazor.Polyfill</RepositoryUrl>
     <PackageTags>blazor blazor-server ie11 edgeHTML edge-legacy polyfill</PackageTags>
     <PackageReleaseNotes>
+6.0.100.3:
+- Fix invalid 'require' keyword in blazor.server.js added by Babel in transpilation that cannot be used on a pure javascript environment
+
 6.0.100.2:
 - Blazor.Polyfill now respect the autostart attribute value at start
 - Added the ES5ConversionScope option in Blazor.Polyfill configuration. This option is meant to transpile None, Razor Class Libraries, or All Javascript files to ES5 automatically and store it in a es5cache store for your application. Files will be used automatically at runtime when needed. Keeping them under source control is advised.
