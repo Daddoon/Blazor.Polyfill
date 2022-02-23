@@ -576,7 +576,7 @@ namespace Blazor.Polyfill.Server
 
         private static Assembly _blazorPolyfillAssembly = null;
 
-        private static Assembly GetBlazorPolyfillAssembly()
+        internal static Assembly GetBlazorPolyfillAssembly()
         {
             if (_blazorPolyfillAssembly == null)
             {

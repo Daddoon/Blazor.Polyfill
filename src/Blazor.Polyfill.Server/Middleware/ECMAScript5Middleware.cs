@@ -134,11 +134,17 @@ namespace Blazor.Polyfill.Server.Middleware
             //Also we must not transpile the JavascriptModuleImportEmulationLibrary file
             //as it should be already transpiled and packed by BlazorPolyfill.Build if used.
             if (RequestedFileIsBlazorPolyfill(context.Request, out bool bmin)
-                || RequestedFileIsBlazorServerJS(context.Request)
                 || RequestedFileIsJavascriptModuleImportEmulationLibraryFile(context.Request, options)
                 || RequestFileIsFromES5CacheStore(context.Request))
             {
                 return false;
+            }
+
+            //Specific case for blazor.server.js. It should now always be taken as to be cached, but should managed differently
+            //when the ES5 behavior will occur.
+            if (RequestedFileIsBlazorServerJS(context.Request))
+            {
+                return true;
             }
 
             switch (options.ES5ConversionScope)
@@ -222,12 +228,29 @@ namespace Blazor.Polyfill.Server.Middleware
 
         private RequestFileMetadata ES5Convert(RequestFileMetadata source)
         {
+            return ES5Convert(source, null, null);
+        }
+
+        private RequestFileMetadata ES5Convert(RequestFileMetadata source, Func<string, string> beforeTransform, Func<string, string> beforeMinification)
+        {
             RequestFileMetadata destination = null;
 
             try
             {
+                //If provided, this event will be called before the ECMA transformation
+                if (beforeTransform != null)
+                {
+                    source.SourceContent = beforeTransform(source.SourceContent);
+                }
+
                 //Transpile code to ES5 for IE11
                 source.ES5Content = BabelHelper.Transform(source.SourceContent, Path.GetFileName(source.SourcePath));
+
+                //If provided, this event will be called before the Minification
+                if (beforeMinification != null)
+                {
+                    source.ES5Content = beforeMinification(source.ES5Content);
+                }
 
                 //Minify with AjaxMin (we don't want an additional external tool with NPM or else for managing this
                 //kind of thing here...
@@ -292,7 +315,29 @@ namespace Blazor.Polyfill.Server.Middleware
                 else
                 {
                     //Convert to ES5 the current response
-                    var fileContent = ES5Convert(response);
+                    RequestFileMetadata fileContent = null;
+
+                    //Manage specific behavior for Blazor.server.js
+                    if (RequestedFileIsBlazorServerJS(context.Request))
+                    {
+                        BlazorPolyfillOptions option = BlazorPolyfillMiddlewareExtensions.GetOptions();
+                        if (option.UsePackagedBlazorServerLibrary)
+                        {
+                            fileContent = response;
+                            fileContent.ES5Content = BlazorServerTransformHelper.GetPackagedBlazorServerLibrary();
+                        }
+                        else
+                        {
+                            fileContent = ES5Convert(response,
+                                BlazorServerTransformHelper.BeforeES5Transform,
+                                BlazorServerTransformHelper.BeforeMinification);
+                        }
+                    }
+                    else
+                    {
+                        //Convert to ES5 the current response
+                        fileContent = ES5Convert(response);
+                    }
 
                     if (fileContent == null)
                     {
