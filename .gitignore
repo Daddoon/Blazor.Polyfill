@@ -10,3 +10,4 @@ node_modules/
 */**/Blazor.Polyfill.Build/tools/net5.0
 */**/Blazor.Polyfill.Build/tools/netcoreapp3.1
 artifacts/
+*/**/es5cache/_framework/blazor.server.js
