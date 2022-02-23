@@ -134,6 +134,21 @@
             <returns></returns>
             <exception cref="T:React.Exceptions.BabelException"></exception>
         </member>
+        <member name="M:Blazor.Polyfill.Server.Helper.BlazorServerTransformHelper.BeforeES5Transform(System.String)">
+            <summary>
+            Fixs that must be done in source JS code before calling Babel
+            </summary>
+            <param name="js"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Blazor.Polyfill.Server.Helper.BlazorServerTransformHelper.BeforeMinification(System.String)">
+            <summary>
+            Fixs that must be done in JS code before being minified. The given es5JS variable should be the Transformed
+            Javascript code by Babel done in <see cref="M:Blazor.Polyfill.Server.Helper.BlazorServerTransformHelper.BeforeES5Transform(System.String)"/>
+            </summary>
+            <param name="es5JS"></param>
+            <returns></returns>
+        </member>
         <member name="M:Blazor.Polyfill.Server.Helper.CryptographyHelper.CreateSHA256(System.String)">
             <summary>
             Get SHA256 from string content

@@ -222,22 +222,6 @@ namespace Blazor.Polyfill.Server
             //This is used in order to transpile dynamically StaticFiles to ES5 when needed
             builder.UseMiddleware<ECMAScript5Middleware>();
 
-            //BrowserNeedES5Fallback is written hiere and not in the builder
-            //because we only want to use MapWhen when we need ES5 fallback.
-            //If this is false, the request will be redirected to the Microsoft
-            //default request management for this file.
-            builder.MapWhen(ctx =>
-            ECMAScript5Middleware.RequestedFileIsBlazorServerJS(ctx.Request)
-            && ctx.Request.BrowserNeedES5Fallback(),
-            subBuilder =>
-            {
-                subBuilder.Run(async (context) =>
-                {
-                    var fileContent = GetPatchedBlazorServerFile();
-                    await HttpRequestManager.ManageRequest(context, fileContent);
-                });
-            });
-
             //As blazor.polyfill.js files does not exist really on theses path and
             //does not have a real fallback request mangement (as for blazor.server.js)
             //we should intercept them at any time with MapWhen, but change the result
@@ -272,8 +256,6 @@ namespace Blazor.Polyfill.Server
 
             try
             {
-                GetPatchedBlazorServerFile();
-
                 GetBlazorPolyfillFile(true, false);
                 GetBlazorPolyfillFile(false, true);
 
@@ -285,119 +267,6 @@ namespace Blazor.Polyfill.Server
                 throw;
             }
         }
-
-        #region PATCHED BLAZOR.SERVER.JS
-
-        private static FileContentReference _patchedBlazorServerFile = null;
-
-        private static FileContentReference GetPatchedBlazorServerFile()
-        {
-            if (_patchedBlazorServerFile == null)
-            {
-                BlazorPolyfillOptions option = GetOptions();
-
-                if (option.UsePackagedBlazorServerLibrary)
-                {
-                    //Get packaged blazor.server.js
-                    var assembly = GetBlazorPolyfillAssembly();
-
-                    var resources = assembly.GetManifestResourceNames();
-                    var resourceName = resources.Single(str => str.EndsWith("blazor.server.packaged.js"));
-
-                    using (Stream stream = assembly.GetManifestResourceStream(resourceName))
-                    {
-                        using (StreamReader reader = new StreamReader(stream))
-                        {
-                            string js = reader.ReadToEnd();
-
-                            string Etag = CryptographyHelper.CreateSHA256(js);
-
-                            //We should rely on ETag and not on LastModifed informations
-                            DateTime buildTime = GetAssemblyCreationDate(assembly);
-
-                            _patchedBlazorServerFile = new FileContentReference()
-                            {
-                                Value = js,
-                                ETag = Etag,
-                                LastModified = buildTime,
-                                ContentLength = System.Text.UTF8Encoding.UTF8.GetByteCount(js).ToString(CultureInfo.InvariantCulture)
-                            };
-                        }
-                    }
-                }
-                else
-                {
-                    var assembly = GetAspNetCoreComponentsServerAssembly();
-
-                    var resources = assembly.GetManifestResourceNames();
-                    var resourceName = resources.Single(str => str.EndsWith("blazor.server.js"));
-
-                    using (Stream stream = assembly.GetManifestResourceStream(resourceName))
-                    {
-                        using (StreamReader reader = new StreamReader(stream))
-                        {
-                            string js = reader.ReadToEnd();
-
-
-                            #region Patch Regex
-
-                            //Patch Descriptor Regex as it make Babel crash during transform
-                            js = js.Replace("/\\W*Blazor:[^{]*(?<descriptor>.*)$/;", @"/[\0-\/:-@\[-\^`\{-\uFFFF]*Blazor:(?:(?!\{)[\s\S])*(.*)$/;");
-
-                            js = js.Replace("/^\\s*Blazor-Component-State:(?<state>[a-zA-Z0-9\\+\\/=]+)$/", @"/^[\t-\r \xA0\u1680\u2000-\u200A\u2028\u2029\u202F\u205F\u3000\uFEFF]*Blazor\x2DComponent\x2DState:([\+\/-9=A-Za-z]+)$/");
-
-                            js = js.Replace("/^\\s*Blazor:[^{]*(?<descriptor>.*)$/", @"/^[\t-\r \xA0\u1680\u2000-\u200A\u2028\u2029\u202F\u205F\u3000\uFEFF]*Blazor:(?:(?!\{)[\s\S])*(.*)$/");
-
-                            #endregion Patch Regex
-
-                            //Transpile code to ES5 for IE11 before manual patching
-                            js = BabelHelper.Transform(js, "blazor.server.js");
-
-                            #region Regex named groups fix
-
-                            //At this point, Babel has unminified the code, and fixed IE11 issues, like 'import' method calls.
-
-                            //We still need to fix 'descriptor' regex evaluation code, as it was expecting a named capture group.
-                            js = Regex.Replace(js, "([_a-zA-Z0-9]+)(.groups[ ]*&&[ ]*[_a-zA-Z0-9]+.groups.descriptor)", "$1[1]");
-
-                            //We still need to fix 'state' regex evaluation code, as it was expecting a named capture group.
-                            js = Regex.Replace(js, "([_a-zA-Z0-9]+)(.groups[ ]*&&[ ]*[_a-zA-Z0-9]+.groups.state)", "$1[1]");
-
-                            //Here we fix invalids interopRequireWildcard(require(''.concat(n))) to _interopRequireWildcard(''.concat(n)) (works for '' or "")
-                            //Warning: " is written "" here but must be read as " from the regex logic: We are in a verbatim string
-                            js = Regex.Replace(js, @"(require\((['""]['""].concat\([a-zA-Z]+\))\))", "$2");
-
-                            #endregion Regex named groups fix
-
-                            //Minify with AjaxMin (we don't want an additional external tool with NPM or else for managing this
-                            //kind of thing here...
-                            js = Uglify.Js(js).Code;
-
-                            //Computing ETag. Should be computed last !
-                            string Etag = CryptographyHelper.CreateSHA256(js);
-
-                            //Computing Build time for the Last-Modified Http Header
-                            //We should rely on the creation date of the Microsoft API
-                            //not the Blazor.Polyfill.Server one as the Microsoft.AspNetCore.Components.Server
-                            //assembly may be updated in time. We will rely on the current creation/modification date on disk
-                            DateTime buildTime = GetAssemblyCreationDate(assembly);
-
-                            _patchedBlazorServerFile = new FileContentReference()
-                            {
-                                Value = js,
-                                ETag = Etag,
-                                LastModified = buildTime,
-                                ContentLength = System.Text.UTF8Encoding.UTF8.GetByteCount(js).ToString(CultureInfo.InvariantCulture)
-                            };
-                        }
-                    }
-                }
-            }
-
-            return _patchedBlazorServerFile;
-        }
-
-        #endregion PATCHED BLAZOR.SERVER.JS
 
         #region IE11 BLAZOR.POLYFILL.JS
 
