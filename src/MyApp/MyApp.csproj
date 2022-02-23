@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <Folder Include="wwwroot\es5cache\" />
+    <Folder Include="wwwroot\es5cache\_framework\" />
   </ItemGroup>
 
   <ItemGroup>
