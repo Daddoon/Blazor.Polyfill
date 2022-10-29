@@ -107,7 +107,16 @@ namespace Blazor.Polyfill.Server.Helper
         /// <returns></returns>
         private static string GetETagForES5File(string sourceChecksum)
         {
-            return sourceChecksum + "1";
+            BlazorPolyfillOptions option = BlazorPolyfillMiddlewareExtensions.GetOptions();
+            if (option.UsePackagedBlazorServerLibrary)
+            {
+                //The "appended" value for Etag change if we are on Packaged version or not in order to avoid some caching if we go from one mod to another
+                return sourceChecksum + "2";
+            }
+            else
+            {
+                return sourceChecksum + "1";
+            }
         }
 
         private static RequestFileCacheMetadata AddFileCacheEntry(string requestPath, string es5FilePath, string sourceChecksum)
