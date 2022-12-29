@@ -9,9 +9,9 @@
   },
   "devDependencies": {
     "@types/emscripten": "^0.0.31",
-    "ts-loader": "^3.2.0",
+    "ts-loader": "^9.4.2",
     "typescript": "^2.6.1",
-    "webpack": "^3.8.1"
+    "webpack": "^5.75.0"
   },
   "dependencies": {
     "abortcontroller-polyfill": "^1.4.0",
