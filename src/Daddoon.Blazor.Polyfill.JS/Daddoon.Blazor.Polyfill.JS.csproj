@@ -31,6 +31,7 @@
     <Exec Command="npm install --save web-animations-js" />
     <Exec Command="npm install --save regenerator-runtime" />
     <Exec Command="npm install --save get-root-node-polyfill" />
+    <Exec Command="npm install --save blob-polyfill" />
     <Exec Command="npm run build" />
   </Target>
 </Project>

@@ -1,19 +1,23 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>6.0.200.0</Version>
+    <Version>7.0.203.0</Version>
     <Authors>Guillaume ZAHRA</Authors>
     <Company>Daddoon</Company>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <Description>Support of Blazor server-side for Internet Explorer 11, Edge Legacy and more on .NET 6.0.200</Description>
+    <Description>Support of Blazor server-side for Internet Explorer 11, Edge Legacy and more on .NET 7.0.203</Description>
     <PackageProjectUrl>https://github.com/Daddoon/Blazor.Polyfill</PackageProjectUrl>
     <PackageIcon>logo_blazorpolyfill_128.png</PackageIcon>
     <RepositoryType>Git</RepositoryType>
     <RepositoryUrl>https://github.com/Daddoon/Blazor.Polyfill</RepositoryUrl>
     <PackageTags>blazor blazor-server ie11 edgeHTML edge-legacy polyfill</PackageTags>
-    <PackageReleaseNotes>
+    <PackageReleaseNotes>7.0.203.0:
+
+- Support .NET 7.0
+- Add Blazor InputFile events support on Internet Explorer 11
+
 6.0.200.0:
 - blazor.server.js is now cached and managed in es5cache like other transpilable libraries. The cached version will always be used instead of generating it at each application startup.
 
@@ -39,13 +43,6 @@
 5.0.100.6:
 - Add configurable ES5 fallback option with a delegate validation
 - Add Javascript isolation and dynamic import emulation - See the documentation
-
-5.0.100.5:
-- Fix dependencies error on Linux (Debian 10 default installation)
-- Potentially fix Azure Web App error with the default Linux image container
-- Added BlazorPolyfillOptions parameter for UseBlazorPolyfill methods in order to configure additional behaviors at startup
-- Added the ForceES5Fallback option in order to force ES5 and Polyfill behaviors even if the browser is not Internet Explorer 11 or Edge Legacy.
-- Added ChakraCore engine image and set it as default. V8 engine is still present as fallback engine.
 </PackageReleaseNotes>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageId>BlazorPolyfill.Server</PackageId>
