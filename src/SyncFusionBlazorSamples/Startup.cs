@@ -108,6 +108,51 @@ namespace BlazorDemos
             {
                 options.ES5ConversionScope = ES5ConversionScope.All;
                 options.ForceES5Fallback = true;
+                options.OnES5ConvertFailure = (string path, Exception ex) =>
+                {
+                    #if DEBUG
+
+                    //For tracking during debug time
+                    throw ex;
+
+                    #endif
+                };
+                options.BeforeES5TransformHandler = (string path, string content) =>
+                {
+                    if (!string.IsNullOrEmpty(path))
+                    {
+                        #region Syncfusion Library Fix
+
+                        //Syncfusion Libary fix
+                        //Tested on version 19.3.0.53
+
+                        //Fix '<' and '>' unescaped characters in a specific regex
+                        //that make NUGlify minification crash with C# Regex evaluator
+                        //as it detect a named capturing group with incorrect syntax
+                        //but this is actually NOT a named capturing group.
+
+                        //Error occur on some version but not on all versions of Library / .NET Version
+
+                        //COMMENT ALL THESES LINE FOR TESTING ERROR HANDLING
+                        //AT TRANSFORM
+                        if (path.EndsWith("syncfusion-blazor.min.js", StringComparison.InvariantCultureIgnoreCase)
+                        || path.EndsWith("syncfusion-blazor.js", StringComparison.InvariantCultureIgnoreCase))
+                        {
+                            content = content
+                            .Replace(@"\<sub>", @"\<sub\>") //SET 1
+                            .Replace(@"\<sup>", @"\<sup\>") //SET 1
+                            .Replace(@"\<\/sub>", @"\<\/sub\>") //SET 2
+                            .Replace(@"\<\/sup>", @"\<\/sup\>") //SET 2
+                            .Replace(@"<\/sub>", @"\<\/sub\>") //SET 3
+                            .Replace(@"<\/sup>", @"\<\/sup\>") //SET 3
+                            .Replace(@"<sub>", @"\<sub\>") //SET 4
+                            .Replace(@"<sup>", @"\<sup\>"); //SET 4
+                        }
+
+                        #endregion Syncfusion Library Fix
+                    }
+                    return content;
+                };
             });
 
             #region DEBUG FILE INTERCEPTION

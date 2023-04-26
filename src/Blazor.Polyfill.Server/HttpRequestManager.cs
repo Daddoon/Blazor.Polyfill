@@ -55,13 +55,16 @@ namespace Blazor.Polyfill.Server
             || RequestHasNoCachingFeatureSet(context.Request)
             || RequestHasCacheFeaturesExpired(context.Request, ETag))
             {
-                if (!context.Response.Headers.ContainsKey(HeaderNames.ContentLength))
+                if (ContentLength != null)
                 {
-                    context.Response.Headers.Append(HeaderNames.ContentLength, ContentLength);
-                }
-                else
-                {
-                    context.Response.Headers[HeaderNames.ContentLength] = ContentLength;
+                    if (!context.Response.Headers.ContainsKey(HeaderNames.ContentLength))
+                    {
+                        context.Response.Headers.Append(HeaderNames.ContentLength, ContentLength);
+                    }
+                    else
+                    {
+                        context.Response.Headers[HeaderNames.ContentLength] = ContentLength;
+                    }
                 }
 
                 context.Response.StatusCode = (int)HttpStatusCode.OK;
@@ -91,6 +94,27 @@ namespace Blazor.Polyfill.Server
             await ManageRequestHeaders(context, contentType, ETag, ContentLength, async () =>
             {
                 await context.Response.SendFileAsync(filePath);
+            });
+        }
+
+        /// <summary>
+        /// Should only alter headers.
+        /// Default current body state should be returned
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="ETag"></param>
+        /// <param name="ContentLength"></param>
+        /// <param name="Content">SHOULD ONLY BE SET WHEN NOT HAVING THE REQUEST BODY PREFILLED AFTER A FIRST FALLBACK REQUEST FAILURE</param>
+        /// <param name="contentType"></param>
+        /// <returns></returns>
+        internal static async Task ManageFallbackRequest(HttpContext context, string ETag, string ContentLength, string Content = null, string contentType = "application/javascript")
+        {
+            await ManageRequestHeaders(context, contentType, ETag, ContentLength, async () =>
+            {
+                if (Content != null)
+                {
+                    await context.Response.WriteAsync(Content);
+                }
             });
         }
 

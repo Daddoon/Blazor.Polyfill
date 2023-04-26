@@ -1,5 +1,6 @@
 ﻿using Blazor.Polyfill.Server.Enums;
 using Microsoft.AspNetCore.Http;
+using NUglify;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,6 +32,7 @@ namespace Blazor.Polyfill.Server
             ForceES5Fallback = false;
             ES5FallbackValidation = null;
             ES5ConversionScope = ES5ConversionScope.None;
+            BeforeES5TransformHandler = null;
             JavascriptModuleImportEmulation = false;
             JavascriptModuleImportEmulationLibraryPath = DefaultJSModuleImportEmulationLibraryPath;
         }
@@ -65,6 +67,24 @@ namespace Blazor.Polyfill.Server
         /// Also, Internet Explorer 11 and Edge Legacy will always return the ES5 Fallback behavior in all scenarios.
         /// </summary>
         public Func<HttpRequest, bool> ES5FallbackValidation { get; set; }
+
+        /// <summary>
+        /// Provide a method that expose a Javascript file that must be converted to ES5, in case you
+        /// wish to alter it before transformation.
+        /// First parameter is the file path from request,
+        /// Second parameter is the original file content,
+        /// Return value is the content that will be provided for the ES5 transformer
+        /// </summary>
+        public Func<string, string, string> BeforeES5TransformHandler { get; set; }
+
+        /// <summary>
+        /// Allow to bind a custom method that will be called when an internal ES5 conversion
+        /// event fail in order to track down the cause.
+        /// First parameter is the source file path
+        /// Second parameter is the Blazor.Polyfill.Server exception when the exception occur
+        /// with the innerException that thrown.
+        /// </summary>
+        public Action<string, Exception> OnES5ConvertFailure { get; set; }
 
         /// <summary>
         /// If enabled, the polyfill library will assume that you have added the BlazorPolyfill.Build library to your project

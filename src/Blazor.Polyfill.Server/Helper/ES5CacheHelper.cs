@@ -19,6 +19,11 @@ namespace Blazor.Polyfill.Server.Helper
 
         private static string _computedCacheFolder = null;
 
+        public static string GetWebRootPathFolder()
+        {
+            return ECMAScript5Middleware.GetWebHostEnvironment().WebRootPath;
+        }
+
         /// <summary>
         /// Return the ES5 Cache Store folder
         /// </summary>
@@ -58,6 +63,16 @@ namespace Blazor.Polyfill.Server.Helper
         private static string RationalizePath(string inputPath)
         {
             return new Uri(_httpLocalHost, inputPath).AbsolutePath.Replace("//", "/");
+        }
+
+        private static string GetFallbackStreamFilePath(string path)
+        {
+            //Path.DirectorySeparatorChar will differ depending the platform
+            return Path.Combine(
+                GetWebRootPathFolder(),
+                RationalizePath(path)
+                .TrimStart('/') //We must trim start the path slash, otherwise Path.Combine will assume that we are rooting the path
+                .Replace('/', Path.DirectorySeparatorChar));
         }
 
         private static string GetES5FilePath(string path)
@@ -119,9 +134,42 @@ namespace Blazor.Polyfill.Server.Helper
             }
         }
 
+        private static string GetETagForFallbackFile(string sourceChecksum)
+        {
+            return sourceChecksum + "3";
+        }
+
+        private static RequestFileCacheMetadata AddFallbackCacheEntry(string requestPath, string fallbackFilePath, string sourceChecksum)
+        {
+            RequestFileCacheMetadata rfc = new RequestFileCacheMetadata(RequestFileCacheType.FailureCache);
+            rfc.Path = requestPath;
+            rfc.ES5Path = fallbackFilePath;
+            rfc.SourceETag = sourceChecksum;
+            rfc.ETag = GetETagForFallbackFile(sourceChecksum);
+            rfc.ContentLength = 0.ToString(); //Assuming 0 here as we should use the original request body size for fallback files
+
+            if (!_fileErrorFallbackStreamHashSet.ContainsKey(requestPath))
+            {
+                //If unable to add, that mean an other thread added the file. Returning the file from the other thread
+                if (!_fileErrorFallbackStreamHashSet.TryAdd(requestPath, rfc))
+                {
+                    rfc = _fileErrorFallbackStreamHashSet.GetOrAdd(requestPath, rfc);
+                }
+            }
+            else
+            {
+                rfc = _fileErrorFallbackStreamHashSet.AddOrUpdate(requestPath, rfc, (requestKeyPath, existingRFC) =>
+                {
+                    return rfc;
+                });
+            }
+
+            return rfc;
+        }
+
         private static RequestFileCacheMetadata AddFileCacheEntry(string requestPath, string es5FilePath, string sourceChecksum)
         {
-            RequestFileCacheMetadata rfc = new RequestFileCacheMetadata();
+            RequestFileCacheMetadata rfc = new RequestFileCacheMetadata(RequestFileCacheType.ES5Cache);
             rfc.Path = requestPath;
             rfc.ES5Path = es5FilePath;
             rfc.SourceETag = sourceChecksum;
@@ -183,6 +231,61 @@ namespace Blazor.Polyfill.Server.Helper
 
                 //As we don't remove data from dictionary, this should be OK. Assuring we don't have any concurrency by using the previous method
                 return resultValue;
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Please call <see cref="HasES5FileInCacheByPath"/> and <see cref="HasES5FileInCacheWithChecksum"/> before calling this method, as
+        /// theses method may populate the cache the first time.
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        public static RequestFileCacheMetadata GetFallbackStream(string path)
+        {
+            if (_fileErrorFallbackStreamHashSet.ContainsKey(path))
+            {
+                RequestFileCacheMetadata resultValue = null;
+                _fileErrorFallbackStreamHashSet.TryGetValue(path, out resultValue);
+
+                //As we don't remove data from dictionary, this should be OK. Assuring we don't have any concurrency by using the previous method
+                return resultValue;
+            }
+
+            return null;
+        }
+
+
+        private static ConcurrentDictionary<string, RequestFileCacheMetadata> _fileErrorFallbackStreamHashSet = new ConcurrentDictionary<string, RequestFileCacheMetadata>(StringComparer.OrdinalIgnoreCase);
+
+        /// <summary>
+        /// If this method return true to a given file, we should return the source file content
+        /// instead of trying any further conversion or ES5 cache serving.
+        /// 
+        /// This is mainly done in order to return the source of failed file in transpilation during current
+        /// application lifetime and avoiding the system to try to re-transpile the failed file during the same
+        /// application lifetime.
+        /// </summary>
+        /// <returns></returns>
+        public static bool IsFileInErrorFallbackStream(string path)
+        {
+            return _fileErrorFallbackStreamHashSet.ContainsKey(path);
+        }
+
+        public static RequestFileCacheMetadata SetFileInErrorFallbackStream(RequestFileMetadata file)
+        {
+            if (!string.IsNullOrEmpty(file.SourcePath) && !_fileErrorFallbackStreamHashSet.ContainsKey(file.SourcePath))
+            {
+                string sourcePath = GetFallbackStreamFilePath(file.SourcePath);
+                return AddFallbackCacheEntry(file.SourcePath, sourcePath, file.SourceCheckSum);
+            }
+            else
+            {
+                if (_fileErrorFallbackStreamHashSet.ContainsKey(file.SourcePath))
+                {
+                    return _fileErrorFallbackStreamHashSet[file.SourceCheckSum];
+                }
             }
 
             return null;

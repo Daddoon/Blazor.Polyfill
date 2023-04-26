@@ -4,6 +4,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Blazor.Polyfill.Server.Enums;
 using Blazor.Polyfill.Server.Helper;
@@ -11,7 +12,9 @@ using Blazor.Polyfill.Server.Model;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.FileSystemGlobbing;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using NUglify;
 
 namespace Blazor.Polyfill.Server.Middleware
@@ -231,35 +234,103 @@ namespace Blazor.Polyfill.Server.Middleware
             return ES5Convert(source, null, null);
         }
 
-        private RequestFileMetadata ES5Convert(RequestFileMetadata source, Func<string, string> beforeTransform, Func<string, string> beforeMinification)
+        private RequestFileMetadata ES5Convert(RequestFileMetadata source, Func<string, string, string> beforeTransform, Func<string, string> beforeMinification)
         {
             RequestFileMetadata destination = null;
+            bool BeforeTransformSuccess = true;
+            bool BeforeMinificationSuccess = true;
+            bool TransformSuccess = true;
+            bool MinificationSuccess = true;
+            List<UglifyError> uglifyErrors = new List<UglifyError>();
 
             try
             {
+                #region Before Transform
+
                 //If provided, this event will be called before the ECMA transformation
                 if (beforeTransform != null)
                 {
-                    source.SourceContent = beforeTransform(source.SourceContent);
+                    BeforeTransformSuccess = false;
+
+                    source.SourceContent = beforeTransform(source.SourcePath, source.SourceContent);
+
+                    BeforeTransformSuccess = true;
                 }
+
+                #endregion Before Transform
+
+                #region Transform
+
+                TransformSuccess = false;
 
                 //Transpile code to ES5 for IE11
                 source.ES5Content = BabelHelper.Transform(source.SourceContent, Path.GetFileName(source.SourcePath));
 
+                TransformSuccess = true;
+
+                #endregion Transform
+
+                #region Before Minification
+
                 //If provided, this event will be called before the Minification
                 if (beforeMinification != null)
                 {
+                    BeforeMinificationSuccess = false;
+
                     source.ES5Content = beforeMinification(source.ES5Content);
+
+                    BeforeMinificationSuccess = true;
                 }
+
+                #endregion Before Minification
+
+                #region Minification
+
+                MinificationSuccess = false;
 
                 //Minify with AjaxMin (we don't want an additional external tool with NPM or else for managing this
                 //kind of thing here...
-                source.ES5Content = Uglify.Js(source.ES5Content).Code;
+                var uglifyResult = Uglify.Js(source.ES5Content);
+
+                source.ES5Content = uglifyResult.Code;
                 destination = source;
+
+                if (uglifyResult.HasErrors)
+                {
+                    MinificationSuccess = false;
+
+                    string errorsList = string.Join('\n', uglifyResult.Errors.Where(p => p.IsError).Select(p => $"Line {p.StartLine} to {p.EndLine}, Column {p.StartColumn} to {p.EndColumn} - Error code: {p.ErrorCode}, Message: {p.Message}").ToArray());
+
+                    throw new Exception($"Errors occured during minification, see details below:\n{errorsList}");
+                }
+                else
+                {
+                    MinificationSuccess = true;
+                }
+
+                #endregion Minification
             }
             catch (Exception ex)
             {
-                LogHelper.LogError($"On path '{source.SourcePath}': {ex.Message}.");
+                string es5ConvertExceptionString = $"On path '{source.SourcePath}' - [Events success status] BeforeTransform: {BeforeTransformSuccess}, Transform: {TransformSuccess}, BeforeMinification: {BeforeMinificationSuccess}, Minification: {MinificationSuccess}\nError Message: {ex.Message}.\nConsider exception analysis with '{nameof(BlazorPolyfillOptions)}.{nameof(BlazorPolyfillOptions.OnES5ConvertFailure)}' method and prior code fixing before transform through '{nameof(BlazorPolyfillOptions)}.{nameof(BlazorPolyfillOptions.BeforeES5TransformHandler)}'";
+
+                LogHelper.LogError(es5ConvertExceptionString);
+                Exception es5exception = new Exception(es5ConvertExceptionString, ex);
+
+                BlazorPolyfillOptions option = BlazorPolyfillMiddlewareExtensions.GetOptions();
+                if (option.OnES5ConvertFailure != null)
+                {
+                    try
+                    {
+                        //Should allow user to track and do anything but we should continue our behavior if this throw
+                        option.OnES5ConvertFailure(source.SourcePath, ex);
+                    }
+                    catch (Exception)
+                    {
+                    }
+                }
+
+                return null;
             }
 
             return destination;
@@ -267,6 +338,51 @@ namespace Blazor.Polyfill.Server.Middleware
 
         private async Task ManageES5Conversion(HttpContext context)
         {
+            if (ES5CacheHelper.IsFileInErrorFallbackStream(context.Request.Path))
+            {
+                //Should return original file if flagged in fallback stream
+                var fallbackCache = ES5CacheHelper.GetFallbackStream(context.Request.Path);
+
+                //Here we cannot use the convenient "SendFileAsync" method in the ManageRequest method
+                //because the file may not be present in wwwroot while development time.
+                //Assuming that all files in FileInErrorFallbackStream are files that must be
+                //fixed by the developer during development time for optimal usage in Production
+
+                var currentResponseStream = context.Response.Body;
+                using (var fakeResponseStream = new MemoryStream())
+                {
+                    context.Response.Body = fakeResponseStream;
+
+                    //Awaiting StaticFile to fill request content
+                    await _next(context);
+
+                    //If the requested file return 304 status code, we should not try to cache / resolve this file
+                    //as StaticFileMiddleware does not return the data in this case
+                    //Same as if there is any other behavior that is not a success (not 200) we must retrieve and return the initial stream modified by the other context
+                    //without any alteration
+                    if (context.Response.StatusCode != 200)
+                    {
+                        //Restoring the original response WriteOnly Stream
+                        context.Response.Body = await CopyStreamAsync(fakeResponseStream, currentResponseStream);
+                        return;
+                    }
+
+                    var response = await ExtractResponseAsync(context.Request, context.Response);
+
+                    //must restore it in order to make the thing work normally
+                    context.Response.Body = currentResponseStream;
+
+                    //Update headers with our logic
+                    await HttpRequestManager.ManageFallbackRequest(
+                        context,
+                        fallbackCache.ETag,
+                        null,
+                        response.SourceContent);
+                }
+
+                return;
+            }
+
             //If this return true here, this mean this is a subsequent call to a file
             //and that the file has already been cached in the internal dictionary
             //Otherwise we must try to seek the file hash of the current request and see
@@ -305,11 +421,11 @@ namespace Blazor.Polyfill.Server.Middleware
 
                 RequestFileCacheMetadata _cacheMetadata = null;
 
-                //From here we must see if we have a corresponding hash for this fetched resource in the cache store. Subsequent call will short-circuit at the top of this method because
-                //the cache entry dictionary will be populated. If the data is not present we will have
-                //to cache the file in disk
                 if (ES5CacheHelper.HasES5FileInCacheWithChecksum(context.Request.Path, response.SourceCheckSum))
                 {
+                    //From here we must see if we have a corresponding hash for this fetched resource in the cache store. Subsequent call will short-circuit at the top of this method because
+                    //the cache entry dictionary will be populated. If the data is not present we will have
+                    //to cache the file in disk
                     _cacheMetadata = ES5CacheHelper.GetES5FileFromCache(context.Request.Path);
                 }
                 else
@@ -317,10 +433,11 @@ namespace Blazor.Polyfill.Server.Middleware
                     //Convert to ES5 the current response
                     RequestFileMetadata fileContent = null;
 
+                    BlazorPolyfillOptions option = BlazorPolyfillMiddlewareExtensions.GetOptions();
+
                     //Manage specific behavior for Blazor.server.js
                     if (RequestedFileIsBlazorServerJS(context.Request))
                     {
-                        BlazorPolyfillOptions option = BlazorPolyfillMiddlewareExtensions.GetOptions();
                         if (option.UsePackagedBlazorServerLibrary)
                         {
                             fileContent = response;
@@ -336,7 +453,7 @@ namespace Blazor.Polyfill.Server.Middleware
                     else
                     {
                         //Convert to ES5 the current response
-                        fileContent = ES5Convert(response);
+                        fileContent = ES5Convert(response, option.BeforeES5TransformHandler, null);
                     }
 
                     if (fileContent == null)
@@ -346,17 +463,30 @@ namespace Blazor.Polyfill.Server.Middleware
                         //current content as ES5 even if not
                         fileContent = response;
                         fileContent.ES5Content = fileContent.SourceContent;
-                    }
 
-                    _cacheMetadata = ES5CacheHelper.SetES5FileInCache(fileContent);
+                        //Cache to "fallback to source stream"
+                        _cacheMetadata = ES5CacheHelper.SetFileInErrorFallbackStream(fileContent);
+                    }
+                    else
+                    {
+                        _cacheMetadata = ES5CacheHelper.SetES5FileInCache(fileContent);
+                    }
                 }
 
                 //As we have interverted the original Http Stream in our 'using' above, we
                 //must restore it in order to make the thing work normally
                 context.Response.Body = originalResponseStream;
 
-                //Manage request specificity
-                await HttpRequestManager.ManageRequest(context, _cacheMetadata.ES5Path, _cacheMetadata.ETag, _cacheMetadata.ContentLength);
+                if (_cacheMetadata.CacheType == RequestFileCacheType.ES5Cache)
+                {
+                    //Manage request specificity
+                    await HttpRequestManager.ManageRequest(context, _cacheMetadata.ES5Path, _cacheMetadata.ETag, _cacheMetadata.ContentLength);
+                }
+                else
+                {
+                    //Manage request specificity
+                    await HttpRequestManager.ManageFallbackRequest(context, _cacheMetadata.ETag, null, response.SourceContent);
+                }
             }
         }
 
@@ -376,7 +506,7 @@ namespace Blazor.Polyfill.Server.Middleware
             {
                 SourcePath = request.Path.Value,
                 SourceContent = responseBody,
-                SourceCheckSum = CryptographyHelper.CreateSHA256(responseBody)
+                SourceCheckSum = CryptographyHelper.CreateSHA256(responseBody),
             };
         }
     }

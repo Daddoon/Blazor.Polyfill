@@ -73,6 +73,24 @@
             Also, Internet Explorer 11 and Edge Legacy will always return the ES5 Fallback behavior in all scenarios.
             </summary>
         </member>
+        <member name="P:Blazor.Polyfill.Server.BlazorPolyfillOptions.BeforeES5TransformHandler">
+            <summary>
+            Provide a method that expose a Javascript file that must be converted to ES5, in case you
+            wish to alter it before transformation.
+            First parameter is the file path from request,
+            Second parameter is the original file content,
+            Return value is the content that will be provided for the ES5 transformer
+            </summary>
+        </member>
+        <member name="P:Blazor.Polyfill.Server.BlazorPolyfillOptions.OnES5ConvertFailure">
+            <summary>
+            Allow to bind a custom method that will be called when an internal ES5 conversion
+            event fail in order to track down the cause.
+            First parameter is the source file path
+            Second parameter is the Blazor.Polyfill.Server exception when the exception occur
+            with the innerException that thrown.
+            </summary>
+        </member>
         <member name="P:Blazor.Polyfill.Server.BlazorPolyfillOptions.JavascriptModuleImportEmulation">
             <summary>
             If enabled, the polyfill library will assume that you have added the BlazorPolyfill.Build library to your project
@@ -134,7 +152,7 @@
             <returns></returns>
             <exception cref="T:React.Exceptions.BabelException"></exception>
         </member>
-        <member name="M:Blazor.Polyfill.Server.Helper.BlazorServerTransformHelper.BeforeES5Transform(System.String)">
+        <member name="M:Blazor.Polyfill.Server.Helper.BlazorServerTransformHelper.BeforeES5Transform(System.String,System.String)">
             <summary>
             Fixs that must be done in source JS code before calling Babel
             </summary>
@@ -144,7 +162,7 @@
         <member name="M:Blazor.Polyfill.Server.Helper.BlazorServerTransformHelper.BeforeMinification(System.String)">
             <summary>
             Fixs that must be done in JS code before being minified. The given es5JS variable should be the Transformed
-            Javascript code by Babel done in <see cref="M:Blazor.Polyfill.Server.Helper.BlazorServerTransformHelper.BeforeES5Transform(System.String)"/>
+            Javascript code by Babel done in <see cref="!:BeforeES5Transform(string)"/>
             </summary>
             <param name="es5JS"></param>
             <returns></returns>
@@ -194,6 +212,25 @@
             theses method may populate the cache the first time.
             </summary>
             <param name="path"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Blazor.Polyfill.Server.Helper.ES5CacheHelper.GetFallbackStream(System.String)">
+            <summary>
+            Please call <see cref="M:Blazor.Polyfill.Server.Helper.ES5CacheHelper.HasES5FileInCacheByPath(System.String)"/> and <see cref="M:Blazor.Polyfill.Server.Helper.ES5CacheHelper.HasES5FileInCacheWithChecksum(System.String,System.String)"/> before calling this method, as
+            theses method may populate the cache the first time.
+            </summary>
+            <param name="path"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Blazor.Polyfill.Server.Helper.ES5CacheHelper.IsFileInErrorFallbackStream(System.String)">
+            <summary>
+            If this method return true to a given file, we should return the source file content
+            instead of trying any further conversion or ES5 cache serving.
+            
+            This is mainly done in order to return the source of failed file in transpilation during current
+            application lifetime and avoiding the system to try to re-transpile the failed file during the same
+            application lifetime.
+            </summary>
             <returns></returns>
         </member>
         <member name="M:Blazor.Polyfill.Server.Helper.ES5CacheHelper.IsFileChecksumEqual(System.String,System.String)">
@@ -252,6 +289,18 @@
             <param name="onBodyWriteReady"></param>
             <returns></returns>
         </member>
+        <member name="M:Blazor.Polyfill.Server.HttpRequestManager.ManageFallbackRequest(Microsoft.AspNetCore.Http.HttpContext,System.String,System.String,System.String,System.String)">
+            <summary>
+            Should only alter headers.
+            Default current body state should be returned
+            </summary>
+            <param name="context"></param>
+            <param name="ETag"></param>
+            <param name="ContentLength"></param>
+            <param name="Content">SHOULD ONLY BE SET WHEN NOT HAVING THE REQUEST BODY PREFILLED AFTER A FIRST FALLBACK REQUEST FAILURE</param>
+            <param name="contentType"></param>
+            <returns></returns>
+        </member>
         <member name="T:Blazor.Polyfill.Server.Middleware.ECMAScript5Middleware">
             <summary>
             Inspiration from:
@@ -284,6 +333,12 @@
             <summary>
             This class is intentionally a kind of placeholder in order to avoid "value" copy of the file stored
             with the string class. We want a kind of "ref" behavior, with the value copied/written only 
+            </summary>
+        </member>
+        <member name="P:Blazor.Polyfill.Server.Model.RequestFileCacheMetadata.ContentLength">
+            <summary>
+            WARNING: DO NOT USE THIS PROPERTY IF CacheType IS FAILURE CACHE
+            AS THE VALUE WILL BE SET TO 0.
             </summary>
         </member>
         <member name="P:Blazor.Polyfill.Server.Model.RequestFileMetadata.SourceCheckSum">

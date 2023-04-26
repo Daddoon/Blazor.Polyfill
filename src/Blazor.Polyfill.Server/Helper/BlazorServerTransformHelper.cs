@@ -35,7 +35,7 @@ namespace Blazor.Polyfill.Server.Helper
         /// </summary>
         /// <param name="js"></param>
         /// <returns></returns>
-        public static string BeforeES5Transform(string js)
+        public static string BeforeES5Transform(string path, string js)
         {
             #region Patch Regex
 
