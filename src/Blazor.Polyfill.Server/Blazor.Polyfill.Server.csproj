@@ -15,9 +15,10 @@
     <PackageTags>blazor blazor-server ie11 edgeHTML edge-legacy polyfill</PackageTags>
     <PackageReleaseNotes>7.0.203.1:
 
-- Support of both .NET 6.0 and .NET 7.0 ins same package
+- Support for .NET 6 and .NET 7 simultaneously
+- Adding BeforeES5TransformHandler delegate method
+- Adding OnES5ConvertFailure delegate method
 - Add Blazor InputFile events support on Internet Explorer 11
-
 
 7.0.203.0:
 
