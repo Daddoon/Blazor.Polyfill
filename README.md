@@ -29,17 +29,12 @@ Blazor server-side Polyfills and fixes for **Internet Explorer 11** & **Edge Leg
 
 
 - Install the **BlazorPolyfill.Server** package interactively from the NuGet Package manager in Visual Studio.
-  - If installing for **.NET 7.x**, please install the **7.0.203** version.
-  - If installing for **.NET 6.x**, please install the **6.0.200** version.
+  - If installing for **.NET 6.x** and **.NET 7.x**, please install the **7.0.203.1**.
   - If installing for **.NET 5.x**, please install the **5.0.102** version.
 - **Or** install it from the Package Manager CLI with this command:
-  - For **.NET 7.x**
+  - For **.NET 6.x** and **.NET 7.x**
     ```
     Install-Package BlazorPolyfill.Server
-    ```
-  - For **.NET 6.x**
-    ```
-    Install-Package BlazorPolyfill.Server -Version 6.0.200
     ```
   - For **.NET 5.x**
     ```
